@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "products")
-public class Product {
+public class Product extends AuditEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String productId;
