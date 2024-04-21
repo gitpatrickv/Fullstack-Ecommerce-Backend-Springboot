@@ -20,7 +20,7 @@ public class Product {
     private String shopName;
     private String productName;
     private String productDescription;
-    private boolean isVariation;
+//    private boolean isVariation;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Inventory> inventory;
