@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    url: jdbc:mysql://localhost:3306/fullstack
+    password: patrick
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+application:
+  security:
+    jwt:
+      secret-key: 6jZy59I3gNLH1Pj45sJT9/E0SSQUA1yNcAV1yZaXiwE
+      expiration: 86400000 # 1 day
