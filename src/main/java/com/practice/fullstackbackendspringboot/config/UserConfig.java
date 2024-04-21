@@ -24,7 +24,7 @@ public class UserConfig {
     public CommandLineRunner commandLineRunner(){
         return args -> {
 
-            if(!userRepository.existsByEmail("admin@gmail.com")) {
+            if(!userRepository.existsByEmailIgnoreCase("admin@gmail.com")) {
                 User user = new User();
                 user.setName("ADMIN");
                 user.setEmail("admin@gmail.com");

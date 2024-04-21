@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserModel register(UserModel userModel) {
 
-        boolean isEmailExists = userRepository.existsByEmail(userModel.getEmail());
+        boolean isEmailExists = userRepository.existsByEmailIgnoreCase(userModel.getEmail());
 
         if(isEmailExists){
             throw new EntityExistsException(StringUtils.ACCOUNT_EXISTS);
