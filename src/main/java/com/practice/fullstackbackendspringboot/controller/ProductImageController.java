@@ -1,42 +1,33 @@
 package com.practice.fullstackbackendspringboot.controller;
 
-import com.practice.fullstackbackendspringboot.model.ProductModel;
-import com.practice.fullstackbackendspringboot.service.ProductService;
+import com.practice.fullstackbackendspringboot.service.ProductImageService;
 import com.practice.fullstackbackendspringboot.utils.StringUtils;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 
 import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
 import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 
 @RestController
-@RequestMapping("/api/product")
+@RequestMapping("/api/product/image")
 @RequiredArgsConstructor
-public class ProductController {
+public class ProductImageController {
 
-    private final ProductService productService;
+    private final ProductImageService productImageService;
 
-    @PostMapping("/save")
-    @ResponseStatus(HttpStatus.OK)
-    public ProductModel saveProduct(@RequestBody @Valid ProductModel model){
-        return productService.saveProduct(model);
-    }
-
-    @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public List<ProductModel> getAllProducts(){
-        return productService.getAllProducts();
+    @PutMapping("/upload")
+    public void uploadPhoto(@RequestParam(value = "id") String id, @RequestParam(value = "file") MultipartFile file) {
+        productImageService.uploadPhoto(id, file);
     }
 
     @GetMapping(path = "/{filename}", produces = {IMAGE_PNG_VALUE, IMAGE_JPEG_VALUE})
     public byte[] getPhoto(@PathVariable("filename") String filename) throws IOException {
         return Files.readAllBytes(Paths.get(StringUtils.PHOTO_DIRECTORY + filename));
     }
+
 }

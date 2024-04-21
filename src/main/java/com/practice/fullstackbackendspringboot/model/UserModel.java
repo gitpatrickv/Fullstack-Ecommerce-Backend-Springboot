@@ -1,5 +1,6 @@
 package com.practice.fullstackbackendspringboot.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.practice.fullstackbackendspringboot.entity.constants.Role;
 import com.practice.fullstackbackendspringboot.validation.ConfirmPasswordValid;
 import com.practice.fullstackbackendspringboot.validation.UniqueEmailValid;
@@ -12,11 +13,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @ConfirmPasswordValid
+@JsonInclude(NON_DEFAULT)
 public class UserModel{
 
     @Valid

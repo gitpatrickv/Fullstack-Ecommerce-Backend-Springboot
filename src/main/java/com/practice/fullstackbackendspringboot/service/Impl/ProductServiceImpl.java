@@ -2,6 +2,7 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 
 import com.practice.fullstackbackendspringboot.entity.Inventory;
 import com.practice.fullstackbackendspringboot.entity.Product;
+import com.practice.fullstackbackendspringboot.entity.ProductImage;
 import com.practice.fullstackbackendspringboot.entity.User;
 import com.practice.fullstackbackendspringboot.model.ProductModel;
 import com.practice.fullstackbackendspringboot.repository.InventoryRepository;
@@ -15,6 +16,10 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 @Transactional
@@ -63,6 +68,40 @@ public class ProductServiceImpl implements ProductService {
         }
         return mapper.mapProductEntityToProductModel(savedProduct);
     }
+
+    @Override
+    public List<ProductModel> getAllProducts() {
+
+        List<Product> products = productRepository.findAll();
+        List<ProductModel> productModels = new ArrayList<>();
+
+        for(Product product : products) {
+            ProductModel productModel = mapper.mapProductEntityToProductModel(product);
+            getPhotoUrl(product, productModel);
+            getPriceAndQuantity(product, productModel);
+            productModels.add(productModel);
+        }
+        return productModels;
+
+    }
+
+    private void getPhotoUrl(Product product, ProductModel productModel){
+        List<ProductImage> productImages = product.getProductImage();
+        if (productImages != null && !productImages.isEmpty()) {
+            ProductImage image = productImages.get(0);
+            productModel.setPhotoUrl(image.getPhotoUrl());
+        }
+    }
+
+    private void getPriceAndQuantity(Product product, ProductModel productModel){
+        List<Inventory> inventories = product.getInventory();
+        if(inventories != null && !inventories.isEmpty()){
+            Inventory inventory = inventories.get(0);
+            productModel.setQuantity(inventory.getQuantity());
+            productModel.setPrice(inventory.getPrice());
+        }
+    }
+
 }
 
 
