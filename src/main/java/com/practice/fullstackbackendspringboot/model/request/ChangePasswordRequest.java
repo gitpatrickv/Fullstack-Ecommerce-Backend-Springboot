@@ -1,4 +1,4 @@
-package com.practice.fullstackbackendspringboot.model;
+package com.practice.fullstackbackendspringboot.model.request;
 
 import com.practice.fullstackbackendspringboot.validation.PasswordMatchValid;
 import com.practice.fullstackbackendspringboot.validation.PasswordValid;

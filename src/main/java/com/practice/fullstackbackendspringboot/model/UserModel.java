@@ -1,6 +1,7 @@
 package com.practice.fullstackbackendspringboot.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.practice.fullstackbackendspringboot.entity.constants.Role;
 import com.practice.fullstackbackendspringboot.validation.ConfirmPasswordValid;
 import com.practice.fullstackbackendspringboot.validation.UniqueEmailValid;
@@ -18,7 +19,6 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @ConfirmPasswordValid
 @JsonInclude(NON_DEFAULT)
 public class UserModel{
@@ -34,6 +34,7 @@ public class UserModel{
     private String address;
     @NotBlank(message = "{phone.number.required}")
     private String contactNumber;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotBlank(message = "{password.required}")
     private String password;
     @NotBlank(message = "{confirm.password.required}")

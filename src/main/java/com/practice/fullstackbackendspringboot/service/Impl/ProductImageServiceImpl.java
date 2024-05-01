@@ -15,6 +15,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,24 +38,24 @@ public class ProductImageServiceImpl implements ProductImageService {
 
         ProductImage productImage = new ProductImage();
         productImage.setProduct(product.get());
-        productImage.setPhotoUrl(processImage(id,file));
+        productImage.setPhotoUrl(processImage(id, file));
         productImageRepository.save(productImage);
         log.info(productImage.getPhotoUrl());
     }
 
-    private String getFileExtension(String filename){
+    private String getFileExtension(String filename) {
         return Optional.of(filename)
                 .filter(name -> name.contains("."))
                 .map(name -> "." + name.substring(filename.lastIndexOf(".") + 1))
                 .orElse(".png");
     }
 
-    private String processImage(String id, MultipartFile image){
+    private String processImage(String id, MultipartFile image) {
         String filename = id + getFileExtension(image.getOriginalFilename());
         try {
             Path fileStorageLocation = Paths.get(StringUtils.PHOTO_DIRECTORY).toAbsolutePath().normalize();
 
-            if(!Files.exists(fileStorageLocation)) {
+            if (!Files.exists(fileStorageLocation)) {
                 Files.createDirectories(fileStorageLocation);
             }
 
@@ -63,10 +64,8 @@ public class ProductImageServiceImpl implements ProductImageService {
             return ServletUriComponentsBuilder
                     .fromCurrentContextPath()
                     .path("/api/product/image/" + filename).toUriString();
-        }
-        catch (Exception exception) {
+        } catch (Exception exception) {
             throw new RuntimeException("Unable to save image");
         }
     }
-
 }

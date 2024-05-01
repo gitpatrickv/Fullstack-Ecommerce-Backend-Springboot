@@ -1,10 +1,11 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
 import com.practice.fullstackbackendspringboot.entity.User;
-import com.practice.fullstackbackendspringboot.model.LoginRequest;
-import com.practice.fullstackbackendspringboot.model.LoginResponse;
+import com.practice.fullstackbackendspringboot.model.request.LoginRequest;
+import com.practice.fullstackbackendspringboot.model.response.LoginResponse;
 import com.practice.fullstackbackendspringboot.model.UserModel;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
+import com.practice.fullstackbackendspringboot.security.JwtAuthenticationFilter;
 import com.practice.fullstackbackendspringboot.security.JwtService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import com.practice.fullstackbackendspringboot.utils.StringUtils;
@@ -17,6 +18,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
+
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +35,7 @@ public class UserServiceImpl implements UserService {
 
         boolean isEmailExists = userRepository.existsByEmailIgnoreCase(userModel.getEmail());
 
-        if(isEmailExists){
+        if (isEmailExists) {
             throw new EntityExistsException(StringUtils.ACCOUNT_EXISTS);
         }
 
@@ -44,17 +47,26 @@ public class UserServiceImpl implements UserService {
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
 
-        try{
+        try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
             return LoginResponse.builder()
                     .jwtToken(jwtService.generateToken(authentication))
-                    .role(authentication.getAuthorities().toString())
+                    .role(authentication.getAuthorities().iterator().next().getAuthority())
                     .build();
-        }catch (AuthenticationException e){
+        } catch (AuthenticationException e) {
             throw new BadCredentialsException(StringUtils.INVALID_CREDENTIALS);
         }
 
     }
+    @Override
+    public String getUserFromToken(String email){
+        email = JwtAuthenticationFilter.CURRENT_USER;
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtils.USER_NOT_FOUND));
+        return email;
+    }
+
 }
+

@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface ProductService {
 
-    ProductModel saveProduct(ProductModel model);
+//    ProductModel saveProduct(ProductModel model);
     List<ProductModel> getAllProducts();
+    ProductModel getProductById(String productId);
+    ProductModel saveProduct(ProductModel model, String email);
 }

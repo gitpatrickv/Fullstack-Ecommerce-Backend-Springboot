@@ -15,7 +15,6 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @JsonInclude(NON_DEFAULT)
 public class ProductModel {
 

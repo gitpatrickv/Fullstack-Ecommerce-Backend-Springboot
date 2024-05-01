@@ -20,7 +20,7 @@ public class ProductImageController {
 
     private final ProductImageService productImageService;
 
-    @PutMapping("/upload")
+    @PostMapping("/upload")
     public void uploadPhoto(@RequestParam(value = "id") String id, @RequestParam(value = "file") MultipartFile file) {
         productImageService.uploadPhoto(id, file);
     }

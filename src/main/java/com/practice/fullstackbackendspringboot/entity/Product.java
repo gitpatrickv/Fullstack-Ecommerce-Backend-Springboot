@@ -3,6 +3,7 @@ package com.practice.fullstackbackendspringboot.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Builder
@@ -20,16 +21,19 @@ public class Product extends AuditEntity{
     private String shopName;
     private String productName;
     private String productDescription;
+    @ElementCollection
+    @Column(length = 1000)
+    private List<String> images;
 //    private boolean isVariation;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<Inventory> inventory;
+    private List<Inventory> inventory = new ArrayList<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ProductVariation> productVariation;
 
     @OneToMany(mappedBy = "product",  cascade = CascadeType.ALL)
-    private List<ProductImage> productImage;
+    private List<ProductImage> productImage = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "user_id")

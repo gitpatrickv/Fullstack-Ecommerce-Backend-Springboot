@@ -10,15 +10,23 @@ import com.practice.fullstackbackendspringboot.repository.ProductImageRepository
 import com.practice.fullstackbackendspringboot.repository.ProductRepository;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.security.JwtAuthenticationFilter;
+import com.practice.fullstackbackendspringboot.service.InventoryService;
 import com.practice.fullstackbackendspringboot.service.ProductService;
+import com.practice.fullstackbackendspringboot.service.UserService;
+import com.practice.fullstackbackendspringboot.utils.StringUtils;
 import com.practice.fullstackbackendspringboot.utils.mapper.ProductMapper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -31,15 +39,17 @@ public class ProductServiceImpl implements ProductService {
     private final UserRepository userRepository;
     private final ProductMapper mapper;
     private final ProductImageRepository productImageRepository;
+    private final UserService userService;
+    private final InventoryService inventoryService;
 
     @Override
-    public ProductModel saveProduct(ProductModel model) {
+    public ProductModel saveProduct(ProductModel model, String email) {
         boolean isNew = productRepository.existsById(model.getProductId());
         Product product;
-        String username = JwtAuthenticationFilter.CURRENT_USER;
-        User user = userRepository.findById(username).get();
+//        String userEmail = userService.getUserFromToken(email);
+        User user = userRepository.findByEmail(email).get();
 
-        if (!isNew) {
+        if(!isNew) {
             product = mapper.mapProductModelToProductEntity(model);
             product.setUser(user);
         } else {
@@ -50,7 +60,7 @@ public class ProductServiceImpl implements ProductService {
             if (model.getProductName() != null) {
                 product.setProductName(model.getProductName());
             }
-            if (model.getProductDescription() != null) {
+            if(model.getProductDescription() != null){
                 product.setProductDescription(model.getProductDescription());
             }
         }
@@ -82,9 +92,27 @@ public class ProductServiceImpl implements ProductService {
             productModels.add(productModel);
         }
         return productModels;
-
     }
 
+    @Override
+    public ProductModel getProductById(String productId) {
+        Optional<Product> product = productRepository.findById(productId);
+        Product products = product.orElseThrow(() -> new NoSuchElementException(StringUtils.PRODUCT_NOT_FOUND + productId));
+        Inventory inventory = inventoryRepository.findByProduct_ProductId(productId).get();
+        List<ProductImage> productImages = productImageRepository.findAllByProduct_ProductId(productId);
+
+        ProductModel productModel = mapper.mapProductEntityToProductModel(products);
+
+        for(ProductImage productImage : productImages){
+            productModel.setPhotoUrl(productImage.getPhotoUrl());
+        }
+        productModel.setPrice(inventory.getPrice());
+        productModel.setQuantity(inventory.getQuantity());
+
+        return productModel;
+    }
+
+    //TODO: refactor to avoid doing database reads one at a time in a loop it is better to use jpa @Query
     private void getPhotoUrl(Product product, ProductModel productModel){
         List<ProductImage> productImages = product.getProductImage();
         if (productImages != null && !productImages.isEmpty()) {
@@ -103,6 +131,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
 }
+
+
+
+
+
 
 
 

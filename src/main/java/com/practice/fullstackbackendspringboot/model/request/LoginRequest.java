@@ -1,4 +1,4 @@
-package com.practice.fullstackbackendspringboot.model;
+package com.practice.fullstackbackendspringboot.model.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
