@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "product_variation")
-public class ProductVariation extends AuditEntity{
+public class ProductVariation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "product_variation_gen")

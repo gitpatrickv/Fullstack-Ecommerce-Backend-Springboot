@@ -1,5 +1,6 @@
 package com.practice.fullstackbackendspringboot.controller;
 
+import com.practice.fullstackbackendspringboot.model.AllProductModel;
 import com.practice.fullstackbackendspringboot.model.ProductModel;
 import com.practice.fullstackbackendspringboot.service.ProductService;
 import com.practice.fullstackbackendspringboot.service.UserService;
@@ -27,7 +28,7 @@ public class ProductController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ProductModel> getAllProducts(){
+    public List<AllProductModel> getAllProducts(){
         return productService.getAllProducts();
     }
 

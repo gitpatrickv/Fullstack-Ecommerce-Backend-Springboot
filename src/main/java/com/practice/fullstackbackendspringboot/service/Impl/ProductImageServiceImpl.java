@@ -12,14 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
-
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 @Service
 @RequiredArgsConstructor
@@ -43,15 +40,13 @@ public class ProductImageServiceImpl implements ProductImageService {
         log.info(productImage.getPhotoUrl());
     }
 
-    private String getFileExtension(String filename) {
-        return Optional.of(filename)
-                .filter(name -> name.contains("."))
-                .map(name -> "." + name.substring(filename.lastIndexOf(".") + 1))
-                .orElse(".png");
+    @Override
+    public byte[] getPhoto(String filename) throws IOException {
+        return Files.readAllBytes(Paths.get(StringUtils.PHOTO_DIRECTORY + filename));
     }
 
     private String processImage(String id, MultipartFile image) {
-        String filename = id + getFileExtension(image.getOriginalFilename());
+        String filename = image.getOriginalFilename();
         try {
             Path fileStorageLocation = Paths.get(StringUtils.PHOTO_DIRECTORY).toAbsolutePath().normalize();
 
@@ -59,7 +54,7 @@ public class ProductImageServiceImpl implements ProductImageService {
                 Files.createDirectories(fileStorageLocation);
             }
 
-            Files.copy(image.getInputStream(), fileStorageLocation.resolve(filename), REPLACE_EXISTING);
+            Files.copy(image.getInputStream(), fileStorageLocation.resolve(filename));
 
             return ServletUriComponentsBuilder
                     .fromCurrentContextPath()
@@ -68,4 +63,5 @@ public class ProductImageServiceImpl implements ProductImageService {
             throw new RuntimeException("Unable to save image");
         }
     }
+
 }

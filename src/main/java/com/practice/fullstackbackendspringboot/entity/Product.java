@@ -21,10 +21,6 @@ public class Product extends AuditEntity{
     private String shopName;
     private String productName;
     private String productDescription;
-    @ElementCollection
-    @Column(length = 1000)
-    private List<String> images;
-//    private boolean isVariation;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Inventory> inventory = new ArrayList<>();

@@ -4,6 +4,7 @@ import com.practice.fullstackbackendspringboot.entity.Inventory;
 import com.practice.fullstackbackendspringboot.entity.Product;
 import com.practice.fullstackbackendspringboot.entity.ProductImage;
 import com.practice.fullstackbackendspringboot.entity.User;
+import com.practice.fullstackbackendspringboot.model.AllProductModel;
 import com.practice.fullstackbackendspringboot.model.ProductModel;
 import com.practice.fullstackbackendspringboot.repository.InventoryRepository;
 import com.practice.fullstackbackendspringboot.repository.ProductImageRepository;
@@ -11,9 +12,11 @@ import com.practice.fullstackbackendspringboot.repository.ProductRepository;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.security.JwtAuthenticationFilter;
 import com.practice.fullstackbackendspringboot.service.InventoryService;
+import com.practice.fullstackbackendspringboot.service.ProductImageService;
 import com.practice.fullstackbackendspringboot.service.ProductService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import com.practice.fullstackbackendspringboot.utils.StringUtils;
+import com.practice.fullstackbackendspringboot.utils.mapper.AllProductMapper;
 import com.practice.fullstackbackendspringboot.utils.mapper.ProductMapper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -41,6 +44,8 @@ public class ProductServiceImpl implements ProductService {
     private final ProductImageRepository productImageRepository;
     private final UserService userService;
     private final InventoryService inventoryService;
+    private final AllProductMapper allProductMapper;
+    private final ProductImageService productImageService;
 
     @Override
     public ProductModel saveProduct(ProductModel model, String email) {
@@ -80,16 +85,16 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductModel> getAllProducts() {
+    public List<AllProductModel> getAllProducts() {
 
         List<Product> products = productRepository.findAll();
-        List<ProductModel> productModels = new ArrayList<>();
+        List<AllProductModel> productModels = new ArrayList<>();
 
         for(Product product : products) {
-            ProductModel productModel = mapper.mapProductEntityToProductModel(product);
-            getPhotoUrl(product, productModel);
-            getPriceAndQuantity(product, productModel);
-            productModels.add(productModel);
+            AllProductModel allProductModel = allProductMapper.mapProductEntityToProductModel(product);
+            getPhotoUrl(product, allProductModel);
+            getPriceAndQuantity(product, allProductModel);
+            productModels.add(allProductModel);
         }
         return productModels;
     }
@@ -100,12 +105,14 @@ public class ProductServiceImpl implements ProductService {
         Product products = product.orElseThrow(() -> new NoSuchElementException(StringUtils.PRODUCT_NOT_FOUND + productId));
         Inventory inventory = inventoryRepository.findByProduct_ProductId(productId).get();
         List<ProductImage> productImages = productImageRepository.findAllByProduct_ProductId(productId);
+        List<String> photoUrls = new ArrayList<>();
 
         ProductModel productModel = mapper.mapProductEntityToProductModel(products);
 
         for(ProductImage productImage : productImages){
-            productModel.setPhotoUrl(productImage.getPhotoUrl());
+            photoUrls.add(productImage.getPhotoUrl());
         }
+        productModel.setProductImage(photoUrls);
         productModel.setPrice(inventory.getPrice());
         productModel.setQuantity(inventory.getQuantity());
 
@@ -113,7 +120,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     //TODO: refactor to avoid doing database reads one at a time in a loop it is better to use jpa @Query
-    private void getPhotoUrl(Product product, ProductModel productModel){
+    private void getPhotoUrl(Product product, AllProductModel productModel){
         List<ProductImage> productImages = product.getProductImage();
         if (productImages != null && !productImages.isEmpty()) {
             ProductImage image = productImages.get(0);
@@ -121,11 +128,10 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
-    private void getPriceAndQuantity(Product product, ProductModel productModel){
+    private void getPriceAndQuantity(Product product, AllProductModel productModel){
         List<Inventory> inventories = product.getInventory();
         if(inventories != null && !inventories.isEmpty()){
             Inventory inventory = inventories.get(0);
-            productModel.setQuantity(inventory.getQuantity());
             productModel.setPrice(inventory.getPrice());
         }
     }
