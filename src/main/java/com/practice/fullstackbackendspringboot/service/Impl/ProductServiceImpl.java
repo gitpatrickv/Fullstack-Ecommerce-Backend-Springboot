@@ -10,7 +10,6 @@ import com.practice.fullstackbackendspringboot.repository.InventoryRepository;
 import com.practice.fullstackbackendspringboot.repository.ProductImageRepository;
 import com.practice.fullstackbackendspringboot.repository.ProductRepository;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
-import com.practice.fullstackbackendspringboot.security.JwtAuthenticationFilter;
 import com.practice.fullstackbackendspringboot.service.InventoryService;
 import com.practice.fullstackbackendspringboot.service.ProductImageService;
 import com.practice.fullstackbackendspringboot.service.ProductService;
@@ -21,10 +20,8 @@ import com.practice.fullstackbackendspringboot.utils.mapper.ProductMapper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +45,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductImageService productImageService;
 
     @Override
-    public ProductModel saveProduct(ProductModel model, String email) {
+    public ProductModel saveProduct(ProductModel model, String email, MultipartFile file) {
         boolean isNew = productRepository.existsById(model.getProductId());
         Product product;
 //        String userEmail = userService.getUserFromToken(email);
@@ -81,6 +78,9 @@ public class ProductServiceImpl implements ProductService {
                     .build();
             inventoryRepository.save(inventory);
         }
+
+        productImageService.uploadPhoto(savedProduct.getProductId(),file);
+
         return mapper.mapProductEntityToProductModel(savedProduct);
     }
 

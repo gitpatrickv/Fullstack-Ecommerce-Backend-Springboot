@@ -1,13 +1,11 @@
 package com.practice.fullstackbackendspringboot.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -38,7 +36,7 @@ public class ProductModel {
     private Double price;
     @NotNull(message = "{this.field.cannot.be.empty}")
     private Long quantity;
+
     private List<String> productImage = new ArrayList<>();
-    private String photoUrl;
 
 }
