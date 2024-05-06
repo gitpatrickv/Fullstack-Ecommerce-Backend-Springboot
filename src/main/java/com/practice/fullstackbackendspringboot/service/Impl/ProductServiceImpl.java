@@ -1,9 +1,6 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
-import com.practice.fullstackbackendspringboot.entity.Inventory;
-import com.practice.fullstackbackendspringboot.entity.Product;
-import com.practice.fullstackbackendspringboot.entity.ProductImage;
-import com.practice.fullstackbackendspringboot.entity.User;
+import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.AllProductModel;
 import com.practice.fullstackbackendspringboot.model.ProductModel;
 import com.practice.fullstackbackendspringboot.repository.InventoryRepository;
@@ -76,10 +73,10 @@ public class ProductServiceImpl implements ProductService {
                     .price(model.getPrice())
                     .quantity(model.getQuantity())
                     .build();
-            inventoryRepository.save(inventory);
+            inventoryRepository.save(inventory);  //@TODO: implement item variation
         }
 
-        productImageService.uploadPhoto(savedProduct.getProductId(),file);
+        productImageService.uploadPhoto(savedProduct.getProductId(),file);      //@TODO: Refactor to upload multiple images at the same time
 
         return mapper.mapProductEntityToProductModel(savedProduct);
     }
