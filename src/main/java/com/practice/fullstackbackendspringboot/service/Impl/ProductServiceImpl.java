@@ -1,6 +1,9 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
-import com.practice.fullstackbackendspringboot.entity.*;
+import com.practice.fullstackbackendspringboot.entity.Inventory;
+import com.practice.fullstackbackendspringboot.entity.Product;
+import com.practice.fullstackbackendspringboot.entity.ProductImage;
+import com.practice.fullstackbackendspringboot.entity.User;
 import com.practice.fullstackbackendspringboot.model.AllProductModel;
 import com.practice.fullstackbackendspringboot.model.ProductModel;
 import com.practice.fullstackbackendspringboot.repository.InventoryRepository;
@@ -11,7 +14,7 @@ import com.practice.fullstackbackendspringboot.service.InventoryService;
 import com.practice.fullstackbackendspringboot.service.ProductImageService;
 import com.practice.fullstackbackendspringboot.service.ProductService;
 import com.practice.fullstackbackendspringboot.service.UserService;
-import com.practice.fullstackbackendspringboot.utils.StringUtils;
+import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.AllProductMapper;
 import com.practice.fullstackbackendspringboot.utils.mapper.ProductMapper;
 import jakarta.transaction.Transactional;
@@ -36,10 +39,9 @@ public class ProductServiceImpl implements ProductService {
     private final UserRepository userRepository;
     private final ProductMapper mapper;
     private final ProductImageRepository productImageRepository;
-    private final UserService userService;
-    private final InventoryService inventoryService;
     private final AllProductMapper allProductMapper;
     private final ProductImageService productImageService;
+
 
     @Override
     public ProductModel saveProduct(ProductModel model, String email, MultipartFile file) {
@@ -99,7 +101,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductModel getProductById(String productId) {
         Optional<Product> product = productRepository.findById(productId);
-        Product products = product.orElseThrow(() -> new NoSuchElementException(StringUtils.PRODUCT_NOT_FOUND + productId));
+        Product products = product.orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId));
         Inventory inventory = inventoryRepository.findByProduct_ProductId(productId).get();
         List<ProductImage> productImages = productImageRepository.findAllByProduct_ProductId(productId);
         List<String> photoUrls = new ArrayList<>();

@@ -8,7 +8,7 @@ import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.security.JwtAuthenticationFilter;
 import com.practice.fullstackbackendspringboot.security.JwtService;
 import com.practice.fullstackbackendspringboot.service.UserService;
-import com.practice.fullstackbackendspringboot.utils.StringUtils;
+import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.UserMapper;
 import jakarta.persistence.EntityExistsException;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
         boolean isEmailExists = userRepository.existsByEmailIgnoreCase(userModel.getEmail());
 
         if (isEmailExists) {
-            throw new EntityExistsException(StringUtils.ACCOUNT_EXISTS);
+            throw new EntityExistsException(StringUtil.ACCOUNT_EXISTS);
         }
 
         User user = mapper.mapUserModelToUserEntity(userModel);
@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService {
                     .role(authentication.getAuthorities().iterator().next().getAuthority())
                     .build();
         } catch (AuthenticationException e) {
-            throw new BadCredentialsException(StringUtils.INVALID_CREDENTIALS);
+            throw new BadCredentialsException(StringUtil.INVALID_CREDENTIALS);
         }
 
     }
@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
     public String getUserFromToken(String email){
         email = JwtAuthenticationFilter.CURRENT_USER;
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtils.USER_NOT_FOUND));
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND));
         return email;
     }
 

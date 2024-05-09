@@ -5,7 +5,7 @@ import com.practice.fullstackbackendspringboot.entity.ProductImage;
 import com.practice.fullstackbackendspringboot.repository.ProductImageRepository;
 import com.practice.fullstackbackendspringboot.repository.ProductRepository;
 import com.practice.fullstackbackendspringboot.service.ProductImageService;
-import com.practice.fullstackbackendspringboot.utils.StringUtils;
+import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -42,13 +42,13 @@ public class ProductImageServiceImpl implements ProductImageService {
 
     @Override
     public byte[] getPhoto(String filename) throws IOException {
-        return Files.readAllBytes(Paths.get(StringUtils.PHOTO_DIRECTORY + filename));
+        return Files.readAllBytes(Paths.get(StringUtil.PHOTO_DIRECTORY + filename));
     }
 
     private String processImage(String id, MultipartFile image) {
-        String filename = image.getOriginalFilename();
+        String filename = id+image.getOriginalFilename();
         try {
-            Path fileStorageLocation = Paths.get(StringUtils.PHOTO_DIRECTORY).toAbsolutePath().normalize();
+            Path fileStorageLocation = Paths.get(StringUtil.PHOTO_DIRECTORY).toAbsolutePath().normalize();
 
             if (!Files.exists(fileStorageLocation)) {
                 Files.createDirectories(fileStorageLocation);
