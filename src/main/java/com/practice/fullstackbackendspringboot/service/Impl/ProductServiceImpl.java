@@ -13,7 +13,6 @@ import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.service.InventoryService;
 import com.practice.fullstackbackendspringboot.service.ProductImageService;
 import com.practice.fullstackbackendspringboot.service.ProductService;
-import com.practice.fullstackbackendspringboot.service.UserService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.AllProductMapper;
 import com.practice.fullstackbackendspringboot.utils.mapper.ProductMapper;
@@ -30,7 +29,6 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-@Transactional
 @Slf4j
 public class ProductServiceImpl implements ProductService {
 
@@ -41,13 +39,14 @@ public class ProductServiceImpl implements ProductService {
     private final ProductImageRepository productImageRepository;
     private final AllProductMapper allProductMapper;
     private final ProductImageService productImageService;
+    private final InventoryService inventoryService;
 
-
+    @Transactional(rollbackOn = Exception.class)
     @Override
     public ProductModel saveProduct(ProductModel model, String email, MultipartFile file) {
         boolean isNew = productRepository.existsById(model.getProductId());
         Product product;
-//        String userEmail = userService.getUserFromToken(email);
+
         User user = userRepository.findByEmail(email).get();
 
         if(!isNew) {
@@ -103,7 +102,7 @@ public class ProductServiceImpl implements ProductService {
         Optional<Product> product = productRepository.findById(productId);
         Product products = product.orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId));
         Inventory inventory = inventoryRepository.findByProduct_ProductId(productId).get();
-        List<ProductImage> productImages = productImageRepository.findAllByProduct_ProductId(productId);
+        List<ProductImage> productImages = productImageRepository.findAllPhotoUrlByProduct_ProductId(productId);
         List<String> photoUrls = new ArrayList<>();
 
         ProductModel productModel = mapper.mapProductEntityToProductModel(products);

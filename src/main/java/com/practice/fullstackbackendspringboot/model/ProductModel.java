@@ -36,6 +36,7 @@ public class ProductModel {
     private Double price;
     @NotNull(message = "{this.field.cannot.be.empty}")
     private Long quantity;
+    private String skuCode;
 
     private List<String> productImage = new ArrayList<>();
 

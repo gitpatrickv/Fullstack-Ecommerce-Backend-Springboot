@@ -21,13 +21,10 @@ public class Inventory extends AuditEntity{
     private Long quantity;
     private Double price;
     private String skuCode;
-    private boolean isVariation;
+
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @ManyToOne
-    @JoinColumn(name = "product_variation_id")
-    private ProductVariation productVariation;
 
 }

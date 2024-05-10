@@ -33,6 +33,8 @@ public class User implements UserDetails {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
+    @OneToMany(mappedBy = "user")
+    private List<Cart> cart;
 
     @CreationTimestamp
     private LocalDate createdDate;

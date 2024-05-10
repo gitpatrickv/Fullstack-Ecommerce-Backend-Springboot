@@ -25,9 +25,6 @@ public class Product extends AuditEntity{
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Inventory> inventory = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<ProductVariation> productVariation;
-
     @OneToMany(mappedBy = "product",  cascade = CascadeType.ALL)
     private List<ProductImage> productImage = new ArrayList<>();
 
