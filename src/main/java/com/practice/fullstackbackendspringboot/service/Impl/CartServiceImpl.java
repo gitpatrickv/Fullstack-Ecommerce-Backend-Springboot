@@ -85,7 +85,7 @@ public class CartServiceImpl implements CartService {
 
 
     @Override
-    public CartModel filterCartProducts( String cartId, String email) {
+    public Double filterCartProducts( String cartId, String email) {
         Optional<User> user = userRepository.findByEmail(email);
         Optional<Cart> existingCart = cartRepository.findByCartIdAndUserEmail(cartId,email);
 
@@ -93,20 +93,18 @@ public class CartServiceImpl implements CartService {
         cart.setFilter(!cart.isFilter());
         cartRepository.save(cart);
 
-        return cartMapper.mapCartEntityToCartModel(cart);
+        return this.getCartTotal(email,true);
     }
 
     @Override
-    public Double getCartTotal(String email) {
+    public Double getCartTotal(String email, boolean filter) {
         Optional<User> user = userRepository.findByEmail(email);
-        List<Cart> carts = cartRepository.findAllByUserEmail(email);
-
+        List<Cart> carts = cartRepository.findAllByFilterAndUserEmail(true,email);
         Double total = 0.0;
 
         for(Cart cart : carts){
             Double cartTotalAmount = cart.getTotalAmount();
             total += cartTotalAmount;
-            log.info(total.toString());
         }
 
         return total;
