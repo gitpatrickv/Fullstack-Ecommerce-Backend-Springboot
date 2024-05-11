@@ -4,8 +4,7 @@ import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.CartModel;
 import com.practice.fullstackbackendspringboot.model.request.CartRequest;
 import com.practice.fullstackbackendspringboot.repository.*;
-import com.practice.fullstackbackendspringboot.security.JwtAuthenticationFilter;
-import com.practice.fullstackbackendspringboot.service.*;
+import com.practice.fullstackbackendspringboot.service.CartService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.CartMapper;
 import jakarta.transaction.Transactional;
@@ -13,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,8 +27,6 @@ public class CartServiceImpl implements CartService {
     private final InventoryRepository inventoryRepository;
     private final ProductImageRepository productImageRepository;
     private final CartMapper cartMapper;
-    private final UserService userService;
-
 
     @Override
     public CartModel addProductToCart(CartRequest cartRequest, String email) {
@@ -83,7 +79,6 @@ public class CartServiceImpl implements CartService {
                 .toList();
     }
 
-
     @Override
     public Double filterCartProducts( String cartId, String email) {
         Optional<User> user = userRepository.findByEmail(email);
@@ -93,6 +88,18 @@ public class CartServiceImpl implements CartService {
         cart.setFilter(!cart.isFilter());
         cartRepository.save(cart);
 
+        return this.getCartTotal(email,true);
+    }
+
+    @Override
+    public Double filterAllCartProducts(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        List<Cart> existingCart = cartRepository.findAllByUserEmail(email);
+
+        for(Cart cart : existingCart){
+            cart.setFilter(!cart.isFilter());
+            cartRepository.save(cart);
+        }
         return this.getCartTotal(email,true);
     }
 
@@ -109,7 +116,6 @@ public class CartServiceImpl implements CartService {
 
         return total;
     }
-
 
 }
 

@@ -12,4 +12,5 @@ public interface CartService {
     List<CartModel> getAllProductsInCart(String email);
     Double getCartTotal(String email, boolean filter);
     Double filterCartProducts(String cartId, String email);
+    Double filterAllCartProducts(String email);
 }

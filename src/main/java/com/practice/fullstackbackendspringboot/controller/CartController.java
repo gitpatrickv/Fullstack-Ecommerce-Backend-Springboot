@@ -34,7 +34,7 @@ public class CartController {
     }
     @GetMapping("/total")
     @ResponseStatus(HttpStatus.OK)
-    public Double getCartTotal( @RequestHeader("Authorization") String email, boolean filter){
+    public Double getCartTotal(@RequestHeader("Authorization") String email, boolean filter){
         String user = userService.getUserFromToken(email);
         return cartService.getCartTotal(user,filter);
     }
@@ -44,6 +44,12 @@ public class CartController {
     public Double filterCartProducts(@PathVariable("cartId") String cartId,@RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
         return cartService.filterCartProducts(cartId,user);
+    }
+    @PutMapping("filter")
+    @ResponseStatus(HttpStatus.OK)
+    public Double filterAllCartProducts(@RequestHeader("Authorization") String email) {
+        String user = userService.getUserFromToken(email);
+        return cartService.filterAllCartProducts(user);
     }
 
 }
