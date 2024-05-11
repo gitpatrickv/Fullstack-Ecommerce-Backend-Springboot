@@ -2,37 +2,34 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 
 import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.CartModel;
-import com.practice.fullstackbackendspringboot.model.InventoryModel;
-import com.practice.fullstackbackendspringboot.model.ProductModel;
 import com.practice.fullstackbackendspringboot.model.request.CartRequest;
 import com.practice.fullstackbackendspringboot.repository.*;
-import com.practice.fullstackbackendspringboot.service.CartService;
-import com.practice.fullstackbackendspringboot.service.InventoryService;
-import com.practice.fullstackbackendspringboot.service.ProductImageService;
-import com.practice.fullstackbackendspringboot.service.ProductService;
+import com.practice.fullstackbackendspringboot.security.JwtAuthenticationFilter;
+import com.practice.fullstackbackendspringboot.service.*;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.CartMapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(rollbackOn = Exception.class)
 public class CartServiceImpl implements CartService {
 
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
-    private final ProductService productService;
     private final ProductRepository productRepository;
     private final InventoryRepository inventoryRepository;
-    private final InventoryService inventoryService;
-    private final ProductImageService productImageService;
     private final ProductImageRepository productImageRepository;
     private final CartMapper cartMapper;
+    private final UserService userService;
 
 
     @Override
@@ -85,4 +82,36 @@ public class CartServiceImpl implements CartService {
                 .map(cartMapper::mapCartEntityToCartModel)
                 .toList();
     }
+
+
+    @Override
+    public CartModel filterCartProducts( String cartId, String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        Optional<Cart> existingCart = cartRepository.findByCartIdAndUserEmail(cartId,email);
+
+        Cart cart = existingCart.get();
+        cart.setFilter(!cart.isFilter());
+        cartRepository.save(cart);
+
+        return cartMapper.mapCartEntityToCartModel(cart);
+    }
+
+    @Override
+    public Double getCartTotal(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        List<Cart> carts = cartRepository.findAllByUserEmail(email);
+
+        Double total = 0.0;
+
+        for(Cart cart : carts){
+            Double cartTotalAmount = cart.getTotalAmount();
+            total += cartTotalAmount;
+            log.info(total.toString());
+        }
+
+        return total;
+    }
+
+
 }
+

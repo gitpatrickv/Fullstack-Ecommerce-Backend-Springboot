@@ -1,6 +1,5 @@
 package com.practice.fullstackbackendspringboot.controller;
 
-import com.practice.fullstackbackendspringboot.entity.Cart;
 import com.practice.fullstackbackendspringboot.model.CartModel;
 import com.practice.fullstackbackendspringboot.model.request.CartRequest;
 import com.practice.fullstackbackendspringboot.service.CartService;
@@ -32,6 +31,19 @@ public class CartController {
     public List<CartModel> getAllProductsInCart(@RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
         return cartService.getAllProductsInCart(user);
+    }
+    @GetMapping("/total")
+    @ResponseStatus(HttpStatus.OK)
+    public Double getCartTotal( @RequestHeader("Authorization") String email){
+        String user = userService.getUserFromToken(email);
+        return cartService.getCartTotal(user);
+    }
+
+    @PutMapping("filter/{cartId}")
+    @ResponseStatus(HttpStatus.OK)
+    public CartModel filterCartProducts(@PathVariable("cartId") String cartId,@RequestHeader("Authorization") String email){
+        String user = userService.getUserFromToken(email);
+        return cartService.filterCartProducts(cartId,user);
     }
 
 }

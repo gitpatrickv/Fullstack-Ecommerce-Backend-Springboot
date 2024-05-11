@@ -10,4 +10,6 @@ public interface CartService {
 
     CartModel addProductToCart(CartRequest cartRequest, String email);
     List<CartModel> getAllProductsInCart(String email);
+    Double getCartTotal(String email);
+    CartModel filterCartProducts(String cartId, String email);
 }
