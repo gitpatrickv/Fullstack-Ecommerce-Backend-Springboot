@@ -1,6 +1,7 @@
 package com.practice.fullstackbackendspringboot.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.practice.fullstackbackendspringboot.entity.constants.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,9 +29,12 @@ public class User implements UserDetails {
     private String name;
     private String address;
     private String contactNumber;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
+    @OneToMany(mappedBy = "user")
+    private List<Cart> cart;
 
     @CreationTimestamp
     private LocalDate createdDate;

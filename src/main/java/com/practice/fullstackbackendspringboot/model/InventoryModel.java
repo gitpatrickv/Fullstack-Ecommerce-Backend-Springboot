@@ -1,17 +1,17 @@
 package com.practice.fullstackbackendspringboot.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginResponse {
+public class InventoryModel {
 
-    private String jwtToken;
-    private String role;
-
+    private Long inventoryId;
+    private Long quantity;
+    private Double price;
+    private String skuCode;
+    private String productId;
 }

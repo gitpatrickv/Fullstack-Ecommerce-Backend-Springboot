@@ -2,8 +2,6 @@ package com.practice.fullstackbackendspringboot.validation;
 
 import com.practice.fullstackbackendspringboot.validation.impl.PasswordMatchValidator;
 import jakarta.validation.Constraint;
-import jakarta.validation.ConstraintValidator;
-import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Payload;
 
 import java.lang.annotation.Retention;

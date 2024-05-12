@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "product_image")
-public class ProductImage {
+public class ProductImage{
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

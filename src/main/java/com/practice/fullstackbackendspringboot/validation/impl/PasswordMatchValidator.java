@@ -1,6 +1,6 @@
 package com.practice.fullstackbackendspringboot.validation.impl;
 
-import com.practice.fullstackbackendspringboot.model.ChangePasswordRequest;
+import com.practice.fullstackbackendspringboot.model.request.ChangePasswordRequest;
 import com.practice.fullstackbackendspringboot.validation.PasswordMatchValid;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

@@ -1,20 +1,17 @@
 package com.practice.fullstackbackendspringboot.controller;
 
+import com.practice.fullstackbackendspringboot.model.AllProductModel;
 import com.practice.fullstackbackendspringboot.model.ProductModel;
 import com.practice.fullstackbackendspringboot.service.ProductService;
-import com.practice.fullstackbackendspringboot.utils.StringUtils;
+import com.practice.fullstackbackendspringboot.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
-
-import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
-import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 
 @RestController
 @RequestMapping("/api/product")
@@ -22,21 +19,27 @@ import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 public class ProductController {
 
     private final ProductService productService;
+    private final UserService userService;
 
-    @PostMapping("/save")
+    @PostMapping(value = {"/save"},  consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @ResponseStatus(HttpStatus.OK)
-    public ProductModel saveProduct(@RequestBody @Valid ProductModel model){
-        return productService.saveProduct(model);
+    public ProductModel saveProduct( @RequestPart("product") @Valid ProductModel model,
+                                     @RequestPart("file") MultipartFile file,
+                                     @RequestHeader("Authorization") String email){
+        String user = userService.getUserFromToken(email);
+        return productService.saveProduct(model,user,file);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ProductModel> getAllProducts(){
+    public List<AllProductModel> getAllProducts(){
         return productService.getAllProducts();
     }
 
-    @GetMapping(path = "/{filename}", produces = {IMAGE_PNG_VALUE, IMAGE_JPEG_VALUE})
-    public byte[] getPhoto(@PathVariable("filename") String filename) throws IOException {
-        return Files.readAllBytes(Paths.get(StringUtils.PHOTO_DIRECTORY + filename));
+    @GetMapping("/{productId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ProductModel getProductById(@PathVariable (value="productId") String productId){
+        return productService.getProductById(productId);
     }
+
 }

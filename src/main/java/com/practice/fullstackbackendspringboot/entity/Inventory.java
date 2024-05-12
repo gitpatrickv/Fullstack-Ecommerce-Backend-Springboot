@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "inventory")
-public class Inventory {
+public class Inventory extends AuditEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "inventory_gen")
@@ -26,8 +26,5 @@ public class Inventory {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @ManyToOne
-    @JoinColumn(name = "product_variation_id")
-    private ProductVariation productVariation;
 
 }

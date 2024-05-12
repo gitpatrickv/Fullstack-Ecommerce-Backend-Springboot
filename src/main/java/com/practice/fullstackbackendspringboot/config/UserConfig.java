@@ -4,7 +4,7 @@ package com.practice.fullstackbackendspringboot.config;
 import com.practice.fullstackbackendspringboot.entity.User;
 import com.practice.fullstackbackendspringboot.entity.constants.Role;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
-import com.practice.fullstackbackendspringboot.utils.StringUtils;
+import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -24,17 +24,17 @@ public class UserConfig {
     public CommandLineRunner commandLineRunner(){
         return args -> {
 
-            if(!userRepository.existsByEmail("admin@gmail.com")) {
+            if(!userRepository.existsByEmailIgnoreCase("admin@gmail.com")) {
                 User user = new User();
                 user.setName("ADMIN");
                 user.setEmail("admin@gmail.com");
                 user.setPassword(passwordEncoder.encode("admin"));
                 user.setRole(Role.ADMIN);
                 userRepository.save(user);
-                log.info(StringUtils.ADMIN_CREATED);
+                log.info(StringUtil.ADMIN_CREATED);
             }
             else{
-                log.info(StringUtils.ADMIN_ALREADY_EXISTS);
+                log.info(StringUtil.ADMIN_ALREADY_EXISTS);
             }
         };
     }
