@@ -2,6 +2,7 @@ package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.CartModel;
 import com.practice.fullstackbackendspringboot.model.request.CartRequest;
+import com.practice.fullstackbackendspringboot.model.request.QuantityRequest;
 import com.practice.fullstackbackendspringboot.service.CartService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import jakarta.validation.Valid;
@@ -20,7 +21,7 @@ public class CartController {
     private final UserService userService;
 
     @PutMapping("/add")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.CREATED)
     public CartModel addProductToCart(@RequestBody @Valid CartRequest cartRequest, @RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
         return cartService.addProductToCart(cartRequest,user);
@@ -39,17 +40,38 @@ public class CartController {
         return cartService.getCartTotal(user,filter);
     }
 
-    @PutMapping("filter/{cartId}")
+    @PutMapping("/filter/{cartId}")
     @ResponseStatus(HttpStatus.OK)
     public Double filterCartProducts(@PathVariable("cartId") String cartId,@RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
         return cartService.filterCartProducts(cartId,user);
     }
-    @PutMapping("filter")
+    @PutMapping("/filter")
     @ResponseStatus(HttpStatus.OK)
     public Double filterAllCartProducts(@RequestHeader("Authorization") String email) {
         String user = userService.getUserFromToken(email);
         return cartService.filterAllCartProducts(user);
+    }
+
+    @PutMapping("/increment")
+    @ResponseStatus(HttpStatus.OK)
+    public void increaseQuantity(@RequestBody QuantityRequest quantityRequest, @RequestHeader("Authorization") String email) {
+        String user = userService.getUserFromToken(email);
+        cartService.increaseQuantity(quantityRequest,user);
+    }
+
+    @PutMapping("/decrement")
+    @ResponseStatus(HttpStatus.OK)
+    public void decreaseQuantity(@RequestBody QuantityRequest quantityRequest, @RequestHeader("Authorization") String email) {
+        String user = userService.getUserFromToken(email);
+        cartService.decreaseQuantity(quantityRequest,user);
+    }
+
+    @DeleteMapping("/{cartId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void delete(@PathVariable String cartId, @RequestHeader("Authorization") String email) {
+        String user = userService.getUserFromToken(email);
+        cartService.delete(cartId,email);
     }
 
 }
