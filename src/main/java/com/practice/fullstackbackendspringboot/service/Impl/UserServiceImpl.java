@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public String getUserFromToken(String email){
         email = JwtAuthenticationFilter.CURRENT_USER;
-        User user = userRepository.findByEmail(email)
+        userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND));
         return email;
     }

@@ -16,7 +16,7 @@ public class  UserController {
 
     private final UserService userService;
     @PostMapping("/register")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.CREATED)
     public UserModel register(@RequestBody @Valid UserModel userModel){
         return userService.register(userModel);
     }

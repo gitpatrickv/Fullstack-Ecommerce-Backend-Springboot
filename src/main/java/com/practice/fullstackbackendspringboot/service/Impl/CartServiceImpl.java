@@ -3,6 +3,7 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.CartModel;
 import com.practice.fullstackbackendspringboot.model.request.CartRequest;
+import com.practice.fullstackbackendspringboot.model.request.QuantityRequest;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.CartService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
@@ -80,20 +81,21 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Double filterCartProducts( String cartId, String email) {
-        Optional<User> user = userRepository.findByEmail(email);
+    public Double filterCartProducts(String cartId, String email) {
+        userRepository.findByEmail(email);
         Optional<Cart> existingCart = cartRepository.findByCartIdAndUserEmail(cartId,email);
 
-        Cart cart = existingCart.get();
-        cart.setFilter(!cart.isFilter());
-        cartRepository.save(cart);
-
+        if(existingCart.isPresent()) {
+            Cart cart = existingCart.get();
+            cart.setFilter(!cart.isFilter());
+            cartRepository.save(cart);
+        }
         return this.getCartTotal(email,true);
     }
 
     @Override
     public Double filterAllCartProducts(String email) {
-        Optional<User> user = userRepository.findByEmail(email);
+        userRepository.findByEmail(email);
         List<Cart> existingCart = cartRepository.findAllByUserEmail(email);
 
         for(Cart cart : existingCart){
@@ -105,7 +107,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Double getCartTotal(String email, boolean filter) {
-        Optional<User> user = userRepository.findByEmail(email);
+        userRepository.findByEmail(email);
         List<Cart> carts = cartRepository.findAllByFilterAndUserEmail(true,email);
         Double total = 0.0;
 
@@ -116,6 +118,49 @@ public class CartServiceImpl implements CartService {
 
         return total;
     }
+
+    @Override
+    public void increaseQuantity(QuantityRequest quantityRequest, String email) {
+        userRepository.findByEmail(email);
+        Optional<Cart> existingCart = cartRepository.findByCartIdAndUserEmail(quantityRequest.getCartId(), email);
+        Optional<Inventory> inventory = inventoryRepository.findByProduct_ProductId(quantityRequest.getProductId());
+
+        if (existingCart.isPresent()){
+            Cart cart = existingCart.get();
+            if(cart.getQuantity() < inventory.get().getQuantity()) {
+                cart.setQuantity(existingCart.get().getQuantity() + 1);
+                cart.setTotalAmount(existingCart.get().getQuantity() * inventory.get().getPrice());
+                cartRepository.save(cart);
+            }else{
+                log.info(StringUtil.OUT_OF_STOCK);
+            }
+        }
+    }
+
+    @Override
+    public void decreaseQuantity(QuantityRequest quantityRequest, String email) {
+        userRepository.findByEmail(email);
+        Optional<Cart> existingCart = cartRepository.findByCartIdAndUserEmail(quantityRequest.getCartId(), email);
+        Optional<Inventory> inventory = inventoryRepository.findByProduct_ProductId(quantityRequest.getProductId());
+
+        if(existingCart.isPresent()){
+            Cart cart = existingCart.get();
+            if(cart.getQuantity() > 1) {
+                cart.setQuantity(existingCart.get().getQuantity() - 1);
+                cart.setTotalAmount(existingCart.get().getQuantity() * inventory.get().getPrice());
+                cartRepository.save(cart);
+            }else{
+                cartRepository.deleteByCartIdAndUserEmail(quantityRequest.getCartId(), email);
+            }
+        }
+    }
+
+    @Override
+    public void delete(String cartId, String email) {
+        userRepository.findByEmail(email);
+        cartRepository.deleteById(cartId);
+    }
+
 
 }
 
