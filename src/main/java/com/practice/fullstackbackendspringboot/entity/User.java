@@ -35,7 +35,10 @@ public class User implements UserDetails {
     private Role role;
     @OneToMany(mappedBy = "user")
     private List<Cart> cart;
-
+    @OneToMany(mappedBy = "user")
+    private List<Product> product;
+    @OneToOne(mappedBy = "user")
+    private CartTotal cartTotal;
     @CreationTimestamp
     private LocalDate createdDate;
     @UpdateTimestamp

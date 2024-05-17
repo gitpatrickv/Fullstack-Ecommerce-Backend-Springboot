@@ -1,6 +1,7 @@
 package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.CartModel;
+import com.practice.fullstackbackendspringboot.model.CartTotalModel;
 import com.practice.fullstackbackendspringboot.model.request.CartRequest;
 import com.practice.fullstackbackendspringboot.model.request.QuantityRequest;
 import com.practice.fullstackbackendspringboot.service.CartService;
@@ -35,22 +36,22 @@ public class CartController {
     }
     @GetMapping("/total")
     @ResponseStatus(HttpStatus.OK)
-    public Double getCartTotal(@RequestHeader("Authorization") String email, boolean filter){
+    public CartTotalModel getCartTotal(@RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
-        return cartService.getCartTotal(user,filter);
+        return cartService.getCartTotal(user,true);
     }
 
     @PutMapping("/filter/{cartId}")
     @ResponseStatus(HttpStatus.OK)
-    public Double filterCartProducts(@PathVariable("cartId") String cartId,@RequestHeader("Authorization") String email){
+    public void filterCartProducts(@PathVariable("cartId") String cartId,@RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
-        return cartService.filterCartProducts(cartId,user);
+        cartService.filterCartProducts(cartId,user);
     }
     @PutMapping("/filter")
     @ResponseStatus(HttpStatus.OK)
-    public Double filterAllCartProducts(@RequestHeader("Authorization") String email) {
+    public void filterAllCartProducts(@RequestHeader("Authorization") String email) {
         String user = userService.getUserFromToken(email);
-        return cartService.filterAllCartProducts(user);
+        cartService.filterAllCartProducts(user);
     }
 
     @PutMapping("/increment")
