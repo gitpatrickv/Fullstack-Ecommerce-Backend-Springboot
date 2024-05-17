@@ -13,6 +13,7 @@ public class CartMapper {
     private final ModelMapper mapper = new ModelMapper();
 
     public CartModel mapCartEntityToCartModel(Cart cart){
+
         return mapper.map(cart, CartModel.class);
     }
 

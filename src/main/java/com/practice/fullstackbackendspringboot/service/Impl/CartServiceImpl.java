@@ -2,12 +2,14 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 
 import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.CartModel;
+import com.practice.fullstackbackendspringboot.model.CartTotalModel;
 import com.practice.fullstackbackendspringboot.model.request.CartRequest;
 import com.practice.fullstackbackendspringboot.model.request.QuantityRequest;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.CartService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.CartMapper;
+import com.practice.fullstackbackendspringboot.utils.mapper.CartTotalMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,7 @@ public class CartServiceImpl implements CartService {
     private final ProductImageRepository productImageRepository;
     private final CartTotalRepository cartTotalRepository;
     private final CartMapper cartMapper;
+    private final CartTotalMapper cartTotalMapper;
 
     @Override
     public CartModel addProductToCart(CartRequest cartRequest, String email) {
@@ -82,7 +85,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Double filterCartProducts(String cartId, String email) {
+    public CartTotalModel filterCartProducts(String cartId, String email) {
         userRepository.findByEmail(email);
         Optional<Cart> existingCart = cartRepository.findByCartIdAndUserEmail(cartId,email);
 
@@ -95,7 +98,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Double filterAllCartProducts(String email) {
+    public CartTotalModel filterAllCartProducts(String email) {
         userRepository.findByEmail(email);
         List<Cart> existingCart = cartRepository.findAllByUserEmail(email);
 
@@ -107,12 +110,11 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Double getCartTotal(String email, boolean filter) {
+    public CartTotalModel getCartTotal(String email, boolean filter) {
         User user = userRepository.findByEmail(email).get();
         List<Cart> carts = cartRepository.findAllByFilterAndUserEmail(true,email);
         Optional<CartTotal> existingCartTotal = cartTotalRepository.findByUserEmail(email);
         Double total = 0.0;
-
 
         for(Cart cart : carts){
             Double cartTotalAmount = cart.getTotalAmount();
@@ -124,14 +126,14 @@ public class CartServiceImpl implements CartService {
         cartTotal.setCartTotal(total);
         cartTotal.setUser(user);
         cartTotalRepository.save(cartTotal);
-        return cartTotal.getCartTotal();
+        return cartTotalMapper.mapEntityToModel(cartTotal);
         }
 
         CartTotal cartTotal = new CartTotal();
         cartTotal.setCartTotal(total);
         cartTotal.setUser(user);
         cartTotalRepository.save(cartTotal);
-        return cartTotal.getCartTotal();
+        return cartTotalMapper.mapEntityToModel(cartTotal);
 
     }
 

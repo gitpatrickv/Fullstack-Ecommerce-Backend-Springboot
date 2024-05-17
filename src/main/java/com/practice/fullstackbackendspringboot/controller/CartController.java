@@ -1,9 +1,11 @@
 package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.CartModel;
+import com.practice.fullstackbackendspringboot.model.CartTotalModel;
 import com.practice.fullstackbackendspringboot.model.request.CartRequest;
 import com.practice.fullstackbackendspringboot.model.request.QuantityRequest;
 import com.practice.fullstackbackendspringboot.service.CartService;
+import com.practice.fullstackbackendspringboot.service.CartTotalService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ public class CartController {
 
     private final CartService cartService;
     private final UserService userService;
+    private final CartTotalService cartTotalService;
 
     @PutMapping("/add")
     @ResponseStatus(HttpStatus.CREATED)
@@ -35,20 +38,20 @@ public class CartController {
     }
     @GetMapping("/total")
     @ResponseStatus(HttpStatus.OK)
-    public Double getCartTotal(@RequestHeader("Authorization") String email, boolean filter){
+    public CartTotalModel getCartTotal(@RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
-        return cartService.getCartTotal(user,filter);
+        return cartTotalService.getCartTotal(user);
     }
 
     @PutMapping("/filter/{cartId}")
     @ResponseStatus(HttpStatus.OK)
-    public Double filterCartProducts(@PathVariable("cartId") String cartId,@RequestHeader("Authorization") String email){
+    public CartTotalModel filterCartProducts(@PathVariable("cartId") String cartId,@RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
         return cartService.filterCartProducts(cartId,user);
     }
     @PutMapping("/filter")
     @ResponseStatus(HttpStatus.OK)
-    public Double filterAllCartProducts(@RequestHeader("Authorization") String email) {
+    public CartTotalModel filterAllCartProducts(@RequestHeader("Authorization") String email) {
         String user = userService.getUserFromToken(email);
         return cartService.filterAllCartProducts(user);
     }
