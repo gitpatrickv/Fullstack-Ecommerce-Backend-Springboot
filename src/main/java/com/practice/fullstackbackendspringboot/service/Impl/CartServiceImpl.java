@@ -85,7 +85,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public CartTotalModel filterCartProducts(String cartId, String email) {
+    public void filterCartProducts(String cartId, String email) {
         userRepository.findByEmail(email);
         Optional<Cart> existingCart = cartRepository.findByCartIdAndUserEmail(cartId,email);
 
@@ -94,11 +94,10 @@ public class CartServiceImpl implements CartService {
             cart.setFilter(!cart.isFilter());
             cartRepository.save(cart);
         }
-        return this.getCartTotal(email,true);
     }
 
     @Override
-    public CartTotalModel filterAllCartProducts(String email) {
+    public void filterAllCartProducts(String email) {
         userRepository.findByEmail(email);
         List<Cart> existingCart = cartRepository.findAllByUserEmail(email);
 
@@ -106,7 +105,6 @@ public class CartServiceImpl implements CartService {
             cart.setFilter(!cart.isFilter());
             cartRepository.save(cart);
         }
-        return this.getCartTotal(email,true);
     }
 
     @Override

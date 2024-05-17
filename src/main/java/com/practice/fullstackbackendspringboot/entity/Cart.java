@@ -30,7 +30,7 @@ public class Cart {
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
-    @OneToOne(mappedBy = "cart")
+    @OneToOne
     private CartTotal cartTotal;
 
 }

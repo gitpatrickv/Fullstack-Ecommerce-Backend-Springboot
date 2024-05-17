@@ -13,8 +13,8 @@ public interface CartService {
     CartModel addProductToCart(CartRequest cartRequest, String email);
     List<CartModel> getAllProductsInCart(String email);
     CartTotalModel getCartTotal(String email, boolean filter);
-    CartTotalModel filterCartProducts(String cartId, String email);
-    CartTotalModel filterAllCartProducts(String email);
+    void filterCartProducts(String cartId, String email);
+    void filterAllCartProducts(String email);
     void increaseQuantity(QuantityRequest quantityRequest, String email);
     void decreaseQuantity(QuantityRequest quantityRequest, String email);
     void delete(String cartId, String email);

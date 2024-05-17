@@ -20,7 +20,7 @@ public class CartTotal {
     private Long cartTotalId;
     private Double cartTotal;
 
-    @OneToOne
+    @OneToOne(mappedBy = "cartTotal")
     private Cart cart;
 
     @OneToOne
