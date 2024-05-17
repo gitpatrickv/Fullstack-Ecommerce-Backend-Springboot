@@ -27,6 +27,7 @@ public class CartServiceImpl implements CartService {
     private final ProductRepository productRepository;
     private final InventoryRepository inventoryRepository;
     private final ProductImageRepository productImageRepository;
+    private final CartTotalRepository cartTotalRepository;
     private final CartMapper cartMapper;
 
     @Override
@@ -107,16 +108,31 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Double getCartTotal(String email, boolean filter) {
-        userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email).get();
         List<Cart> carts = cartRepository.findAllByFilterAndUserEmail(true,email);
+        Optional<CartTotal> existingCartTotal = cartTotalRepository.findByUserEmail(email);
         Double total = 0.0;
+
 
         for(Cart cart : carts){
             Double cartTotalAmount = cart.getTotalAmount();
             total += cartTotalAmount;
         }
 
-        return total;
+        if(existingCartTotal.isPresent()){
+        CartTotal cartTotal = existingCartTotal.get();
+        cartTotal.setCartTotal(total);
+        cartTotal.setUser(user);
+        cartTotalRepository.save(cartTotal);
+        return cartTotal.getCartTotal();
+        }
+
+        CartTotal cartTotal = new CartTotal();
+        cartTotal.setCartTotal(total);
+        cartTotal.setUser(user);
+        cartTotalRepository.save(cartTotal);
+        return cartTotal.getCartTotal();
+
     }
 
     @Override
