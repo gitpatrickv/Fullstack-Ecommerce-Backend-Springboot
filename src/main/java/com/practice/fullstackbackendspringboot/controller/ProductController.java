@@ -41,5 +41,10 @@ public class ProductController {
     public ProductModel getProductById(@PathVariable (value="productId") String productId){
         return productService.getProductById(productId);
     }
+    @DeleteMapping("/delete/{productId}")
+    public void delete(@PathVariable (value="productId") String productId, @RequestHeader("Authorization") String email){
+        String user = userService.getUserFromToken(email);
+        productService.delete(productId, user);
+    }
 
 }

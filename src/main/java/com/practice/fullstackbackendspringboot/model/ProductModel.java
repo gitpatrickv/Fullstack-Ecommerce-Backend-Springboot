@@ -24,8 +24,8 @@ public class ProductModel {
 
     @NotNull(message = "{product.id.must.not.be.null}")
     private String productId;
-    @NotBlank(message = "{shop.name.required}")
-    private String shopName;
+//    @NotBlank(message = "{shop.name.required}")
+//    private String shopName;
     @NotBlank(message = "{product.name.required}")
     private String productName;
     @NotBlank(message = "{this.field.cannot.be.empty}")

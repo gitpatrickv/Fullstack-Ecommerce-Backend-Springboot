@@ -1,15 +1,9 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
-import com.practice.fullstackbackendspringboot.entity.Inventory;
-import com.practice.fullstackbackendspringboot.entity.Product;
-import com.practice.fullstackbackendspringboot.entity.ProductImage;
-import com.practice.fullstackbackendspringboot.entity.User;
+import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.AllProductModel;
 import com.practice.fullstackbackendspringboot.model.ProductModel;
-import com.practice.fullstackbackendspringboot.repository.InventoryRepository;
-import com.practice.fullstackbackendspringboot.repository.ProductImageRepository;
-import com.practice.fullstackbackendspringboot.repository.ProductRepository;
-import com.practice.fullstackbackendspringboot.repository.UserRepository;
+import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.InventoryService;
 import com.practice.fullstackbackendspringboot.service.ProductImageService;
 import com.practice.fullstackbackendspringboot.service.ProductService;
@@ -40,6 +34,7 @@ public class ProductServiceImpl implements ProductService {
     private final AllProductMapper allProductMapper;
     private final ProductImageService productImageService;
     private final InventoryService inventoryService;
+    private final StoreRepository storeRepository;
 
     @Transactional(rollbackOn = Exception.class)
     @Override
@@ -48,15 +43,16 @@ public class ProductServiceImpl implements ProductService {
         Product product;
 
         User user = userRepository.findByEmail(email).get();
-
+        Store store = storeRepository.findByUserEmail(email).get();
         if(!isNew) {
             product = mapper.mapProductModelToProductEntity(model);
             product.setUser(user);
+            product.setStore(store);
         } else {
             product = productRepository.findById(model.getProductId()).get();
-            if (model.getShopName() != null) {
-                product.setShopName(model.getShopName());
-            }
+//            if (model.getShopName() != null) {
+//                product.setShopName(model.getShopName());
+//            }
             if (model.getProductName() != null) {
                 product.setProductName(model.getProductName());
             }
@@ -115,6 +111,12 @@ public class ProductServiceImpl implements ProductService {
         productModel.setQuantity(inventory.getQuantity());
 
         return productModel;
+    }
+
+    @Override
+    public void delete(String productId, String email) {
+        userRepository.findByEmail(email);
+        productRepository.deleteById(productId);
     }
 
     //TODO: refactor to avoid doing database reads one at a time in a loop it is better to use jpa @Query

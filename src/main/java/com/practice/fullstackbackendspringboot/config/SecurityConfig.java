@@ -14,8 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import static com.practice.fullstackbackendspringboot.entity.constants.Role.ADMIN;
-import static com.practice.fullstackbackendspringboot.entity.constants.Role.SELLER;
+import static com.practice.fullstackbackendspringboot.entity.constants.Role.*;
 
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -32,7 +31,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize ->
                                 authorize
                                         .requestMatchers(HttpMethod.POST, "/api/product/save").hasAnyAuthority(ADMIN.name(), SELLER.name())
-                                        .anyRequest().permitAll()
+                                        .requestMatchers("/api/store/**").hasAnyAuthority(ADMIN.name(), SELLER.name())
+                                        .requestMatchers(HttpMethod.DELETE,"/api/product/delete/**").hasAuthority(SELLER.name())
+                                        .requestMatchers("/api/cart/**").hasAuthority(USER.name())
+                                        .requestMatchers("/api/product/**").permitAll()
+                                        .requestMatchers("/api/user/**").permitAll()
+                                        .anyRequest().authenticated()
                 );
         httpSecurity.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         httpSecurity.authenticationProvider(authenticationProvider);
