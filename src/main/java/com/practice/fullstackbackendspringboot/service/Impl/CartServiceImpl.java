@@ -63,7 +63,7 @@ public class CartServiceImpl implements CartService {
                 cart.setProduct(product.get());
                 cart.setQuantity(cartRequest.getQuantity());
                 cart.setPrice(inventory.get().getPrice());
-//                cart.setShopName(product.get().getShopName());
+                cart.setStoreName(product.get().getStore().getStoreName());
                 cart.setProductName(product.get().getProductName());
                 cart.setPhotoUrl(productImage.get().getPhotoUrl());
                 cart.setTotalAmount(inventory.get().getPrice() * cartRequest.getQuantity());

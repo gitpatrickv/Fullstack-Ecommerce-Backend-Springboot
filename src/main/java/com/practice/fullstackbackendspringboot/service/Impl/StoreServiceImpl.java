@@ -27,7 +27,7 @@ public class StoreServiceImpl implements StoreService {
             store = mapper.mapModelToEntity(storeModel);
             store.setUser(user.get());
         }else{
-            store = storeRepository.findById(storeModel.getStoreId()).get();
+            store = storeRepository.findByUserEmail(email).get();
 
             if(storeModel.getStoreName() != null){
                 store.setStoreName(storeModel.getStoreName());

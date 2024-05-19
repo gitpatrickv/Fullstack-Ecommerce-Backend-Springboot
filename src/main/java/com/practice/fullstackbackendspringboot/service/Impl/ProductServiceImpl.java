@@ -38,7 +38,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(rollbackOn = Exception.class)
     @Override
-    public ProductModel saveProduct(ProductModel model, String email, MultipartFile file) {
+    public ProductModel saveProduct(ProductModel model, String email, MultipartFile file) { //TODO: remove productID on productmodel
         boolean isNew = productRepository.existsById(model.getProductId());
         Product product;
 
@@ -50,9 +50,7 @@ public class ProductServiceImpl implements ProductService {
             product.setStore(store);
         } else {
             product = productRepository.findById(model.getProductId()).get();
-//            if (model.getShopName() != null) {
-//                product.setShopName(model.getShopName());
-//            }
+
             if (model.getProductName() != null) {
                 product.setProductName(model.getProductName());
             }

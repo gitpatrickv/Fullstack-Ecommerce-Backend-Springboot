@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 public class StoreModel {
     @Valid
 
-    private Long storeId;
     @NotBlank(message = "{store.name.required}")
     private String storeName;
     @NotBlank

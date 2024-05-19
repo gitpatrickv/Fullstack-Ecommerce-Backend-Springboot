@@ -15,7 +15,7 @@ public class CartModel {
     private Long quantity;
     private Double price;
     private Double totalAmount;
-    private String shopName;
+    private String storeName;
     private String productName;
     private boolean filter;
     private String photoUrl;

@@ -18,7 +18,6 @@ public class Product extends AuditEntity{
     @GeneratedValue(strategy = GenerationType.UUID)
     private String productId;
 
-//    private String shopName;
     private String productName;
     private String productDescription;
 
