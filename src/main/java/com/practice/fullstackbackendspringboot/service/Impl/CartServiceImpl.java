@@ -101,8 +101,11 @@ public class CartServiceImpl implements CartService {
         userRepository.findByEmail(email);
         List<Cart> existingCart = cartRepository.findAllByUserEmail(email);
 
+        boolean allFilteredCarts = existingCart.stream().allMatch(Cart::isFilter);
+        boolean toggleFilter = !allFilteredCarts;
+
         for(Cart cart : existingCart){
-            cart.setFilter(!cart.isFilter());
+            cart.setFilter(toggleFilter);
             cartRepository.save(cart);
         }
     }
