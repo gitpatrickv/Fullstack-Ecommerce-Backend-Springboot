@@ -193,5 +193,11 @@ public class CartServiceImpl implements CartService {
         userRepository.findByEmail(email);
         cartRepository.deleteById(cartId);
     }
+
+    @Override
+    public void deleteAllCarts(String email) {
+        userRepository.findByEmail(email);
+        cartRepository.deleteAllByFilterTrueAndUserEmail(email);
+    }
 }
 

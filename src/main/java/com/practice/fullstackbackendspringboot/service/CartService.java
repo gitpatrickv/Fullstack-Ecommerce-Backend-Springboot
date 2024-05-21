@@ -19,5 +19,5 @@ public interface CartService {
     void increaseQuantity(QuantityRequest quantityRequest, String email);
     void decreaseQuantity(QuantityRequest quantityRequest, String email);
     void delete(String cartId, String email);
-
+    void deleteAllCarts(String email);
 }

@@ -73,11 +73,16 @@ public class CartController {
         cartService.decreaseQuantity(quantityRequest,user);
     }
 
-    @DeleteMapping("/{cartId}")
+    @DeleteMapping("/delete/{cartId}")
     @ResponseStatus(HttpStatus.OK)
     public void delete(@PathVariable String cartId, @RequestHeader("Authorization") String email) {
         String user = userService.getUserFromToken(email);
         cartService.delete(cartId,email);
+    }
+    @DeleteMapping("/delete")
+    public void deleteAllCarts(@RequestHeader("Authorization") String email) {
+        String user = userService.getUserFromToken(email);
+        cartService.deleteAllCarts(user);
     }
 
 }
