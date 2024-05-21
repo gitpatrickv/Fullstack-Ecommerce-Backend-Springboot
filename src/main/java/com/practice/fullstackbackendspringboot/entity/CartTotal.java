@@ -19,7 +19,7 @@ public class CartTotal {
     @SequenceGenerator(name = "cart_gen", sequenceName = "cart_seq", allocationSize = 1)
     private Long cartTotalId;
     private Double cartTotal;
-    private Integer cartItems;
+    private Long cartItems;
 
     @OneToOne(mappedBy = "cartTotal")
     private Cart cart;

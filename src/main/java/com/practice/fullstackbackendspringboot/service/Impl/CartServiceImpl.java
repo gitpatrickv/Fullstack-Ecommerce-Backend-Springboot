@@ -127,17 +127,25 @@ public class CartServiceImpl implements CartService {
     public CartTotalModel getCartTotal(String email, boolean filter) {
         User user = userRepository.findByEmail(email).get();
         List<Cart> carts = cartRepository.findAllByFilterAndUserEmail(true,email);
+        List<Cart> cartCount = cartRepository.findAllByUserEmail(email);
         Optional<CartTotal> existingCartTotal = cartTotalRepository.findByUserEmail(email);
         Double total = 0.0;
+        long count = 0;
 
         for(Cart cart : carts){
             Double cartTotalAmount = cart.getTotalAmount();
             total += cartTotalAmount;
         }
 
+        for(Cart cart : cartCount){
+            long itemCount = cart.getQuantity();
+            count += itemCount;
+        }
+
         if(existingCartTotal.isPresent()){
         CartTotal cartTotal = existingCartTotal.get();
         cartTotal.setCartTotal(total);
+        cartTotal.setCartItems(count);
         cartTotal.setUser(user);
         cartTotalRepository.save(cartTotal);
         return cartTotalMapper.mapEntityToModel(cartTotal);
@@ -145,17 +153,10 @@ public class CartServiceImpl implements CartService {
 
         CartTotal cartTotal = new CartTotal();
         cartTotal.setCartTotal(total);
+        cartTotal.setCartItems(count);
         cartTotal.setUser(user);
         cartTotalRepository.save(cartTotal);
         return cartTotalMapper.mapEntityToModel(cartTotal);
-
-    }
-
-    @Override
-    public Integer getCartItemCount(String email) {
-
-
-        return null;
     }
 
     @Override
