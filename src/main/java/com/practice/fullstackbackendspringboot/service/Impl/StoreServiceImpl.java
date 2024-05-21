@@ -8,12 +8,14 @@ import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.service.StoreService;
 import com.practice.fullstackbackendspringboot.utils.mapper.StoreMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StoreServiceImpl implements StoreService {
 
     private final UserRepository userRepository;
@@ -22,10 +24,20 @@ public class StoreServiceImpl implements StoreService {
     @Override
     public StoreModel createStore(StoreModel storeModel, String email) {
         Optional<User> user = userRepository.findByEmail(email);
+        boolean isNew = storeRepository.existsByStoreNameIgnoreCase(storeModel.getStoreName());
+
+        if(user.isPresent() && isNew){
+            String errorMessage = "A store with the name '" + storeModel.getStoreName() +
+                    "' already exists for user with email '" + email + "'.";
+            log.info(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
+
         Store store;
-        if(user.isPresent()){
+        if(user.isPresent() && !isNew){
             store = mapper.mapModelToEntity(storeModel);
             store.setUser(user.get());
+            log.info("Creating a new store for user with email: " + email);
         }else{
             store = storeRepository.findByUserEmail(email).get();
 
@@ -45,6 +57,5 @@ public class StoreServiceImpl implements StoreService {
 
         Store saveStore = storeRepository.save(store);
         return mapper.mapEntityToModel(saveStore);
-
     }
 }

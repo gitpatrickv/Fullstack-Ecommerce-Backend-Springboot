@@ -15,6 +15,7 @@ public interface CartService {
     CartTotalModel getCartTotal(String email, boolean filter);
     void filterCartProducts(String cartId, String email);
     void filterAllCartProducts(String email);
+    void filterCartByStoreName(String storeName, String email);
     void increaseQuantity(QuantityRequest quantityRequest, String email);
     void decreaseQuantity(QuantityRequest quantityRequest, String email);
     void delete(String cartId, String email);

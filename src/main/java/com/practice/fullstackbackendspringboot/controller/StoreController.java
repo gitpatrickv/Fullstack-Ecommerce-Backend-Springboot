@@ -6,6 +6,7 @@ import com.practice.fullstackbackendspringboot.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,9 +18,15 @@ public class StoreController {
     private final StoreService storeService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public StoreModel createStore(@RequestBody @Valid StoreModel storeModel, @RequestHeader("Authorization") String email){
-        String user = userService.getUserFromToken(email);
-        return storeService.createStore(storeModel,user);
+    public ResponseEntity<StoreModel> createStore(@RequestBody @Valid StoreModel storeModel, @RequestHeader("Authorization") String email){
+        try {
+            String user = userService.getUserFromToken(email);
+            StoreModel createdStore = storeService.createStore(storeModel,user);
+            return new ResponseEntity<>(createdStore, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e){
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }catch (Exception e){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

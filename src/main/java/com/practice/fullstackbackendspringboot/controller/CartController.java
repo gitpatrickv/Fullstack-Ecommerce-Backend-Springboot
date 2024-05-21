@@ -53,6 +53,11 @@ public class CartController {
         String user = userService.getUserFromToken(email);
         cartService.filterAllCartProducts(user);
     }
+    @PutMapping("/filter/store/{storeName}")
+    public void filterCartByStoreName(@PathVariable("storeName") String storeName, @RequestHeader("Authorization") String email){
+        String user = userService.getUserFromToken(email);
+        cartService.filterCartByStoreName(storeName,user);
+    }
 
     @PutMapping("/increment")
     @ResponseStatus(HttpStatus.OK)

@@ -111,6 +111,20 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    public void filterCartByStoreName(String storeName, String email) {
+        userRepository.findByEmail(email);
+        List<Cart> existingCart = cartRepository.findAllByStoreNameIgnoreCaseAndUserEmail(storeName, email);
+
+        boolean allFilteredCarts = existingCart.stream().allMatch(Cart::isFilter);
+        boolean toggleFilter = !allFilteredCarts;
+
+        for(Cart cart : existingCart){
+           cart.setFilter(toggleFilter);
+           cartRepository.save(cart);
+        }
+    }
+
+    @Override
     public CartTotalModel getCartTotal(String email, boolean filter) {
         User user = userRepository.findByEmail(email).get();
         List<Cart> carts = cartRepository.findAllByFilterAndUserEmail(true,email);
@@ -179,7 +193,5 @@ public class CartServiceImpl implements CartService {
         userRepository.findByEmail(email);
         cartRepository.deleteById(cartId);
     }
-
-
 }
 
