@@ -77,9 +77,8 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public List<CartModel> getAllProductsInCart(String email) {
-        return cartRepository.findAll()
+        return cartRepository.findAllByUserEmail(email)
                 .stream()
-                .filter(filter -> filter.getUser().getEmail().equals(email))
                 .map(cartMapper::mapCartEntityToCartModel)
                 .toList();
     }
@@ -128,17 +127,30 @@ public class CartServiceImpl implements CartService {
     public CartTotalModel getCartTotal(String email, boolean filter) {
         User user = userRepository.findByEmail(email).get();
         List<Cart> carts = cartRepository.findAllByFilterAndUserEmail(true,email);
+        List<Cart> cartCount = cartRepository.findAllByUserEmail(email);
         Optional<CartTotal> existingCartTotal = cartTotalRepository.findByUserEmail(email);
         Double total = 0.0;
+        long count = 0;
+        long filteredItem = 0;
 
         for(Cart cart : carts){
             Double cartTotalAmount = cart.getTotalAmount();
             total += cartTotalAmount;
+
+            long filterNumber = cart.getQuantity();
+            filteredItem += filterNumber;
+        }
+
+        for(Cart cart : cartCount){
+            long itemCount = cart.getQuantity();
+            count += itemCount;
         }
 
         if(existingCartTotal.isPresent()){
         CartTotal cartTotal = existingCartTotal.get();
         cartTotal.setCartTotal(total);
+        cartTotal.setCartItems(count);
+        cartTotal.setQty(filteredItem);
         cartTotal.setUser(user);
         cartTotalRepository.save(cartTotal);
         return cartTotalMapper.mapEntityToModel(cartTotal);
@@ -146,10 +158,11 @@ public class CartServiceImpl implements CartService {
 
         CartTotal cartTotal = new CartTotal();
         cartTotal.setCartTotal(total);
+        cartTotal.setCartItems(count);
+        cartTotal.setQty(filteredItem);
         cartTotal.setUser(user);
         cartTotalRepository.save(cartTotal);
         return cartTotalMapper.mapEntityToModel(cartTotal);
-
     }
 
     @Override
@@ -192,6 +205,12 @@ public class CartServiceImpl implements CartService {
     public void delete(String cartId, String email) {
         userRepository.findByEmail(email);
         cartRepository.deleteById(cartId);
+    }
+
+    @Override
+    public void deleteAllCarts(String email) {
+        userRepository.findByEmail(email);
+        cartRepository.deleteAllByFilterTrueAndUserEmail(email);
     }
 }
 
