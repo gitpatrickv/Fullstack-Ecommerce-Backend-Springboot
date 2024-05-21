@@ -20,6 +20,7 @@ public class CartTotal {
     private Long cartTotalId;
     private Double cartTotal;
     private Long cartItems;
+    private Long qty;
 
     @OneToOne(mappedBy = "cartTotal")
     private Cart cart;

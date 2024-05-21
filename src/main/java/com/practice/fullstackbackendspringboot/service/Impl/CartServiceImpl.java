@@ -131,10 +131,14 @@ public class CartServiceImpl implements CartService {
         Optional<CartTotal> existingCartTotal = cartTotalRepository.findByUserEmail(email);
         Double total = 0.0;
         long count = 0;
+        long filteredItem = 0;
 
         for(Cart cart : carts){
             Double cartTotalAmount = cart.getTotalAmount();
             total += cartTotalAmount;
+
+            long filterNumber = cart.getQuantity();
+            filteredItem += filterNumber;
         }
 
         for(Cart cart : cartCount){
@@ -146,6 +150,7 @@ public class CartServiceImpl implements CartService {
         CartTotal cartTotal = existingCartTotal.get();
         cartTotal.setCartTotal(total);
         cartTotal.setCartItems(count);
+        cartTotal.setQty(filteredItem);
         cartTotal.setUser(user);
         cartTotalRepository.save(cartTotal);
         return cartTotalMapper.mapEntityToModel(cartTotal);
@@ -154,6 +159,7 @@ public class CartServiceImpl implements CartService {
         CartTotal cartTotal = new CartTotal();
         cartTotal.setCartTotal(total);
         cartTotal.setCartItems(count);
+        cartTotal.setQty(filteredItem);
         cartTotal.setUser(user);
         cartTotalRepository.save(cartTotal);
         return cartTotalMapper.mapEntityToModel(cartTotal);

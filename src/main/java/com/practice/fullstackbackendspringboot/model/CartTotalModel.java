@@ -11,4 +11,5 @@ public class CartTotalModel {
     private Long cartTotalId;
     private Double cartTotal;
     private Long cartItems;
+    private Long qty;
 }
