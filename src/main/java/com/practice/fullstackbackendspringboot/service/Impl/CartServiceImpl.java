@@ -63,7 +63,7 @@ public class CartServiceImpl implements CartService {
                 cart.setProduct(product.get());
                 cart.setQuantity(cartRequest.getQuantity());
                 cart.setPrice(inventory.get().getPrice());
-                cart.setShopName(product.get().getShopName());
+                cart.setStoreName(product.get().getStore().getStoreName());
                 cart.setProductName(product.get().getProductName());
                 cart.setPhotoUrl(productImage.get().getPhotoUrl());
                 cart.setTotalAmount(inventory.get().getPrice() * cartRequest.getQuantity());
@@ -107,6 +107,20 @@ public class CartServiceImpl implements CartService {
         for(Cart cart : existingCart){
             cart.setFilter(toggleFilter);
             cartRepository.save(cart);
+        }
+    }
+
+    @Override
+    public void filterCartByStoreName(String storeName, String email) {
+        userRepository.findByEmail(email);
+        List<Cart> existingCart = cartRepository.findAllByStoreNameIgnoreCaseAndUserEmail(storeName, email);
+
+        boolean allFilteredCarts = existingCart.stream().allMatch(Cart::isFilter);
+        boolean toggleFilter = !allFilteredCarts;
+
+        for(Cart cart : existingCart){
+           cart.setFilter(toggleFilter);
+           cartRepository.save(cart);
         }
     }
 
@@ -179,7 +193,5 @@ public class CartServiceImpl implements CartService {
         userRepository.findByEmail(email);
         cartRepository.deleteById(cartId);
     }
-
-
 }
 

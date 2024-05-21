@@ -18,7 +18,7 @@ public class Cart {
     private Long quantity;
     private Double price;
     private Double totalAmount;
-    private String shopName;
+    private String storeName;
     private String productName;
     private boolean filter;
     private String photoUrl;
@@ -31,6 +31,7 @@ public class Cart {
     @JoinColumn(name = "product_id")
     private Product product;
     @OneToOne
+    @JoinColumn(name = "cart_total_id")
     private CartTotal cartTotal;
 
 }

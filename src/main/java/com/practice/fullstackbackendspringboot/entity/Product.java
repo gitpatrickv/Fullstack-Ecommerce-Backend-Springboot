@@ -18,7 +18,6 @@ public class Product extends AuditEntity{
     @GeneratedValue(strategy = GenerationType.UUID)
     private String productId;
 
-    private String shopName;
     private String productName;
     private String productDescription;
 
@@ -31,6 +30,10 @@ public class Product extends AuditEntity{
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "store_id")
+    private Store store;
 
 
 }

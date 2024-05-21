@@ -29,20 +29,24 @@ public class User implements UserDetails {
     private String name;
     private String address;
     private String contactNumber;
+
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
+    @CreationTimestamp
+    private LocalDate createdDate;
+    @UpdateTimestamp
+    private LocalDate lastModified;
+
     @OneToMany(mappedBy = "user")
     private List<Cart> cart;
     @OneToMany(mappedBy = "user")
     private List<Product> product;
     @OneToOne(mappedBy = "user")
     private CartTotal cartTotal;
-    @CreationTimestamp
-    private LocalDate createdDate;
-    @UpdateTimestamp
-    private LocalDate lastModified;
+    @OneToOne(mappedBy = "user")
+    private Store store;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

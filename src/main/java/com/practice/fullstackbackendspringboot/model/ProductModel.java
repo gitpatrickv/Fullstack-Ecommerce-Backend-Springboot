@@ -24,20 +24,17 @@ public class ProductModel {
 
     @NotNull(message = "{product.id.must.not.be.null}")
     private String productId;
-    @NotBlank(message = "{shop.name.required}")
-    private String shopName;
     @NotBlank(message = "{product.name.required}")
     private String productName;
     @NotBlank(message = "{this.field.cannot.be.empty}")
     private String productDescription;
-
     @NotNull(message = "{this.field.cannot.be.empty}")
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
     private Double price;
     @NotNull(message = "{this.field.cannot.be.empty}")
     private Long quantity;
     private String skuCode;
-
+    private String storeName;
     private List<String> productImage = new ArrayList<>();
 
 }
