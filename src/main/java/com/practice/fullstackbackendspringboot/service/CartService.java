@@ -13,6 +13,7 @@ public interface CartService {
     CartModel addProductToCart(CartRequest cartRequest, String email);
     List<CartModel> getAllProductsInCart(String email);
     CartTotalModel getCartTotal(String email, boolean filter);
+    Integer getCartItemCount(String email);
     void filterCartProducts(String cartId, String email);
     void filterAllCartProducts(String email);
     void filterCartByStoreName(String storeName, String email);

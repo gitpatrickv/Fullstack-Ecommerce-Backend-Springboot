@@ -77,9 +77,8 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public List<CartModel> getAllProductsInCart(String email) {
-        return cartRepository.findAll()
+        return cartRepository.findAllByUserEmail(email)
                 .stream()
-                .filter(filter -> filter.getUser().getEmail().equals(email))
                 .map(cartMapper::mapCartEntityToCartModel)
                 .toList();
     }
@@ -150,6 +149,13 @@ public class CartServiceImpl implements CartService {
         cartTotalRepository.save(cartTotal);
         return cartTotalMapper.mapEntityToModel(cartTotal);
 
+    }
+
+    @Override
+    public Integer getCartItemCount(String email) {
+
+
+        return null;
     }
 
     @Override
