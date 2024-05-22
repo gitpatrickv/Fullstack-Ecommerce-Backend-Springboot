@@ -1,9 +1,9 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
 import com.practice.fullstackbackendspringboot.entity.User;
+import com.practice.fullstackbackendspringboot.model.UserModel;
 import com.practice.fullstackbackendspringboot.model.request.LoginRequest;
 import com.practice.fullstackbackendspringboot.model.response.LoginResponse;
-import com.practice.fullstackbackendspringboot.model.UserModel;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.security.JwtAuthenticationFilter;
 import com.practice.fullstackbackendspringboot.security.JwtService;
@@ -66,6 +66,12 @@ public class UserServiceImpl implements UserService {
         userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND));
         return email;
+    }
+
+    @Override
+    public UserModel getUser(String email) {
+        User user = userRepository.findByEmail(email).get();
+        return mapper.mapUserEntityToUserModel(user);
     }
 
 }

@@ -27,5 +27,11 @@ public class  UserController {
         return userService.login(loginRequest);
     }
 
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public UserModel getUser(@RequestHeader("Authorization") String email) {
+        String user = userService.getUserFromToken(email);
+        return userService.getUser(user);
+    }
 
 }

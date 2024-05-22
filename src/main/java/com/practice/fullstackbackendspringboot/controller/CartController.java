@@ -58,6 +58,11 @@ public class CartController {
         String user = userService.getUserFromToken(email);
         cartService.filterCartByStoreName(storeName,user);
     }
+    @GetMapping("/checkout")
+    public List<CartModel> checkout(@RequestHeader("Authorization") String email){
+        String user = userService.getUserFromToken(email);
+        return cartService.checkout(user);
+    }
 
     @PutMapping("/increment")
     @ResponseStatus(HttpStatus.OK)

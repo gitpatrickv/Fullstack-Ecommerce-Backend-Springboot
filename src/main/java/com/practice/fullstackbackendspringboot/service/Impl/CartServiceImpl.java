@@ -124,6 +124,15 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    public List<CartModel> checkout(String email) {
+        userRepository.findByEmail(email);
+        return cartRepository.findAllByFilterTrueAndUserEmail(email)
+                .stream()
+                .map(cartMapper::mapCartEntityToCartModel)
+                .toList();
+    }
+
+    @Override
     public CartTotalModel getCartTotal(String email, boolean filter) {
         User user = userRepository.findByEmail(email).get();
         List<Cart> carts = cartRepository.findAllByFilterAndUserEmail(true,email);
