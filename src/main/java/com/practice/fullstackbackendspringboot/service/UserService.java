@@ -8,5 +8,6 @@ public interface UserService {
     UserModel register(UserModel userModel);
     LoginResponse login(LoginRequest loginRequest);
     String getUserFromToken(String email);
+    UserModel getUser(String email);
 
 }
