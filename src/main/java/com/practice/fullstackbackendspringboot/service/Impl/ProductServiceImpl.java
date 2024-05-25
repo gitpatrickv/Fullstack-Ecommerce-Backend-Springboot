@@ -92,6 +92,21 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<AllProductModel> searchProduct(String search) {
+
+        List<Product> products = productRepository.findByProductNameContainingIgnoreCaseOrStore_StoreNameContainingIgnoreCase(search,search);
+        List<AllProductModel> productModels = new ArrayList<>();
+
+        for(Product product : products) {
+            AllProductModel allProductModel = allProductMapper.mapProductEntityToProductModel(product);
+            getPhotoUrl(product, allProductModel);
+            getPriceAndQuantity(product,allProductModel);
+            productModels.add(allProductModel);
+        }
+        return productModels;
+    }
+
+    @Override
     public ProductModel getProductById(String productId) {
         Optional<Product> product = productRepository.findById(productId);
         Product products = product.orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId));
@@ -117,7 +132,6 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteById(productId);
     }
 
-    //TODO: refactor to avoid doing database reads one at a time in a loop it is better to use jpa @Query
     private void getPhotoUrl(Product product, AllProductModel productModel){
         List<ProductImage> productImages = product.getProductImage();
         if (productImages != null && !productImages.isEmpty()) {

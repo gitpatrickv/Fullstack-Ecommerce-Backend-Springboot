@@ -11,10 +11,7 @@ import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, String> {
-//    @EntityGraph(attributePaths = {"productImage", "inventory"})
-//    List<Product> findAll();
 
-//    @Query("SELECT p.productImage, i.quantity FROM Product p JOIN p.productImage pimg JOIN p.inventory i WHERE p.productId = :productId")
-//    List<Object[]> findProductImagesAndInventoryByProductId(@Param("productId") String productId);
+List<Product> findByProductNameContainingIgnoreCaseOrStore_StoreNameContainingIgnoreCase(String search, String search1);
 
 }

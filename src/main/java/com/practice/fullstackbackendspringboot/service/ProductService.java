@@ -12,4 +12,5 @@ public interface ProductService {
     List<AllProductModel> getAllProducts();
     ProductModel getProductById(String productId);
     void delete(String productId, String email);
+    List<AllProductModel> searchProduct(String search);
 }

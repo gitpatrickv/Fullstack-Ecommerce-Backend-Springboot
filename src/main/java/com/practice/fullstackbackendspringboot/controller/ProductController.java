@@ -29,17 +29,20 @@ public class ProductController {
         String user = userService.getUserFromToken(email);
         return productService.saveProduct(model,user,file);
     }
-
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<AllProductModel> getAllProducts(){
         return productService.getAllProducts();
     }
-
     @GetMapping("/{productId}")
     @ResponseStatus(HttpStatus.OK)
     public ProductModel getProductById(@PathVariable (value="productId") String productId){
         return productService.getProductById(productId);
+    }
+    @GetMapping("/search")
+    @ResponseStatus(HttpStatus.OK)
+    public List<AllProductModel> searchProduct(@RequestParam (value = "keyword") String search ){
+        return productService.searchProduct(search);
     }
     @DeleteMapping("/delete/{productId}")
     public void delete(@PathVariable (value="productId") String productId, @RequestHeader("Authorization") String email){
