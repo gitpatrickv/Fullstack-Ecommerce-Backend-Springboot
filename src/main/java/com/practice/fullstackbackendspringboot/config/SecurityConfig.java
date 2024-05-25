@@ -30,9 +30,11 @@ public class SecurityConfig {
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize ->
                                 authorize
+                                        .requestMatchers("/api/admin/**").hasAuthority(ADMIN.name())
+                                        .requestMatchers("/api/seller/**").hasAuthority(SELLER.name())
                                         .requestMatchers(HttpMethod.POST, "/api/product/save").hasAnyAuthority(ADMIN.name(), SELLER.name())
-                                        .requestMatchers("/api/store/**").hasAnyAuthority(ADMIN.name(), SELLER.name())
                                         .requestMatchers(HttpMethod.DELETE,"/api/product/delete/**").hasAuthority(SELLER.name())
+                                        .requestMatchers("/api/store/**").hasAnyAuthority(ADMIN.name(), SELLER.name())
                                         .requestMatchers("/api/cart/**").hasAuthority(USER.name())
                                         .requestMatchers(HttpMethod.GET, "/api/user").authenticated()
                                         .requestMatchers("/api/product/**").permitAll()
