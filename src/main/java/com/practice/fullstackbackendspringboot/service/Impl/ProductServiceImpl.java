@@ -3,6 +3,8 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.AllProductModel;
 import com.practice.fullstackbackendspringboot.model.ProductModel;
+import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
+import com.practice.fullstackbackendspringboot.model.response.PageResponse;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.InventoryService;
 import com.practice.fullstackbackendspringboot.service.ProductImageService;
@@ -13,6 +15,9 @@ import com.practice.fullstackbackendspringboot.utils.mapper.ProductMapper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -77,18 +82,26 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<AllProductModel> getAllProducts() {
+    public AllProductsPageResponse getAllProducts(int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        Page<Product> products = productRepository.findAll(pageable);
 
-        List<Product> products = productRepository.findAll();
         List<AllProductModel> productModels = new ArrayList<>();
+        PageResponse pageResponse = new PageResponse();
+        pageResponse.setPageNo(products.getNumber());
+        pageResponse.setPageSize(products.getSize());
+        pageResponse.setTotalElements(products.getTotalElements());
+        pageResponse.setTotalPages(products.getTotalPages());
+        pageResponse.setLast(products.isLast());
 
-        for(Product product : products) {
+        for (Product product : products) {
             AllProductModel allProductModel = allProductMapper.mapProductEntityToProductModel(product);
             getPhotoUrl(product, allProductModel);
             getPriceAndQuantity(product, allProductModel);
             productModels.add(allProductModel);
         }
-        return productModels;
+
+        return new AllProductsPageResponse(productModels, pageResponse);
     }
 
     @Override

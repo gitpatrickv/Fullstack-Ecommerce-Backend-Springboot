@@ -2,6 +2,7 @@ package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.AllProductModel;
 import com.practice.fullstackbackendspringboot.model.ProductModel;
+import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
 import com.practice.fullstackbackendspringboot.service.ProductService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import jakarta.validation.Valid;
@@ -29,11 +30,15 @@ public class ProductController {
         String user = userService.getUserFromToken(email);
         return productService.saveProduct(model,user,file);
     }
+
+//correct
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<AllProductModel> getAllProducts(){
-        return productService.getAllProducts();
+    public AllProductsPageResponse getAllProducts(@RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                                 @RequestParam(value = "pageSize", defaultValue = "50", required = false) int pageSize){
+        return productService.getAllProducts(pageNo,pageSize);
     }
+
     @GetMapping("/{productId}")
     @ResponseStatus(HttpStatus.OK)
     public ProductModel getProductById(@PathVariable (value="productId") String productId){
