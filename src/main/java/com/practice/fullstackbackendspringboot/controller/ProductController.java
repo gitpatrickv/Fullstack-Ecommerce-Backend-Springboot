@@ -1,6 +1,5 @@
 package com.practice.fullstackbackendspringboot.controller;
 
-import com.practice.fullstackbackendspringboot.model.AllProductModel;
 import com.practice.fullstackbackendspringboot.model.ProductModel;
 import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
 import com.practice.fullstackbackendspringboot.service.ProductService;
@@ -11,8 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/product")
@@ -35,7 +32,7 @@ public class ProductController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public AllProductsPageResponse getAllProducts(@RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
-                                                 @RequestParam(value = "pageSize", defaultValue = "50", required = false) int pageSize){
+                                                 @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize){
         return productService.getAllProducts(pageNo,pageSize);
     }
 
@@ -44,10 +41,13 @@ public class ProductController {
     public ProductModel getProductById(@PathVariable (value="productId") String productId){
         return productService.getProductById(productId);
     }
+
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public List<AllProductModel> searchProduct(@RequestParam (value = "keyword") String search ){
-        return productService.searchProduct(search);
+    public AllProductsPageResponse searchProduct(@RequestParam (value = "keyword") String search,
+                                                 @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                                 @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize){
+        return productService.searchProduct(search, pageNo, pageSize);
     }
     @DeleteMapping("/delete/{productId}")
     public void delete(@PathVariable (value="productId") String productId, @RequestHeader("Authorization") String email){

@@ -85,8 +85,8 @@ public class ProductServiceImpl implements ProductService {
     public AllProductsPageResponse getAllProducts(int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
         Page<Product> products = productRepository.findAll(pageable);
-
         List<AllProductModel> productModels = new ArrayList<>();
+
         PageResponse pageResponse = new PageResponse();
         pageResponse.setPageNo(products.getNumber());
         pageResponse.setPageSize(products.getSize());
@@ -105,10 +105,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<AllProductModel> searchProduct(String search) {
-
-        List<Product> products = productRepository.findByProductNameContainingIgnoreCaseOrStore_StoreNameContainingIgnoreCase(search,search);
+    public AllProductsPageResponse searchProduct(String search, int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo,pageSize);
+        Page<Product> products = productRepository.findByProductNameContainingIgnoreCaseOrStore_StoreNameContainingIgnoreCase(search,search, pageable);
         List<AllProductModel> productModels = new ArrayList<>();
+
+        PageResponse pageResponse = new PageResponse();
+        pageResponse.setPageNo(products.getNumber());
+        pageResponse.setPageSize(products.getSize());
+        pageResponse.setTotalElements(products.getTotalElements());
+        pageResponse.setTotalPages(products.getTotalPages());
+        pageResponse.setLast(products.isLast());
 
         for(Product product : products) {
             AllProductModel allProductModel = allProductMapper.mapProductEntityToProductModel(product);
@@ -116,7 +123,7 @@ public class ProductServiceImpl implements ProductService {
             getPriceAndQuantity(product,allProductModel);
             productModels.add(allProductModel);
         }
-        return productModels;
+        return new AllProductsPageResponse(productModels, pageResponse);
     }
 
     @Override
