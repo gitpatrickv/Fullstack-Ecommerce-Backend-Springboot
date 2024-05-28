@@ -29,7 +29,7 @@ public class ProductImageServiceImpl implements ProductImageService {
 
     @Override
     public void uploadPhoto(String id, MultipartFile file) {
-        log.info("Saving picture for user ID: {}", id);
+        log.info("Saving picture for product ID: {}", id);
 
         Optional<Product> product = productRepository.findById(id);
 
