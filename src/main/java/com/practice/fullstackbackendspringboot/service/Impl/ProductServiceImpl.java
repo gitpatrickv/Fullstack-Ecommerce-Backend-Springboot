@@ -76,7 +76,7 @@ public class ProductServiceImpl implements ProductService {
             inventoryRepository.save(inventory);  //@TODO: implement item variation
         }
 
-        productImageService.uploadPhoto(savedProduct.getProductId(),file);      //@TODO: Refactor to upload multiple images at the same time
+        productImageService.uploadProductPhoto(savedProduct.getProductId(),file);      //@TODO: Refactor to upload multiple images at the same time
 
         return mapper.mapProductEntityToProductModel(savedProduct);
     }
@@ -131,13 +131,13 @@ public class ProductServiceImpl implements ProductService {
         Optional<Product> product = productRepository.findById(productId);
         Product products = product.orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId));
         Inventory inventory = inventoryRepository.findByProduct_ProductId(productId).get();
-        List<ProductImage> productImages = productImageRepository.findAllPhotoUrlByProduct_ProductId(productId);
+        List<Image> images = productImageRepository.findAllPhotoUrlByProduct_ProductId(productId);
         List<String> photoUrls = new ArrayList<>();
 
         ProductModel productModel = mapper.mapProductEntityToProductModel(products);
 
-        for(ProductImage productImage : productImages){
-            photoUrls.add(productImage.getPhotoUrl());
+        for(Image image : images){
+            photoUrls.add(image.getPhotoUrl());
         }
         productModel.setProductImage(photoUrls);
         productModel.setPrice(inventory.getPrice());
@@ -153,9 +153,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private void getPhotoUrl(Product product, AllProductModel productModel){
-        List<ProductImage> productImages = product.getProductImage();
-        if (productImages != null && !productImages.isEmpty()) {
-            ProductImage image = productImages.get(0);
+        List<Image> images = product.getImage();
+        if (images != null && !images.isEmpty()) {
+            Image image = images.get(0);
             productModel.setPhotoUrl(image.getPhotoUrl());
         }
     }

@@ -29,7 +29,7 @@ public class User implements UserDetails {
     private String name;
     private String address;
     private String contactNumber;
-
+    private String photoUrl;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     @Enumerated(EnumType.STRING)
@@ -47,6 +47,8 @@ public class User implements UserDetails {
     private CartTotal cartTotal;
     @OneToOne(mappedBy = "user")
     private Store store;
+    @OneToOne
+    private Image image;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

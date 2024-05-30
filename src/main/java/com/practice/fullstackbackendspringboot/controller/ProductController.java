@@ -28,7 +28,6 @@ public class ProductController {
         return productService.saveProduct(model,user,file);
     }
 
-//correct
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public AllProductsPageResponse getAllProducts(@RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
