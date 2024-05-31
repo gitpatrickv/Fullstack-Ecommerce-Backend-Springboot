@@ -25,8 +25,8 @@ public class ProductImageController {
     }
     @PostMapping("/user/image/upload")
     public void uploadUserPhoto(@RequestHeader("Authorization") String email,  @RequestParam(value = "file") MultipartFile file) {
-        String username = userService.getUserFromToken(email);
-        productImageService.uploadUserPhoto(username,file);
+        String user = userService.getUserFromToken(email);
+        productImageService.uploadUserPhoto(user,file);
     }
 
     @GetMapping(path = "/product/image/{filename}", produces = {IMAGE_PNG_VALUE, IMAGE_JPEG_VALUE})
