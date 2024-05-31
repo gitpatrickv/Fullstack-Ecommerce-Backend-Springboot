@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "product_image")
-public class ProductImage{
+public class Image {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -23,5 +23,8 @@ public class ProductImage{
     @JoinColumn(name = "product_id")
     @JsonIgnore
     private Product product;
+
+    @OneToOne
+    private User user;
 
 }

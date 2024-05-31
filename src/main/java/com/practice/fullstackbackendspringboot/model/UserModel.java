@@ -41,4 +41,5 @@ public class UserModel{
     private String confirmPassword;
     @Enumerated(EnumType.STRING)
     private Role role;
+    private String photoUrl;
 }

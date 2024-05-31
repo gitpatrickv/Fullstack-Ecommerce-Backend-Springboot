@@ -38,7 +38,7 @@ public class CartServiceImpl implements CartService {
 
         Optional<User> user = userRepository.findByEmail(email);
         Optional<Product> product = productRepository.findById(cartRequest.getProductId());
-        Optional<ProductImage> productImage = productImageRepository.findByProduct_ProductId(cartRequest.getProductId());
+        Optional<Image> productImage = productImageRepository.findByProduct_ProductId(cartRequest.getProductId());
         Optional<Inventory> inventory = inventoryRepository.findByProduct_ProductId(cartRequest.getProductId());
         Optional<Cart> existingCart = cartRepository.findByProduct_ProductIdAndUserEmail(cartRequest.getProductId(),email);
         Cart cart;
