@@ -28,7 +28,7 @@ public class CartServiceImpl implements CartService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final InventoryRepository inventoryRepository;
-    private final ProductImageRepository productImageRepository;
+    private final ImageRepository imageRepository;
     private final CartTotalRepository cartTotalRepository;
     private final CartMapper cartMapper;
     private final CartTotalMapper cartTotalMapper;
@@ -38,7 +38,7 @@ public class CartServiceImpl implements CartService {
 
         Optional<User> user = userRepository.findByEmail(email);
         Optional<Product> product = productRepository.findById(cartRequest.getProductId());
-        Optional<Image> productImage = productImageRepository.findByProduct_ProductId(cartRequest.getProductId());
+        Optional<Image> productImage = imageRepository.findByProduct_ProductId(cartRequest.getProductId());
         Optional<Inventory> inventory = inventoryRepository.findByProduct_ProductId(cartRequest.getProductId());
         Optional<Cart> existingCart = cartRepository.findByProduct_ProductIdAndUserEmail(cartRequest.getProductId(),email);
         Cart cart;

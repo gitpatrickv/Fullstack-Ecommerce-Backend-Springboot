@@ -6,8 +6,8 @@ import com.practice.fullstackbackendspringboot.model.ProductModel;
 import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
 import com.practice.fullstackbackendspringboot.model.response.PageResponse;
 import com.practice.fullstackbackendspringboot.repository.*;
+import com.practice.fullstackbackendspringboot.service.ImageService;
 import com.practice.fullstackbackendspringboot.service.InventoryService;
-import com.practice.fullstackbackendspringboot.service.ProductImageService;
 import com.practice.fullstackbackendspringboot.service.ProductService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.AllProductMapper;
@@ -35,9 +35,9 @@ public class ProductServiceImpl implements ProductService {
     private final InventoryRepository inventoryRepository;
     private final UserRepository userRepository;
     private final ProductMapper mapper;
-    private final ProductImageRepository productImageRepository;
+    private final ImageRepository imageRepository;
     private final AllProductMapper allProductMapper;
-    private final ProductImageService productImageService;
+    private final ImageService imageService;
     private final InventoryService inventoryService;
     private final StoreRepository storeRepository;
 
@@ -76,7 +76,7 @@ public class ProductServiceImpl implements ProductService {
             inventoryRepository.save(inventory);  //@TODO: implement item variation
         }
 
-        productImageService.uploadProductPhoto(savedProduct.getProductId(),file);      //@TODO: Refactor to upload multiple images at the same time
+        imageService.uploadProductPhoto(savedProduct.getProductId(),file);      //@TODO: Refactor to upload multiple images at the same time
 
         return mapper.mapProductEntityToProductModel(savedProduct);
     }
@@ -131,7 +131,7 @@ public class ProductServiceImpl implements ProductService {
         Optional<Product> product = productRepository.findById(productId);
         Product products = product.orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId));
         Inventory inventory = inventoryRepository.findByProduct_ProductId(productId).get();
-        List<Image> images = productImageRepository.findAllPhotoUrlByProduct_ProductId(productId);
+        List<Image> images = imageRepository.findAllPhotoUrlByProduct_ProductId(productId);
         List<String> photoUrls = new ArrayList<>();
 
         ProductModel productModel = mapper.mapProductEntityToProductModel(products);

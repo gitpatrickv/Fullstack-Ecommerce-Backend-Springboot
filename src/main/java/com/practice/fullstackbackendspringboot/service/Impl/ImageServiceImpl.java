@@ -3,10 +3,10 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 import com.practice.fullstackbackendspringboot.entity.Product;
 import com.practice.fullstackbackendspringboot.entity.Image;
 import com.practice.fullstackbackendspringboot.entity.User;
-import com.practice.fullstackbackendspringboot.repository.ProductImageRepository;
+import com.practice.fullstackbackendspringboot.repository.ImageRepository;
 import com.practice.fullstackbackendspringboot.repository.ProductRepository;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
-import com.practice.fullstackbackendspringboot.service.ProductImageService;
+import com.practice.fullstackbackendspringboot.service.ImageService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,9 +25,9 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ProductImageServiceImpl implements ProductImageService {
+public class ImageServiceImpl implements ImageService {
 
-    private final ProductImageRepository productImageRepository;
+    private final ImageRepository imageRepository;
 
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
@@ -41,7 +41,7 @@ public class ProductImageServiceImpl implements ProductImageService {
         Image image = new Image();
         image.setProduct(product.get());
         image.setPhotoUrl(processProductImage(id, file));
-        productImageRepository.save(image);
+        imageRepository.save(image);
         log.info(image.getPhotoUrl());
     }
 
