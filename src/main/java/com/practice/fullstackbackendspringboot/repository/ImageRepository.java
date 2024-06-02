@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProductImageRepository extends JpaRepository<Image, String> {
+public interface ImageRepository extends JpaRepository<Image, String> {
 
     List<Image> findAllPhotoUrlByProduct_ProductId(String productId);
     Optional<Image> findByProduct_ProductId(String productId);

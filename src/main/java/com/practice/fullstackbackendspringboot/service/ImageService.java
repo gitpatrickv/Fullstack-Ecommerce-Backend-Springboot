@@ -4,7 +4,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-public interface ProductImageService {
+public interface ImageService {
 
     void uploadProductPhoto(String id, MultipartFile file);
     void uploadUserPhoto(String email, MultipartFile file);
