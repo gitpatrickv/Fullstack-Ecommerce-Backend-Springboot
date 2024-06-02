@@ -22,6 +22,7 @@ public class FavoritesServiceImpl implements FavoritesService {
     private final ProductRepository productRepository;
     private final ImageRepository imageRepository;
     private final InventoryRepository inventoryRepository;
+    private final CartRepository cartRepository;
     private final FavoritesMapper favoritesMapper;
     @Override
     public void addToFavorites(String email, String productId) {
@@ -45,6 +46,30 @@ public class FavoritesServiceImpl implements FavoritesService {
             favorites.setUser(user.get());
             favoritesRepository.save(favorites);
         }
+    }
+
+    @Override
+    public void addToFavoritesByFilter(String email) {
+        User user = userRepository.findByEmail(email).get();
+        List<Cart> carts = cartRepository.findAllByFilterAndUserEmail(true,email);
+
+        for(Cart cart : carts){
+            Optional<Favorites> favorite = favoritesRepository.findByProductIdAndUserEmail(cart.getProduct().getProductId(), user.getEmail());
+            if(favorite.isPresent() && favorite.get().isFavorites()){
+                cartRepository.delete(cart);
+            }else {
+                Favorites favorites = new Favorites();
+                favorites.setProductName(cart.getProductName());
+                favorites.setPrice(cart.getPrice());
+                favorites.setPhotoUrl(cart.getPhotoUrl());
+                favorites.setProductId(cart.getProduct().getProductId());
+                favorites.setFavorites(true);
+                favorites.setUser(user);
+                favoritesRepository.save(favorites);
+                cartRepository.delete(cart);
+            }
+        }
+
     }
 
     @Override

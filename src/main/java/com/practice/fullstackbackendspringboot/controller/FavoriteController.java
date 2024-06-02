@@ -24,6 +24,13 @@ public class FavoriteController {
         String user = userService.getUserFromToken(email);
         favoritesService.addToFavorites(user,productId);
     }
+
+    @PutMapping("/cart/add")
+    @ResponseStatus(HttpStatus.OK)
+    public void addToFavoritesByFilter(@RequestHeader("Authorization") String email){
+        String user = userService.getUserFromToken(email);
+        favoritesService.addToFavoritesByFilter(user);
+    }
     @GetMapping("/get")
     @ResponseStatus(HttpStatus.OK)
     public List<AllProductModel> getAllFavorites(@RequestHeader("Authorization") String email) {
