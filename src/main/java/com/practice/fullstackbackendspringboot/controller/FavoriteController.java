@@ -1,6 +1,7 @@
 package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.AllProductModel;
+import com.practice.fullstackbackendspringboot.model.FavoritesModel;
 import com.practice.fullstackbackendspringboot.service.FavoritesService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -28,5 +29,12 @@ public class FavoriteController {
     public List<AllProductModel> getAllFavorites(@RequestHeader("Authorization") String email) {
         String user = userService.getUserFromToken(email);
         return favoritesService.getAllFavorites(user);
+    }
+
+    @GetMapping("/get/status/{productId}")
+    @ResponseStatus(HttpStatus.OK)
+    public FavoritesModel getFavoriteStatus(@RequestHeader("Authorization") String email, @PathVariable (value="productId") String productId){
+        String user = userService.getUserFromToken(email);
+        return favoritesService.getFavoriteStatus(user,productId);
     }
 }

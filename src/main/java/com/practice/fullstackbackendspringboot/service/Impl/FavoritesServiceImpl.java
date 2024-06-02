@@ -2,8 +2,10 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 
 import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.AllProductModel;
+import com.practice.fullstackbackendspringboot.model.FavoritesModel;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.FavoritesService;
+import com.practice.fullstackbackendspringboot.utils.mapper.FavoritesMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +22,7 @@ public class FavoritesServiceImpl implements FavoritesService {
     private final ProductRepository productRepository;
     private final ImageRepository imageRepository;
     private final InventoryRepository inventoryRepository;
-
+    private final FavoritesMapper favoritesMapper;
     @Override
     public void addToFavorites(String email, String productId) {
         Optional<User> user = userRepository.findByEmail(email);
@@ -28,24 +30,20 @@ public class FavoritesServiceImpl implements FavoritesService {
         Optional<Image> image = imageRepository.findByProduct_ProductId(productId);
         Optional<Inventory> inventory = inventoryRepository.findByProduct_ProductId(productId);
         Optional<Favorites> favorite = favoritesRepository.findByProductIdAndUserEmail(productId, user.get().getEmail());
-
-        if(favorite.isPresent() ){
-            favoritesRepository.delete(favorite.get());
-            Product prod = product.get();
-            prod.setFavorites(false);
-            productRepository.save(prod);
-        }else{
-            Favorites favorites = new Favorites();
+        Favorites favorites;
+        if(favorite.isPresent() && favorite.get().isFavorites()){
+            favorites = favorite.get();
+            favorites.setFavorites(false);
+            favoritesRepository.delete(favorites);
+        }else {
+            favorites = new Favorites();
             favorites.setPhotoUrl(image.get().getPhotoUrl());
             favorites.setProductId(product.get().getProductId());
             favorites.setPrice(inventory.get().getPrice());
             favorites.setProductName(product.get().getProductName());
+            favorites.setFavorites(true);
             favorites.setUser(user.get());
             favoritesRepository.save(favorites);
-
-            Product prod = product.get();
-            prod.setFavorites(true);
-            productRepository.save(prod);
         }
     }
 
@@ -63,8 +61,15 @@ public class FavoritesServiceImpl implements FavoritesService {
 
             model.add(favoritesModel);
         }
-
         return model;
+    }
+
+    @Override
+    public FavoritesModel getFavoriteStatus(String email, String productId) {
+        userRepository.findByEmail(email).get();
+        Optional<Favorites> favorites = favoritesRepository.findByProductIdAndUserEmail(productId,email);
+
+        return favorites.map(favoritesMapper::mapEntityToModel).orElse(null);
     }
 
 }
