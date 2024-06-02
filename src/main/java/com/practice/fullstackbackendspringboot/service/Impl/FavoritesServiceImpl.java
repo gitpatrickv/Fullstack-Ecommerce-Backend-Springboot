@@ -29,17 +29,23 @@ public class FavoritesServiceImpl implements FavoritesService {
         Optional<Inventory> inventory = inventoryRepository.findByProduct_ProductId(productId);
         Optional<Favorites> favorite = favoritesRepository.findByProductIdAndUserEmail(productId, user.get().getEmail());
 
-        if(favorite.isPresent() && favorite.get().isFavorites()){
+        if(favorite.isPresent() ){
             favoritesRepository.delete(favorite.get());
+            Product prod = product.get();
+            prod.setFavorites(false);
+            productRepository.save(prod);
         }else{
             Favorites favorites = new Favorites();
             favorites.setPhotoUrl(image.get().getPhotoUrl());
             favorites.setProductId(product.get().getProductId());
             favorites.setPrice(inventory.get().getPrice());
             favorites.setProductName(product.get().getProductName());
-            favorites.setFavorites(true);
             favorites.setUser(user.get());
             favoritesRepository.save(favorites);
+
+            Product prod = product.get();
+            prod.setFavorites(true);
+            productRepository.save(prod);
         }
     }
 
@@ -53,7 +59,6 @@ public class FavoritesServiceImpl implements FavoritesService {
             favoritesModel.setProductName(favorite.getProductName());
             favoritesModel.setPrice(favorite.getPrice());
             favoritesModel.setPhotoUrl(favorite.getPhotoUrl());
-            favoritesModel.setFavorites(favorite.isFavorites());
             favoritesModel.setProductId(favorite.getProductId());
 
             model.add(favoritesModel);
@@ -61,4 +66,5 @@ public class FavoritesServiceImpl implements FavoritesService {
 
         return model;
     }
+
 }

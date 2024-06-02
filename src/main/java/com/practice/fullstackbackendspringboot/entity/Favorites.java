@@ -18,7 +18,6 @@ public class Favorites {
     private String productName;
     private Double price;
     private String photoUrl;
-    private boolean favorites;
 
     @ManyToOne
     private User user;

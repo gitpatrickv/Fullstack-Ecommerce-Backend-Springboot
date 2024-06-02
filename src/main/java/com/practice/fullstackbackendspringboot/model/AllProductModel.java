@@ -28,5 +28,5 @@ public class AllProductModel {
     private Double price;
 
     private String photoUrl;
-    private boolean favorites;
+
 }
