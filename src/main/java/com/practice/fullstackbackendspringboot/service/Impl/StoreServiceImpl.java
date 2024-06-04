@@ -24,38 +24,43 @@ public class StoreServiceImpl implements StoreService {
     @Override
     public StoreModel createStore(StoreModel storeModel, String email) {
         Optional<User> user = userRepository.findByEmail(email);
+        Optional<Store> existingStore = storeRepository.findByUserEmail(email);
         boolean isNew = storeRepository.existsByStoreNameIgnoreCase(storeModel.getStoreName());
-
-        if(user.isPresent() && isNew){
-            String errorMessage = "A store with the name '" + storeModel.getStoreName() +
-                    "' already exists for user with email '" + email + "'.";
-            log.info(errorMessage);
-            throw new IllegalArgumentException(errorMessage);
-        }
-
         Store store;
-        if(user.isPresent() && !isNew){
-            store = mapper.mapModelToEntity(storeModel);
-            store.setUser(user.get());
-            log.info("Creating a new store for user with email: " + email);
-        }else{
-            store = storeRepository.findByUserEmail(email).get();
 
-            if(storeModel.getStoreName() != null){
-                store.setStoreName(storeModel.getStoreName());
+        if (user.isPresent() && !isNew) {
+            if (existingStore.isPresent()) {
+                store = existingStore.get();
+            } else {
+                store = mapper.mapModelToEntity(storeModel);
+                store.setUser(user.get());
             }
-            if(storeModel.getStoreDescription() != null){
+
+            if (storeModel.getStoreDescription() != null) {
                 store.setStoreDescription(storeModel.getStoreDescription());
             }
-            if(storeModel.getAddress() != null) {
+            if (storeModel.getAddress() != null) {
                 store.setAddress(storeModel.getAddress());
             }
-            if(storeModel.getContactNumber() != null){
+            if (storeModel.getContactNumber() != null) {
                 store.setContactNumber(storeModel.getContactNumber());
             }
+            if (storeModel.getStoreName() != null) {
+                store.setStoreName(storeModel.getStoreName());
+            }
+            Store saveStore = storeRepository.save(store);
+            return mapper.mapEntityToModel(saveStore);
+        } else {
+            throw new IllegalArgumentException();
         }
-
-        Store saveStore = storeRepository.save(store);
-        return mapper.mapEntityToModel(saveStore);
     }
 }
+
+
+
+
+
+
+
+
+

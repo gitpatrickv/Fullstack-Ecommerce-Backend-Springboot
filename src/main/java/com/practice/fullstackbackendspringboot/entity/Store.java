@@ -16,6 +16,8 @@ import java.util.List;
 public class Store {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String storeId;
     private String storeName;
     private String storeDescription;
     private String address;
