@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -33,5 +36,8 @@ public class Cart {
     @OneToOne
     @JoinColumn(name = "cart_total_id")
     private CartTotal cartTotal;
+    @OneToMany(mappedBy = "cart")
+    private List<Order> order = new ArrayList<>();
+
 
 }
