@@ -1,5 +1,6 @@
 package com.practice.fullstackbackendspringboot.controller;
 
+import com.practice.fullstackbackendspringboot.model.OrderItemModel;
 import com.practice.fullstackbackendspringboot.model.OrderModel;
 import com.practice.fullstackbackendspringboot.service.OrderService;
 import com.practice.fullstackbackendspringboot.service.UserService;
@@ -21,14 +22,17 @@ public class OrderController {
         String user = userService.getUserFromToken(email);
         orderService.placeOrder(user);
     }
+
     @GetMapping("/get/to-pay")
-    public List<OrderModel> getOrdersByToPayStatus(@RequestHeader("Authorization") String email){
-        String user = userService.getUserFromToken(email);
-        return orderService.getOrdersByToPayStatus(user);
+    public List<OrderItemModel> getOrdersByToPayStatus(@RequestHeader("Authorization") String email){
+        userService.getUserFromToken(email);
+        return orderService.getOrdersByToPayStatus();
     }
-    @GetMapping("/get/to-ship")
-    public List<OrderModel>  getOrdersByToShipStatus(@RequestHeader("Authorization") String email){
-        String user = userService.getUserFromToken(email);
-        return orderService.getOrdersByToShipStatus(user);
-    }
+
+//    @GetMapping("/get/to-pay")
+//    public List<OrderModel> getOrdersByToPayStatus(@RequestHeader("Authorization") String email){
+//        String user = userService.getUserFromToken(email);
+//        return orderService.getOrdersByToPayStatus(user);
+//    }
+
 }

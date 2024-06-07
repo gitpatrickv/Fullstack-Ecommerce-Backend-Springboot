@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface StoreRepository extends JpaRepository<Store, Long> {
+public interface StoreRepository extends JpaRepository<Store, String> {
 
     Optional<Store> findByUserEmail(String email);
     Boolean existsByStoreNameIgnoreCase(String storeName);
