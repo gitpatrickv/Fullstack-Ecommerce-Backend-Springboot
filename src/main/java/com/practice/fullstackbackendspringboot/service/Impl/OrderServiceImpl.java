@@ -1,12 +1,13 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
-import com.practice.fullstackbackendspringboot.entity.*;
+import com.practice.fullstackbackendspringboot.entity.Cart;
+import com.practice.fullstackbackendspringboot.entity.Order;
+import com.practice.fullstackbackendspringboot.entity.OrderItem;
+import com.practice.fullstackbackendspringboot.entity.User;
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
-import com.practice.fullstackbackendspringboot.model.OrderModel;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.OrderService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
-
 import com.practice.fullstackbackendspringboot.utils.mapper.OrderItemMapper;
 import com.practice.fullstackbackendspringboot.utils.mapper.OrderMapper;
 import jakarta.transaction.Transactional;
@@ -42,11 +43,8 @@ public class OrderServiceImpl implements OrderService {
         Map<String, List<Cart>> cartsByStore = cart.stream()
                 .collect(Collectors.groupingBy(Cart::getStoreName));
 
-        List<Order> savedOrders = new ArrayList<>();
-
         for (Map.Entry<String, List<Cart>> cartMap : cartsByStore.entrySet()) {
             List<Cart> storeCarts = cartMap.getValue();
-
 
             Order order = new Order();
             order.setUser(user.get());
@@ -56,8 +54,7 @@ public class OrderServiceImpl implements OrderService {
 //            order.setStore(store.get());
             order.setPaymentMethod(StringUtil.CASH_ON_DELIVERY);
 
-            Order savedOrder = orderRepository.save(order);
-            savedOrders.add(savedOrder);
+            Double storeTotalAmount = 0.0;
 
             List<OrderItem> orderItems = new ArrayList<>();
 
@@ -71,30 +68,30 @@ public class OrderServiceImpl implements OrderService {
                 orderItem.setProductName(carts.getProductName());
                 orderItem.setPhotoUrl(carts.getPhotoUrl());
                 orderItem.setOrderStatus(StringUtil.TO_PAY);
-                orderItem.setOrder(savedOrder);
-
+                orderItem.setUser(user.get());
+                orderItem.setOrder(order);
+                storeTotalAmount += orderItem.getTotalAmount();
                 OrderItem savedOrderItems = orderItemRepository.save(orderItem);
                 orderItems.add(savedOrderItems);
             }
 
-            savedOrder.setOrderItems(orderItems);
-            orderRepository.save(savedOrder);
+            order.setTotalAmount(storeTotalAmount);
+            order.setOrderItems(orderItems);
+            orderRepository.save(order);
 
 //            store.get().getOrder().add(savedOrder);
         }
-
         cartRepository.deleteAllByFilterTrueAndUserEmail(email);
     }
 
     @Override
-    public  List<OrderItemModel> getOrdersByToPayStatus() {     //TODO: need to identify who owns the order
-
-        List<OrderItem> order = orderItemRepository.findAll();
+    public List<OrderItemModel> getOrdersByToPayStatus(String email) {     //TODO: need to identify who owns the order
+        List<OrderItem> order = orderItemRepository.findAllByUserEmail(email);
         List<OrderItemModel> orderModels = new ArrayList<>();
 
         for(OrderItem orders : order){
             if(orders.getOrderStatus().equals(StringUtil.TO_PAY)) {
-               OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orders);
+                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orders);
 //                this.getOrders(orders,orderModel);
                 orderModels.add(orderItemModel);
             }

@@ -25,8 +25,8 @@ public class OrderController {
 
     @GetMapping("/get/to-pay")
     public List<OrderItemModel> getOrdersByToPayStatus(@RequestHeader("Authorization") String email){
-        userService.getUserFromToken(email);
-        return orderService.getOrdersByToPayStatus();
+        String user =  userService.getUserFromToken(email);
+        return orderService.getOrdersByToPayStatus(user);
     }
 
 //    @GetMapping("/get/to-pay")
