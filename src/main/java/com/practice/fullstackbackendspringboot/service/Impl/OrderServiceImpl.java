@@ -1,9 +1,6 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
-import com.practice.fullstackbackendspringboot.entity.Cart;
-import com.practice.fullstackbackendspringboot.entity.Order;
-import com.practice.fullstackbackendspringboot.entity.OrderItem;
-import com.practice.fullstackbackendspringboot.entity.User;
+import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.OrderService;
@@ -32,26 +29,26 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemRepository orderItemRepository;
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
-    private final ProductRepository productRepository;
 
     @Override
     public void placeOrder(String email) {
         Optional<User> user = userRepository.findByEmail(email);
         List<Cart> cart = cartRepository.findAllByFilterTrueAndUserEmail(email);
-//        Optional<Store> store = storeRepository.findById(storeId);
 
         Map<String, List<Cart>> cartsByStore = cart.stream()
                 .collect(Collectors.groupingBy(Cart::getStoreName));
 
         for (Map.Entry<String, List<Cart>> cartMap : cartsByStore.entrySet()) {
             List<Cart> storeCarts = cartMap.getValue();
+            String storeName = cartMap.getKey();
+
+            Optional<Store> store = storeRepository.findByStoreName(storeName);
 
             Order order = new Order();
-            order.setUser(user.get());
+            order.setStore(store.get());
             order.setDeliveryAddress(user.get().getAddress());
             order.setFullName(user.get().getName());
             order.setContactNumber(user.get().getContactNumber());
-//            order.setStore(store.get());
             order.setPaymentMethod(StringUtil.CASH_ON_DELIVERY);
 
             Double storeTotalAmount = 0.0;
@@ -75,17 +72,17 @@ public class OrderServiceImpl implements OrderService {
                 orderItems.add(savedOrderItems);
             }
 
-            order.setTotalAmount(storeTotalAmount);
+            order.setOrderTotalAmount(storeTotalAmount);
             order.setOrderItems(orderItems);
-            orderRepository.save(order);
+            Order savedOrder = orderRepository.save(order);
 
-//            store.get().getOrder().add(savedOrder);
+            store.get().getOrder().add(savedOrder);
         }
         cartRepository.deleteAllByFilterTrueAndUserEmail(email);
     }
 
-    @Override
-    public List<OrderItemModel> getOrdersByToPayStatus(String email) {     //TODO: need to identify who owns the order
+    @Override       //TODO: Sort latest item will be place at the top
+    public List<OrderItemModel> getOrdersByToPayStatus(String email) {
         List<OrderItem> order = orderItemRepository.findAllByUserEmail(email);
         List<OrderItemModel> orderModels = new ArrayList<>();
 
@@ -98,6 +95,9 @@ public class OrderServiceImpl implements OrderService {
         }
         return orderModels;
     }
+
+
+
 
 //    @Override
 //    public  List<OrderModel> getOrdersByToPayStatus(String email) {

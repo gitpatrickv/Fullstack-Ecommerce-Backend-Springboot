@@ -53,7 +53,7 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Favorites> favorites = new ArrayList<>();
     @OneToMany(mappedBy = "user")
-    private List<Order> order = new ArrayList<>();
+    private List<OrderItem> orderItems = new ArrayList<>();
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

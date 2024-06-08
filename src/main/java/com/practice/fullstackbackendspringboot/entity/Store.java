@@ -26,8 +26,9 @@ public class Store {
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
     private List<Product> product = new ArrayList<>();
 
-//    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
-//    private List<Order> order = new ArrayList<>();
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    private List<Order> order = new ArrayList<>();
+
     @OneToOne
     private User user;
 
