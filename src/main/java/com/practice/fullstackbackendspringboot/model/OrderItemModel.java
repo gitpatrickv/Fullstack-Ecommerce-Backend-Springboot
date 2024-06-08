@@ -20,5 +20,5 @@ public class OrderItemModel {
     private String orderId;
 
     private String orderStatus;
-
+    private Double orderTotalAmount;
 }

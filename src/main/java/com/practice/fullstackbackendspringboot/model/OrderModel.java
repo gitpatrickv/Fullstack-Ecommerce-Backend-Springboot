@@ -14,11 +14,11 @@ public class OrderModel {
 
     private String orderId;
 
-    private Double totalAmount;
+    private Double orderTotalAmount;
 
     private String paymentMethod;
 
-
+    private String orderStatus;
     private String deliveryAddress;
     private String fullName;
     private String contactNumber;

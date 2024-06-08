@@ -12,12 +12,12 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "orders")
-public class Order {
+public class Order extends AuditEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String orderId;
-
+    private String orderStatus;
     private Double orderTotalAmount;
     private String paymentMethod;
 

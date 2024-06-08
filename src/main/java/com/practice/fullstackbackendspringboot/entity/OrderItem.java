@@ -10,13 +10,12 @@ import lombok.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "order_item")
-public class OrderItem {
+public class OrderItem extends AuditEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    private String orderStatus;
     private Long quantity;
     private Double price;
     private Double totalAmount;

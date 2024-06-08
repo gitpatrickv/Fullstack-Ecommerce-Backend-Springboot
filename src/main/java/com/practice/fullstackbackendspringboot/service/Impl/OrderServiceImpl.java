@@ -49,6 +49,7 @@ public class OrderServiceImpl implements OrderService {
             order.setDeliveryAddress(user.get().getAddress());
             order.setFullName(user.get().getName());
             order.setContactNumber(user.get().getContactNumber());
+            order.setOrderStatus(StringUtil.TO_PAY);
             order.setPaymentMethod(StringUtil.CASH_ON_DELIVERY);
 
             Double storeTotalAmount = 0.0;
@@ -64,7 +65,6 @@ public class OrderServiceImpl implements OrderService {
                 orderItem.setStoreName(carts.getStoreName());
                 orderItem.setProductName(carts.getProductName());
                 orderItem.setPhotoUrl(carts.getPhotoUrl());
-                orderItem.setOrderStatus(StringUtil.TO_PAY);
                 orderItem.setUser(user.get());
                 orderItem.setOrder(order);
                 storeTotalAmount += orderItem.getTotalAmount();
@@ -83,20 +83,22 @@ public class OrderServiceImpl implements OrderService {
 
     @Override       //TODO: Sort latest item will be place at the top
     public List<OrderItemModel> getOrdersByToPayStatus(String email) {
-        List<OrderItem> order = orderItemRepository.findAllByUserEmail(email);
+        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email);
+
         List<OrderItemModel> orderModels = new ArrayList<>();
 
-        for(OrderItem orders : order){
-            if(orders.getOrderStatus().equals(StringUtil.TO_PAY)) {
-                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orders);
-//                this.getOrders(orders,orderModel);
+        for(OrderItem orderItem : orderItems){
+            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
+
+            if(order.getOrderStatus().equals(StringUtil.TO_PAY)) {
+                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
+                orderItemModel.setOrderStatus(order.getOrderStatus());
                 orderModels.add(orderItemModel);
             }
         }
         return orderModels;
     }
-
-
 
 
 //    @Override
