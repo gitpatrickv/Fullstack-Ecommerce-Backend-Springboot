@@ -72,11 +72,10 @@ public class OrderServiceImpl implements OrderService {
                 orderItems.add(savedOrderItems);
             }
 
-            order.setOrderTotalAmount(storeTotalAmount);
+            order.setOrderTotalAmount(storeTotalAmount + store.get().getShippingFee());
             order.setOrderItems(orderItems);
-            Order savedOrder = orderRepository.save(order);
+            orderRepository.save(order);
 
-            store.get().getOrder().add(savedOrder);
         }
         cartRepository.deleteAllByFilterTrueAndUserEmail(email);
     }

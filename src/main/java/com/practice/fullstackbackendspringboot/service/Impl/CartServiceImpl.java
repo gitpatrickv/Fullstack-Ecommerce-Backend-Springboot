@@ -16,7 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +32,7 @@ public class CartServiceImpl implements CartService {
     private final InventoryRepository inventoryRepository;
     private final ImageRepository imageRepository;
     private final CartTotalRepository cartTotalRepository;
+    private final StoreRepository storeRepository;
     private final CartMapper cartMapper;
     private final CartTotalMapper cartTotalMapper;
 
@@ -141,6 +144,8 @@ public class CartServiceImpl implements CartService {
         Double total = 0.0;
         long count = 0;
         long filteredItem = 0;
+        Double totalShippingFee = 0.0;
+
 
         for(Cart cart : carts){
             Double cartTotalAmount = cart.getTotalAmount();
@@ -155,14 +160,29 @@ public class CartServiceImpl implements CartService {
             count += itemCount;
         }
 
+        Map<String, List<Cart>> cartsByStore = carts.stream()
+                .collect(Collectors.groupingBy(Cart::getStoreName));
+
+        for (Map.Entry<String, List<Cart>> cartMap : cartsByStore.entrySet()) {
+            String storeName = cartMap.getKey();
+
+            Optional<Store> store = storeRepository.findByStoreName(storeName);
+            Double shipFee = store.get().getShippingFee();
+            totalShippingFee+=shipFee;
+
+        }
+
         if(existingCartTotal.isPresent()){
         CartTotal cartTotal = existingCartTotal.get();
         cartTotal.setCartTotal(total);
         cartTotal.setCartItems(count);
         cartTotal.setQty(filteredItem);
         cartTotal.setUser(user);
+        cartTotal.setTotalShippingFee(totalShippingFee);
+        cartTotal.setTotalPayment(total + totalShippingFee);
         cartTotalRepository.save(cartTotal);
         return cartTotalMapper.mapEntityToModel(cartTotal);
+
         }
 
         CartTotal cartTotal = new CartTotal();
@@ -170,6 +190,8 @@ public class CartServiceImpl implements CartService {
         cartTotal.setCartItems(count);
         cartTotal.setQty(filteredItem);
         cartTotal.setUser(user);
+        cartTotal.setTotalShippingFee(totalShippingFee);
+        cartTotal.setTotalPayment(total + totalShippingFee);
         cartTotalRepository.save(cartTotal);
         return cartTotalMapper.mapEntityToModel(cartTotal);
     }
