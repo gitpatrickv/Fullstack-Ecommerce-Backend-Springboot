@@ -27,6 +27,7 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
     private final OrderItemRepository orderItemRepository;
+    private final InventoryRepository inventoryRepository;
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
 
@@ -51,7 +52,7 @@ public class OrderServiceImpl implements OrderService {
             order.setContactNumber(user.get().getContactNumber());
             order.setOrderStatus(StringUtil.TO_PAY);
             order.setPaymentMethod(StringUtil.CASH_ON_DELIVERY);
-
+            order = orderRepository.save(order);
             Double storeTotalAmount = 0.0;
 
             List<OrderItem> orderItems = new ArrayList<>();
@@ -70,17 +71,27 @@ public class OrderServiceImpl implements OrderService {
                 storeTotalAmount += orderItem.getTotalAmount();
                 OrderItem savedOrderItems = orderItemRepository.save(orderItem);
                 orderItems.add(savedOrderItems);
+
+                Optional<Inventory> inventory = inventoryRepository.findByProduct_ProductId(carts.getProduct().getProductId());
+                if(inventory.isPresent()) {
+                    if (carts.getQuantity() > inventory.get().getQuantity()) {
+                        throw new IllegalArgumentException(StringUtil.OUT_OF_STOCK);
+                    } else {
+                        inventory.get().setQuantity(inventory.get().getQuantity() - carts.getQuantity());
+                    }
+                }else{
+                    throw new IllegalArgumentException(StringUtil.PRODUCT_NOT_FOUND);
+                }
             }
 
             order.setOrderTotalAmount(storeTotalAmount + store.get().getShippingFee());
             order.setOrderItems(orderItems);
             orderRepository.save(order);
-
         }
         cartRepository.deleteAllByFilterTrueAndUserEmail(email);
     }
 
-    @Override       //TODO: Sort latest item will be place at the top
+    @Override
     public List<OrderItemModel> getOrdersByToPayStatus(String email) {
         List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email);
 
