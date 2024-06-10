@@ -34,6 +34,11 @@ public class OrderController {
         String user = userService.getUserFromToken(email);
         orderService.cancelOrder(user, orderId);
     }
+    @PutMapping("/ship/{orderId}")
+    public void shipOrder(@RequestHeader("Authorization") String email, @PathVariable (value="orderId") String orderId){
+        String user = userService.getUserFromToken(email);
+        orderService.shipOrder(user,orderId);
+    }
 
     @GetMapping("/get/to-pay")
     @ResponseStatus(HttpStatus.OK)
