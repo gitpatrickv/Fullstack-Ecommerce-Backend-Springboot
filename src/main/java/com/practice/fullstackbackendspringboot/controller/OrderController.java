@@ -22,6 +22,11 @@ public class OrderController {
         String user = userService.getUserFromToken(email);
         orderService.placeOrder(user);
     }
+    @PostMapping("/buy/{orderId}")
+    public void buyAgain(@RequestHeader("Authorization") String email, @PathVariable (value="orderId") String orderId){
+        String user = userService.getUserFromToken(email);
+        orderService.buyAgain(user,orderId);
+    }
 
     @PostMapping("/cancel/{orderId}")
     @ResponseStatus(HttpStatus.OK)

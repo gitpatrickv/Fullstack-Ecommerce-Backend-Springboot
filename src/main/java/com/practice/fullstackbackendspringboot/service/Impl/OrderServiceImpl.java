@@ -123,6 +123,28 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public void buyAgain(String email, String orderId) {
+        Optional<User> user = userRepository.findByEmail(email);
+        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmailAndOrder_OrderId(email,orderId);
+        Long quantity = 1L;
+
+        for(OrderItem orderItem : orderItems){
+            Product product = productRepository.findById(orderItem.getProduct().getProductId()).get();
+            Cart cart = new Cart();
+            cart.setPhotoUrl(orderItem.getPhotoUrl());
+            cart.setPrice(orderItem.getPrice());
+            cart.setProductName(orderItem.getProductName());
+            cart.setQuantity(quantity);
+            cart.setStoreName(orderItem.getStoreName());
+            cart.setTotalAmount(orderItem.getPrice() * quantity);
+            cart.setProduct(product);
+            cart.setOrderItems(orderItems);
+            cart.setUser(user.get());
+            cartRepository.save(cart);
+        }
+    }
+
+    @Override
     public List<OrderItemModel> getOrdersByToPayStatus(String email) {
         List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email);
 

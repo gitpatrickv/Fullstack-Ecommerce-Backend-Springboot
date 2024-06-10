@@ -9,6 +9,7 @@ public interface OrderService {
 
     void placeOrder(String email);
     void cancelOrder(String email, String orderId);
+    void buyAgain(String email, String orderId);
     List<OrderItemModel> getOrdersByToPayStatus(String email);
     List<OrderItemModel> getOrdersByCancelledStatus(String email);
 }
