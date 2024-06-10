@@ -28,6 +28,7 @@ public class OrderServiceImpl implements OrderService {
     private final StoreRepository storeRepository;
     private final OrderItemRepository orderItemRepository;
     private final InventoryRepository inventoryRepository;
+    private final ProductRepository productRepository;
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
 
@@ -59,6 +60,7 @@ public class OrderServiceImpl implements OrderService {
             List<OrderItem> orderItems = new ArrayList<>();
 
             for (Cart carts : storeCarts) {
+                Product product = productRepository.findById(carts.getProduct().getProductId()).get();
                 OrderItem orderItem = new OrderItem();
 
                 orderItem.setQuantity(carts.getQuantity());
@@ -69,6 +71,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItem.setPhotoUrl(carts.getPhotoUrl());
                 orderItem.setUser(user.get());
                 orderItem.setOrder(order);
+                orderItem.setProduct(product);
                 storeTotalAmount += orderItem.getTotalAmount();
                 OrderItem savedOrderItems = orderItemRepository.save(orderItem);
                 orderItems.add(savedOrderItems);
@@ -96,6 +99,7 @@ public class OrderServiceImpl implements OrderService {
     public void cancelOrder(String email, String orderId) {
         Optional<User> user = userRepository.findByEmail(email);
         Optional<Order> order = orderRepository.findById(orderId);
+        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmailAndOrder_OrderId(email, orderId);
 
         if(user.isPresent()){
             if(order.isPresent()){
@@ -105,6 +109,15 @@ public class OrderServiceImpl implements OrderService {
                 orderRepository.save(orders);
             }else{
                 throw new IllegalArgumentException(StringUtil.ORDER_NOT_FOUND);
+            }
+        }
+
+        for(OrderItem orderItem: orderItems){
+            Optional<Inventory> inventory = inventoryRepository.findByProduct_ProductId(orderItem.getProduct().getProductId());
+            if(inventory.isPresent()){
+                inventory.get().setQuantity(inventory.get().getQuantity() + orderItem.getQuantity());
+            }else{
+                throw new IllegalArgumentException(StringUtil.PRODUCT_NOT_FOUND);
             }
         }
     }

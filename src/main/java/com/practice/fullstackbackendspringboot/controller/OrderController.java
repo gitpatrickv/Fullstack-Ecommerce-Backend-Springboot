@@ -1,7 +1,6 @@
 package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
-import com.practice.fullstackbackendspringboot.model.OrderModel;
 import com.practice.fullstackbackendspringboot.service.OrderService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +15,7 @@ import java.util.List;
 public class OrderController {
     private final OrderService orderService;
     private final UserService userService;
+
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
     public void placeOrder(@RequestHeader("Authorization") String email){
@@ -23,7 +23,7 @@ public class OrderController {
         orderService.placeOrder(user);
     }
 
-    @PutMapping("/cancel/{orderId}")
+    @PostMapping("/cancel/{orderId}")
     @ResponseStatus(HttpStatus.OK)
     public void cancelOrder(@RequestHeader("Authorization") String email, @PathVariable (value="orderId") String orderId) {
         String user = userService.getUserFromToken(email);
