@@ -53,5 +53,11 @@ public class OrderController {
         String user =  userService.getUserFromToken(email);
         return orderService.getOrdersByCancelledStatus(user);
     }
+    @GetMapping("/get/to-ship")
+    @ResponseStatus(HttpStatus.OK)
+    public List<OrderItemModel> getOrdersByToShipStatus(@RequestHeader("Authorization") String email){
+        String user =  userService.getUserFromToken(email);
+        return orderService.getOrdersByToShipStatus(user);
+    }
 
 }

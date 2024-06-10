@@ -13,4 +13,5 @@ public interface OrderService {
     void shipOrder(String email, String orderId);
     List<OrderItemModel> getOrdersByToPayStatus(String email);
     List<OrderItemModel> getOrdersByCancelledStatus(String email);
+    List<OrderItemModel> getOrdersByToShipStatus(String email);
 }

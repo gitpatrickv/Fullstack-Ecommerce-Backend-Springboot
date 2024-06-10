@@ -205,4 +205,24 @@ public class OrderServiceImpl implements OrderService {
         }
         return orderModels;
     }
+
+    @Override
+    public List<OrderItemModel> getOrdersByToShipStatus(String email) {
+        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email);
+
+        List<OrderItemModel> orderModels = new ArrayList<>();
+
+        for(OrderItem orderItem : orderItems){
+            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
+
+            if(order.getOrderStatus().equals(StringUtil.TO_SHIP) && order.isActive()) {
+                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
+                orderItemModel.setOrderStatus(order.getOrderStatus());
+                orderItemModel.setActive(order.isActive());
+                orderModels.add(orderItemModel);
+            }
+        }
+        return orderModels;
+    }
 }
