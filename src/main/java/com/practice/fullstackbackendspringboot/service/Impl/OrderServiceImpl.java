@@ -145,6 +145,28 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public void shipOrder(String email, String orderId) { //TODO: implement it on sellers page, set up role base auth
+        Optional<User> user = userRepository.findByEmail(email);
+        Optional<Order> order = orderRepository.findById(orderId);
+
+        if(user.isPresent()){
+            if(order.isPresent()){
+                Order orders = order.get();
+                if(orders.isActive()) {
+                    orders.setOrderStatus(StringUtil.TO_SHIP);
+                    orderRepository.save(orders);
+                }else{
+                    throw new IllegalArgumentException(StringUtil.ORDER_CANCELLED_OR_NOT_ACTIVE);
+                }
+            }else{
+                throw new IllegalArgumentException(StringUtil.ORDER_NOT_FOUND);
+            }
+        }else{
+            throw new IllegalArgumentException(StringUtil.USER_NOT_FOUND);
+        }
+    }
+
+    @Override
     public List<OrderItemModel> getOrdersByToPayStatus(String email) {
         List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email);
 
