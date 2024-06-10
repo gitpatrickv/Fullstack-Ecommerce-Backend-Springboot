@@ -17,7 +17,7 @@ public class OrderModel {
     private Double orderTotalAmount;
 
     private String paymentMethod;
-
+    private boolean active;
     private String orderStatus;
     private String deliveryAddress;
     private String fullName;

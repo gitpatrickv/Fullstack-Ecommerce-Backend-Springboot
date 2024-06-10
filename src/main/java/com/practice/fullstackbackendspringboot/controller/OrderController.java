@@ -23,12 +23,6 @@ public class OrderController {
         orderService.placeOrder(user);
     }
 
-    @GetMapping("/get/to-pay")
-    @ResponseStatus(HttpStatus.OK)
-    public List<OrderItemModel> getOrdersByToPayStatus(@RequestHeader("Authorization") String email){
-        String user =  userService.getUserFromToken(email);
-        return orderService.getOrdersByToPayStatus(user);
-    }
     @PutMapping("/cancel/{orderId}")
     @ResponseStatus(HttpStatus.OK)
     public void cancelOrder(@RequestHeader("Authorization") String email, @PathVariable (value="orderId") String orderId) {
@@ -36,10 +30,18 @@ public class OrderController {
         orderService.cancelOrder(user, orderId);
     }
 
-//    @GetMapping("/get/to-pay")
-//    public List<OrderModel> getOrdersByToPayStatus(@RequestHeader("Authorization") String email){
-//        String user = userService.getUserFromToken(email);
-//        return orderService.getOrdersByToPayStatus(user);
-//    }
+    @GetMapping("/get/to-pay")
+    @ResponseStatus(HttpStatus.OK)
+    public List<OrderItemModel> getOrdersByToPayStatus(@RequestHeader("Authorization") String email){
+        String user =  userService.getUserFromToken(email);
+        return orderService.getOrdersByToPayStatus(user);
+    }
+
+    @GetMapping("/get/cancelled")
+    @ResponseStatus(HttpStatus.OK)
+    public List<OrderItemModel> getOrdersByCancelledStatus(@RequestHeader("Authorization") String email){
+        String user =  userService.getUserFromToken(email);
+        return orderService.getOrdersByCancelledStatus(user);
+    }
 
 }

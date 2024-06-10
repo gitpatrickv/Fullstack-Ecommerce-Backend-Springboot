@@ -20,7 +20,7 @@ public class Order extends AuditEntity{
     private String orderStatus;
     private Double orderTotalAmount;
     private String paymentMethod;
-
+    private boolean active;
     private String deliveryAddress;
     private String fullName;
     private String contactNumber;

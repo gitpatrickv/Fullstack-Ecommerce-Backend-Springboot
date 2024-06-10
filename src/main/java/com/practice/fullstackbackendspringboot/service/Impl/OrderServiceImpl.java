@@ -50,6 +50,7 @@ public class OrderServiceImpl implements OrderService {
             order.setDeliveryAddress(user.get().getAddress());
             order.setFullName(user.get().getName());
             order.setContactNumber(user.get().getContactNumber());
+            order.setActive(true);
             order.setOrderStatus(StringUtil.TO_PAY);
             order.setPaymentMethod(StringUtil.CASH_ON_DELIVERY);
             order = orderRepository.save(order);
@@ -100,6 +101,7 @@ public class OrderServiceImpl implements OrderService {
             if(order.isPresent()){
                 Order orders = order.get();
                 orders.setOrderStatus(StringUtil.ORDER_CANCELLED);
+                orders.setActive(false);
                 orderRepository.save(orders);
             }else{
                 throw new IllegalArgumentException(StringUtil.ORDER_NOT_FOUND);
@@ -116,93 +118,34 @@ public class OrderServiceImpl implements OrderService {
         for(OrderItem orderItem : orderItems){
             Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
 
-            if(order.getOrderStatus().equals(StringUtil.TO_PAY)) {
+            if(order.getOrderStatus().equals(StringUtil.TO_PAY) && order.isActive()) {
                 OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
                 orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
                 orderItemModel.setOrderStatus(order.getOrderStatus());
+                orderItemModel.setActive(order.isActive());
                 orderModels.add(orderItemModel);
             }
         }
         return orderModels;
     }
 
+    @Override
+    public List<OrderItemModel> getOrdersByCancelledStatus(String email) {
+        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email);
 
-//    @Override
-//    public  List<OrderModel> getOrdersByToPayStatus(String email) {
-//        List<Order> order = orderRepository.findAllByUserEmail(email);
-//        List<OrderModel> orderModels = new ArrayList<>();
-//
-//        for(Order orders : order){
-//            if(orders.getOrderStatus().equals(StringUtil.TO_PAY)) {
-//                OrderModel orderModel = orderMapper.mapOrderEntityToOrderModel(orders);
-//                orderModels.add(orderModel);
-//            }
-//        }
-//        return orderModels;
-//    }
+        List<OrderItemModel> orderModels = new ArrayList<>();
 
-//        private void getOrders(Order order, OrderModel orderModel){
-//        orderModel.setQuantity(order.getQuantity());
-//        orderModel.setPrice(order.getPrice());
-//        orderModel.setTotalAmount(order.getTotalAmount());
-//        orderModel.setStoreName(order.getStoreName());
-//        orderModel.setProductName(order.getProductName());
-//        orderModel.setPhotoUrl(order.getPhotoUrl());
-//        orderModel.setPaymentMethod(order.getPaymentMethod());
-//        orderModel.setOrderStatus(order.getOrderStatus());
-//    }
+        for(OrderItem orderItem : orderItems){
+            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
+
+            if(order.getOrderStatus().equals(StringUtil.ORDER_CANCELLED) && !order.isActive()) {
+                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
+                orderItemModel.setOrderStatus(order.getOrderStatus());
+                orderItemModel.setActive(order.isActive());
+                orderModels.add(orderItemModel);
+            }
+        }
+        return orderModels;
+    }
 }
-
-
-//    @Override
-//    public void placeOrder(String email) {
-//        User user = userRepository.findByEmail(email).get();
-//        List<Cart> cart = cartRepository.findAllByFilterTrueAndUserEmail(email);
-//
-//        for(Cart carts : cart) {
-//            Order order = new Order();
-//            order.setQuantity(carts.getQuantity());
-//            order.setPrice(carts.getPrice());
-//            order.setTotalAmount(carts.getTotalAmount());
-//            order.setStoreName(carts.getStoreName());
-//            order.setProductName(carts.getProductName());
-//            order.setPhotoUrl(carts.getPhotoUrl());
-//            order.setPaymentMethod(StringUtil.CASH_ON_DELIVERY);
-//            order.setOrderStatus(StringUtil.TO_PAY);
-//            order.setDeliveryAddress(user.getAddress());
-//            order.setFullName(user.getName());
-//            order.setContactNumber(user.getContactNumber());
-//            order.setUser(user);
-//            orderRepository.save(order);
-//        }
-//
-//        cartRepository.deleteAllByFilterTrueAndUserEmail(email);
-//    }
-//
-
-//
-//    @Override
-//    public  List<OrderModel> getOrdersByToShipStatus(String email) {
-//        List<Order> order = orderRepository.findAllByUserEmail(email);
-//        List<OrderModel> orderModels = new ArrayList<>();
-//
-//        for(Order orders : order){
-//            if(orders.getOrderStatus().equals(StringUtil.TO_SHIP)) {
-//                OrderModel orderModel = orderMapper.mapOrderEntityToOrderModel(orders);
-//                this.getOrders(orders,orderModel);
-//                orderModels.add(orderModel);
-//            }
-//        }
-//        return orderModels;
-//    }
-//
-//    private void getOrders(Order order, OrderModel orderModel){
-//        orderModel.setQuantity(order.getQuantity());
-//        orderModel.setPrice(order.getPrice());
-//        orderModel.setTotalAmount(order.getTotalAmount());
-//        orderModel.setStoreName(order.getStoreName());
-//        orderModel.setProductName(order.getProductName());
-//        orderModel.setPhotoUrl(order.getPhotoUrl());
-//        orderModel.setPaymentMethod(order.getPaymentMethod());
-//        orderModel.setOrderStatus(order.getOrderStatus());
-//    }

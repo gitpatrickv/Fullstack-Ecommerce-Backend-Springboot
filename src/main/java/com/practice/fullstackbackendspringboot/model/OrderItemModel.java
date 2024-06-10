@@ -18,7 +18,7 @@ public class OrderItemModel {
     private String productName;
     private String photoUrl;
     private String orderId;
-
+    private boolean active;
     private String orderStatus;
     private Double orderTotalAmount;
 }
