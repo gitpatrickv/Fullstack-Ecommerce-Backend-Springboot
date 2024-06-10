@@ -32,13 +32,25 @@ public class SecurityConfig {
                                 authorize
                                         .requestMatchers("/api/admin/**").hasAuthority(ADMIN.name())
                                         .requestMatchers("/api/seller/**").hasAuthority(SELLER.name())
-                                        .requestMatchers(HttpMethod.POST, "/api/product/save").hasAnyAuthority(ADMIN.name(), SELLER.name())
-                                        .requestMatchers(HttpMethod.DELETE,"/api/product/delete/**").hasAuthority(SELLER.name())
+
                                         .requestMatchers("/api/store/**").hasAuthority(SELLER.name())
                                         .requestMatchers("/api/cart/**").hasAuthority(USER.name())
-                                        .requestMatchers(HttpMethod.GET, "/api/user").authenticated()
+
+                                        .requestMatchers(HttpMethod.POST, "/api/product/save").hasAuthority(SELLER.name())
+                                        .requestMatchers(HttpMethod.DELETE,"/api/product/delete/**").hasAnyAuthority(SELLER.name(), ADMIN.name())
                                         .requestMatchers("/api/product/**").permitAll()
-                                        .requestMatchers("/api/user/**").permitAll()
+
+                                        .requestMatchers(HttpMethod.GET, "/api/user").authenticated()
+                                        .requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
+                                        .requestMatchers(HttpMethod.POST, "/api/user/register").permitAll()
+
+                                        .requestMatchers("/api/user/favorites/**").hasAuthority(USER.name())
+                                        .requestMatchers("/api/user/image/**").permitAll()
+
+                                        .requestMatchers("/api/inventory/**").hasAnyAuthority(SELLER.name(), ADMIN.name())
+
+                                        .requestMatchers("api/order/**").hasAnyAuthority(SELLER.name(), USER.name())
+
                                         .anyRequest().authenticated()
                 );
         httpSecurity.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

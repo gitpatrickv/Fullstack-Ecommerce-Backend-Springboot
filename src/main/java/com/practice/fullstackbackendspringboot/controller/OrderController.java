@@ -24,9 +24,16 @@ public class OrderController {
     }
 
     @GetMapping("/get/to-pay")
+    @ResponseStatus(HttpStatus.OK)
     public List<OrderItemModel> getOrdersByToPayStatus(@RequestHeader("Authorization") String email){
         String user =  userService.getUserFromToken(email);
         return orderService.getOrdersByToPayStatus(user);
+    }
+    @PutMapping("/cancel/{orderId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void cancelOrder(@RequestHeader("Authorization") String email, @PathVariable (value="orderId") String orderId) {
+        String user = userService.getUserFromToken(email);
+        orderService.cancelOrder(user, orderId);
     }
 
 //    @GetMapping("/get/to-pay")

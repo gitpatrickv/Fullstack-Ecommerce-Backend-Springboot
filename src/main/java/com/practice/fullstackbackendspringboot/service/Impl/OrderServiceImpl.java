@@ -92,6 +92,22 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public void cancelOrder(String email, String orderId) {
+        Optional<User> user = userRepository.findByEmail(email);
+        Optional<Order> order = orderRepository.findById(orderId);
+
+        if(user.isPresent()){
+            if(order.isPresent()){
+                Order orders = order.get();
+                orders.setOrderStatus(StringUtil.ORDER_CANCELLED);
+                orderRepository.save(orders);
+            }else{
+                throw new IllegalArgumentException(StringUtil.ORDER_NOT_FOUND);
+            }
+        }
+    }
+
+    @Override
     public List<OrderItemModel> getOrdersByToPayStatus(String email) {
         List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email);
 
