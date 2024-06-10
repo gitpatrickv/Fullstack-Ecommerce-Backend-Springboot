@@ -21,4 +21,5 @@ public class StoreModel {
     private String address;
     @NotBlank(message = "{phone.number.required}")
     private String contactNumber;
+    private Double shippingFee;
 }

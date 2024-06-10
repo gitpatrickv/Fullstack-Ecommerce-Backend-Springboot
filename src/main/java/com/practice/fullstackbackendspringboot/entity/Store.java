@@ -16,13 +16,19 @@ import java.util.List;
 public class Store {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String storeId;
     private String storeName;
     private String storeDescription;
     private String address;
     private String contactNumber;
+    private Double shippingFee;
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
     private List<Product> product = new ArrayList<>();
+
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    private List<Order> order = new ArrayList<>();
 
     @OneToOne
     private User user;

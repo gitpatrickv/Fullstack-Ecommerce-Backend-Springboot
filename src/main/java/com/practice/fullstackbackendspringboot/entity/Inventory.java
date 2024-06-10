@@ -3,8 +3,6 @@ package com.practice.fullstackbackendspringboot.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
 @Builder
 @Getter
 @Setter
@@ -12,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "inventory")
-public class Inventory extends AuditEntity{
+public class Inventory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "inventory_gen")

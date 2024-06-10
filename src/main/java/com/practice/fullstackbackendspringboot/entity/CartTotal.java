@@ -3,8 +3,6 @@ package com.practice.fullstackbackendspringboot.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -21,6 +19,8 @@ public class CartTotal {
     private Double cartTotal;
     private Long cartItems;
     private Long qty;
+    private Double totalShippingFee;
+    private Double totalPayment;
 
     @OneToOne(mappedBy = "cartTotal")
     private Cart cart;

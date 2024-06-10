@@ -43,7 +43,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional(rollbackOn = Exception.class)
     @Override
-    public ProductModel saveProduct(ProductModel model, String email, MultipartFile file) { //TODO: remove productID on productmodel
+    public ProductModel saveProduct(ProductModel model, String email, MultipartFile file) {
         boolean isNew = productRepository.existsById(model.getProductId());
         Product product;
 
