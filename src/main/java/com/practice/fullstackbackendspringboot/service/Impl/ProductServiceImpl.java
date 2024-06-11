@@ -96,11 +96,35 @@ public class ProductServiceImpl implements ProductService {
 
         for (Product product : products) {
             AllProductModel allProductModel = allProductMapper.mapProductEntityToProductModel(product);
+            allProductModel.setStoreId(product.getStore().getStoreId());
             getPhotoUrl(product, allProductModel);
             getPriceAndQuantity(product, allProductModel);
             productModels.add(allProductModel);
         }
 
+        return new AllProductsPageResponse(productModels, pageResponse);
+    }
+
+    @Override
+    public AllProductsPageResponse getAllStoreProducts(String storeId, int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        Page<Product> products = productRepository.findAllByStore_StoreId(storeId, pageable);
+        List<AllProductModel> productModels = new ArrayList<>();
+
+        PageResponse pageResponse = new PageResponse();
+        pageResponse.setPageNo(products.getNumber());
+        pageResponse.setPageSize(products.getSize());
+        pageResponse.setTotalElements(products.getTotalElements());
+        pageResponse.setTotalPages(products.getTotalPages());
+        pageResponse.setLast(products.isLast());
+
+        for(Product product : products){
+            AllProductModel allProductModel = allProductMapper.mapProductEntityToProductModel(product);
+            getPhotoUrl(product, allProductModel);
+            getPriceAndQuantity(product, allProductModel);
+            allProductModel.setStoreName(product.getStore().getStoreName());
+            productModels.add(allProductModel);
+        }
         return new AllProductsPageResponse(productModels, pageResponse);
     }
 
@@ -165,6 +189,7 @@ public class ProductServiceImpl implements ProductService {
         if(inventories != null && !inventories.isEmpty()){
             Inventory inventory = inventories.get(0);
             productModel.setPrice(inventory.getPrice());
+            productModel.setQuantity(inventory.getQuantity());
         }
     }
 

@@ -180,6 +180,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
                 orderItemModel.setOrderStatus(order.getOrderStatus());
                 orderItemModel.setActive(order.isActive());
+                orderItemModel.setStoreId(order.getStore().getStoreId());
                 orderModels.add(orderItemModel);
             }
         }
@@ -200,6 +201,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
                 orderItemModel.setOrderStatus(order.getOrderStatus());
                 orderItemModel.setActive(order.isActive());
+                orderItemModel.setStoreId(order.getStore().getStoreId());
                 orderModels.add(orderItemModel);
             }
         }
@@ -220,6 +222,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
                 orderItemModel.setOrderStatus(order.getOrderStatus());
                 orderItemModel.setActive(order.isActive());
+                orderItemModel.setStoreId(order.getStore().getStoreId());
                 orderModels.add(orderItemModel);
             }
         }
