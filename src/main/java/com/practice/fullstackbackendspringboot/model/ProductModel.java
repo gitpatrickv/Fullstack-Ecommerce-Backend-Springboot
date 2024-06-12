@@ -36,5 +36,6 @@ public class ProductModel {
     private String skuCode;
     private String storeName;
     private List<String> productImage = new ArrayList<>();
+    private String storeId;
 
 }

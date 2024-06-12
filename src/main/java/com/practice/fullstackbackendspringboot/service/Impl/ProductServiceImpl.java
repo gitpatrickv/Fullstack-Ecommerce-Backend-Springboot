@@ -166,7 +166,7 @@ public class ProductServiceImpl implements ProductService {
         productModel.setProductImage(photoUrls);
         productModel.setPrice(inventory.getPrice());
         productModel.setQuantity(inventory.getQuantity());
-
+        productModel.setStoreId(products.getStore().getStoreId());
         return productModel;
     }
 
