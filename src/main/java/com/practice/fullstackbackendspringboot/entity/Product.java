@@ -34,5 +34,7 @@ public class Product extends AuditEntity{
     @JoinColumn(name = "store_id")
     private Store store;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<OrderItem> orderItems = new ArrayList<>();
 
 }

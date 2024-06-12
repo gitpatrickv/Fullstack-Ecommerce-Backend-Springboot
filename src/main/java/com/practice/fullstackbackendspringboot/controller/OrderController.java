@@ -1,7 +1,6 @@
 package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
-import com.practice.fullstackbackendspringboot.model.OrderModel;
 import com.practice.fullstackbackendspringboot.service.OrderService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -16,18 +15,29 @@ import java.util.List;
 public class OrderController {
     private final OrderService orderService;
     private final UserService userService;
+
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
     public void placeOrder(@RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
         orderService.placeOrder(user);
     }
+    @PostMapping("/buy/{orderId}")
+    public void buyAgain(@RequestHeader("Authorization") String email, @PathVariable (value="orderId") String orderId){
+        String user = userService.getUserFromToken(email);
+        orderService.buyAgain(user,orderId);
+    }
 
-    @PutMapping("/cancel/{orderId}")
+    @PostMapping("/cancel/{orderId}")
     @ResponseStatus(HttpStatus.OK)
     public void cancelOrder(@RequestHeader("Authorization") String email, @PathVariable (value="orderId") String orderId) {
         String user = userService.getUserFromToken(email);
         orderService.cancelOrder(user, orderId);
+    }
+    @PutMapping("/ship/{orderId}")
+    public void shipOrder(@RequestHeader("Authorization") String email, @PathVariable (value="orderId") String orderId){
+        String user = userService.getUserFromToken(email);
+        orderService.shipOrder(user,orderId);
     }
 
     @GetMapping("/get/to-pay")
@@ -42,6 +52,12 @@ public class OrderController {
     public List<OrderItemModel> getOrdersByCancelledStatus(@RequestHeader("Authorization") String email){
         String user =  userService.getUserFromToken(email);
         return orderService.getOrdersByCancelledStatus(user);
+    }
+    @GetMapping("/get/to-ship")
+    @ResponseStatus(HttpStatus.OK)
+    public List<OrderItemModel> getOrdersByToShipStatus(@RequestHeader("Authorization") String email){
+        String user =  userService.getUserFromToken(email);
+        return orderService.getOrdersByToShipStatus(user);
     }
 
 }

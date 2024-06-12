@@ -28,6 +28,7 @@ public class OrderServiceImpl implements OrderService {
     private final StoreRepository storeRepository;
     private final OrderItemRepository orderItemRepository;
     private final InventoryRepository inventoryRepository;
+    private final ProductRepository productRepository;
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
 
@@ -59,6 +60,7 @@ public class OrderServiceImpl implements OrderService {
             List<OrderItem> orderItems = new ArrayList<>();
 
             for (Cart carts : storeCarts) {
+                Product product = productRepository.findById(carts.getProduct().getProductId()).get();
                 OrderItem orderItem = new OrderItem();
 
                 orderItem.setQuantity(carts.getQuantity());
@@ -69,6 +71,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItem.setPhotoUrl(carts.getPhotoUrl());
                 orderItem.setUser(user.get());
                 orderItem.setOrder(order);
+                orderItem.setProduct(product);
                 storeTotalAmount += orderItem.getTotalAmount();
                 OrderItem savedOrderItems = orderItemRepository.save(orderItem);
                 orderItems.add(savedOrderItems);
@@ -96,6 +99,7 @@ public class OrderServiceImpl implements OrderService {
     public void cancelOrder(String email, String orderId) {
         Optional<User> user = userRepository.findByEmail(email);
         Optional<Order> order = orderRepository.findById(orderId);
+        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmailAndOrder_OrderId(email, orderId);
 
         if(user.isPresent()){
             if(order.isPresent()){
@@ -106,6 +110,59 @@ public class OrderServiceImpl implements OrderService {
             }else{
                 throw new IllegalArgumentException(StringUtil.ORDER_NOT_FOUND);
             }
+        }
+
+        for(OrderItem orderItem: orderItems){
+            Optional<Inventory> inventory = inventoryRepository.findByProduct_ProductId(orderItem.getProduct().getProductId());
+            if(inventory.isPresent()){
+                inventory.get().setQuantity(inventory.get().getQuantity() + orderItem.getQuantity());
+            }else{
+                throw new IllegalArgumentException(StringUtil.PRODUCT_NOT_FOUND);
+            }
+        }
+    }
+
+    @Override
+    public void buyAgain(String email, String orderId) {
+        Optional<User> user = userRepository.findByEmail(email);
+        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmailAndOrder_OrderId(email,orderId);
+        Long quantity = 1L;
+
+        for(OrderItem orderItem : orderItems){
+            Product product = productRepository.findById(orderItem.getProduct().getProductId()).get();
+            Cart cart = new Cart();
+            cart.setPhotoUrl(orderItem.getPhotoUrl());
+            cart.setPrice(orderItem.getPrice());
+            cart.setProductName(orderItem.getProductName());
+            cart.setQuantity(quantity);
+            cart.setStoreName(orderItem.getStoreName());
+            cart.setTotalAmount(orderItem.getPrice() * quantity);
+            cart.setProduct(product);
+            cart.setOrderItems(orderItems);
+            cart.setUser(user.get());
+            cartRepository.save(cart);
+        }
+    }
+
+    @Override
+    public void shipOrder(String email, String orderId) { //TODO: implement it on sellers page, set up role base auth
+        Optional<User> user = userRepository.findByEmail(email);
+        Optional<Order> order = orderRepository.findById(orderId);
+
+        if(user.isPresent()){
+            if(order.isPresent()){
+                Order orders = order.get();
+                if(orders.isActive()) {
+                    orders.setOrderStatus(StringUtil.TO_SHIP);
+                    orderRepository.save(orders);
+                }else{
+                    throw new IllegalArgumentException(StringUtil.ORDER_CANCELLED_OR_NOT_ACTIVE);
+                }
+            }else{
+                throw new IllegalArgumentException(StringUtil.ORDER_NOT_FOUND);
+            }
+        }else{
+            throw new IllegalArgumentException(StringUtil.USER_NOT_FOUND);
         }
     }
 
@@ -123,6 +180,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
                 orderItemModel.setOrderStatus(order.getOrderStatus());
                 orderItemModel.setActive(order.isActive());
+                orderItemModel.setStoreId(order.getStore().getStoreId());
                 orderModels.add(orderItemModel);
             }
         }
@@ -143,6 +201,28 @@ public class OrderServiceImpl implements OrderService {
                 orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
                 orderItemModel.setOrderStatus(order.getOrderStatus());
                 orderItemModel.setActive(order.isActive());
+                orderItemModel.setStoreId(order.getStore().getStoreId());
+                orderModels.add(orderItemModel);
+            }
+        }
+        return orderModels;
+    }
+
+    @Override
+    public List<OrderItemModel> getOrdersByToShipStatus(String email) {
+        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email);
+
+        List<OrderItemModel> orderModels = new ArrayList<>();
+
+        for(OrderItem orderItem : orderItems){
+            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
+
+            if(order.getOrderStatus().equals(StringUtil.TO_SHIP) && order.isActive()) {
+                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
+                orderItemModel.setOrderStatus(order.getOrderStatus());
+                orderItemModel.setActive(order.isActive());
+                orderItemModel.setStoreId(order.getStore().getStoreId());
                 orderModels.add(orderItemModel);
             }
         }

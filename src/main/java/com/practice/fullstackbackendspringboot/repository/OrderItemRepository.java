@@ -10,5 +10,6 @@ import java.util.List;
 public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 
     List<OrderItem> findAllByUserEmail(String email);
+    List<OrderItem> findAllByUserEmailAndOrder_OrderId(String email, String orderId);
 
 }

@@ -21,4 +21,5 @@ public class OrderItemModel {
     private boolean active;
     private String orderStatus;
     private Double orderTotalAmount;
+    private String storeId;
 }

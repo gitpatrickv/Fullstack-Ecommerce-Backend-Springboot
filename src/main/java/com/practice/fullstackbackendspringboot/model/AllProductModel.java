@@ -26,7 +26,9 @@ public class AllProductModel {
     @NotNull(message = "{this.field.cannot.be.empty}")
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
     private Double price;
-
+    private Long quantity;
     private String photoUrl;
+    private String storeId;
+    private String storeName;
 
 }
