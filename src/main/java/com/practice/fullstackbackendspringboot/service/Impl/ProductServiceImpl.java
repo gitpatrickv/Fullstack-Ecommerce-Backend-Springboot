@@ -151,6 +151,30 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public AllProductsPageResponse getAllSellersProducts(String email, int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        Optional<User> user = userRepository.findByEmail(email);
+        Page<Product> products = productRepository.findAllByUserEmail(user.get().getEmail(), pageable);
+        List<AllProductModel> productModels = new ArrayList<>();
+
+        PageResponse pageResponse = new PageResponse();
+        pageResponse.setPageNo(products.getNumber());
+        pageResponse.setPageSize(products.getSize());
+        pageResponse.setTotalElements(products.getTotalElements());
+        pageResponse.setTotalPages(products.getTotalPages());
+        pageResponse.setLast(products.isLast());
+
+        for(Product product : products){
+            AllProductModel allProductModel = allProductMapper.mapProductEntityToProductModel(product);
+            getPhotoUrl(product, allProductModel);
+            getPriceAndQuantity(product, allProductModel);
+            allProductModel.setStoreName(product.getStore().getStoreName());
+            productModels.add(allProductModel);
+        }
+        return new AllProductsPageResponse(productModels, pageResponse);
+    }
+
+    @Override
     public ProductModel getProductById(String productId) {
         Optional<Product> product = productRepository.findById(productId);
         Product products = product.orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId));
