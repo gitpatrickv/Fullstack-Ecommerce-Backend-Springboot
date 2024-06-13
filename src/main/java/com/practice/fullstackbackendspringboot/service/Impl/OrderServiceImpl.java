@@ -166,8 +166,9 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+
     @Override
-    public List<OrderItemModel> getOrdersByToPayStatus(String email) {
+    public List<OrderItemModel> getOrdersByStatus(String email, String status) {
         List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email);
 
         List<OrderItemModel> orderModels = new ArrayList<>();
@@ -175,7 +176,16 @@ public class OrderServiceImpl implements OrderService {
         for(OrderItem orderItem : orderItems){
             Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
 
-            if(order.getOrderStatus().equals(StringUtil.TO_PAY) && order.isActive()) {
+            if(order.getOrderStatus().equals(status) && order.isActive()) {
+                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
+                orderItemModel.setOrderStatus(order.getOrderStatus());
+                orderItemModel.setActive(order.isActive());
+                orderItemModel.setStoreId(order.getStore().getStoreId());
+                orderModels.add(orderItemModel);
+            }
+
+            if(order.getOrderStatus().equals(status) && !order.isActive()) {
                 OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
                 orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
                 orderItemModel.setOrderStatus(order.getOrderStatus());
@@ -187,45 +197,4 @@ public class OrderServiceImpl implements OrderService {
         return orderModels;
     }
 
-    @Override
-    public List<OrderItemModel> getOrdersByCancelledStatus(String email) {
-        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email);
-
-        List<OrderItemModel> orderModels = new ArrayList<>();
-
-        for(OrderItem orderItem : orderItems){
-            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
-
-            if(order.getOrderStatus().equals(StringUtil.ORDER_CANCELLED) && !order.isActive()) {
-                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
-                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
-                orderItemModel.setOrderStatus(order.getOrderStatus());
-                orderItemModel.setActive(order.isActive());
-                orderItemModel.setStoreId(order.getStore().getStoreId());
-                orderModels.add(orderItemModel);
-            }
-        }
-        return orderModels;
-    }
-
-    @Override
-    public List<OrderItemModel> getOrdersByToShipStatus(String email) {
-        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email);
-
-        List<OrderItemModel> orderModels = new ArrayList<>();
-
-        for(OrderItem orderItem : orderItems){
-            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
-
-            if(order.getOrderStatus().equals(StringUtil.TO_SHIP) && order.isActive()) {
-                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
-                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
-                orderItemModel.setOrderStatus(order.getOrderStatus());
-                orderItemModel.setActive(order.isActive());
-                orderItemModel.setStoreId(order.getStore().getStoreId());
-                orderModels.add(orderItemModel);
-            }
-        }
-        return orderModels;
-    }
 }

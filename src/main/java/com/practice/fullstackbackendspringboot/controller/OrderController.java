@@ -3,6 +3,7 @@ package com.practice.fullstackbackendspringboot.controller;
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
 import com.practice.fullstackbackendspringboot.service.OrderService;
 import com.practice.fullstackbackendspringboot.service.UserService;
+import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -42,22 +43,25 @@ public class OrderController {
 
     @GetMapping("/get/to-pay")
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderItemModel> getOrdersByToPayStatus(@RequestHeader("Authorization") String email){
+    public List<OrderItemModel> getOrdersByToPayStatus(@RequestHeader("Authorization") String email ){
         String user =  userService.getUserFromToken(email);
-        return orderService.getOrdersByToPayStatus(user);
+        String status = StringUtil.TO_PAY;
+        return orderService.getOrdersByStatus(user, status);
+    }
+
+    @GetMapping("/get/to-ship")
+    @ResponseStatus(HttpStatus.OK)
+    public List<OrderItemModel> getOrdersByToShipStatus(@RequestHeader("Authorization") String email){
+        String user =  userService.getUserFromToken(email);
+        String status = StringUtil.TO_SHIP;
+        return orderService.getOrdersByStatus(user, status);
     }
 
     @GetMapping("/get/cancelled")
     @ResponseStatus(HttpStatus.OK)
     public List<OrderItemModel> getOrdersByCancelledStatus(@RequestHeader("Authorization") String email){
         String user =  userService.getUserFromToken(email);
-        return orderService.getOrdersByCancelledStatus(user);
+        String status = StringUtil.ORDER_CANCELLED;
+        return orderService.getOrdersByStatus(user, status);
     }
-    @GetMapping("/get/to-ship")
-    @ResponseStatus(HttpStatus.OK)
-    public List<OrderItemModel> getOrdersByToShipStatus(@RequestHeader("Authorization") String email){
-        String user =  userService.getUserFromToken(email);
-        return orderService.getOrdersByToShipStatus(user);
-    }
-
 }
