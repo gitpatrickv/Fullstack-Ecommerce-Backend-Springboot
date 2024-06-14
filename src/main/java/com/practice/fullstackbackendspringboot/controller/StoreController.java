@@ -29,4 +29,10 @@ public class StoreController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public StoreModel getStoreInfo(String email){
+        String user = userService.getUserFromToken(email);
+        return storeService.getStoreInfo(user);
+    }
 }

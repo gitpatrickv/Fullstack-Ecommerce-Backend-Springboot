@@ -66,12 +66,19 @@ public class OrderController {
         return orderService.getCustomerOrdersByStatus(user, status, status);
     }
 
+    @GetMapping("/seller/get/pending/{storeId}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<OrderItemModel> getStoreOrdersByPendingStatus(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
+        String user =  userService.getUserFromToken(email);
+        String status1 = StringUtil.PENDING;
+        return orderService.getStoreOrdersByStatus(user, storeId, status1);
+    }
+
     @GetMapping("/seller/get/unpaid/{storeId}")
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderItemModel> getStoreOrdersByStatus(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
+    public List<OrderItemModel> getStoreOrdersByUnpaidStatus(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
         String user =  userService.getUserFromToken(email);
         String status1 = StringUtil.TO_PAY;
-        String status2 = StringUtil.PENDING;
-        return orderService.getStoreOrdersByStatus(user, storeId, status1, status2);
+        return orderService.getStoreOrdersByStatus(user, storeId, status1);
     }
 }

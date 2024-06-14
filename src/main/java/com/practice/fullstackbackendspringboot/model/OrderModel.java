@@ -19,6 +19,7 @@ public class OrderModel {
     private String paymentMethod;
     private boolean active;
     private String orderStatus;
+    private String orderStatusInfo;
     private String deliveryAddress;
     private String fullName;
     private String contactNumber;

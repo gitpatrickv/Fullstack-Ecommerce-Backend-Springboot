@@ -23,6 +23,7 @@ public class Store {
     private String address;
     private String contactNumber;
     private Double shippingFee;
+    private String photoUrl;
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
     private List<Product> product = new ArrayList<>();

@@ -200,7 +200,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderItemModel> getStoreOrdersByStatus(String email, String storeId, String status1, String status2) {
+    public List<OrderItemModel> getStoreOrdersByStatus(String email, String storeId, String status1) {
         Optional<User> user = userRepository.findByEmail(email);
         List<Order> orders = orderRepository.findAllByStore_StoreId(storeId);
         List<OrderItemModel> orderItemModels = new ArrayList<>();
@@ -208,15 +208,13 @@ public class OrderServiceImpl implements OrderService {
         for(Order order : orders) {
             List<OrderItem> orderItems = order.getOrderItems();
             for(OrderItem orderItem : orderItems) {
-                if(order.isActive()) {
-                    if(order.getOrderStatus().equals(status1) || order.getOrderStatus().equals(status2)) {
+                if(order.isActive() && order.getOrderStatus().equals(status1)) {
                         OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
                         orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
                         orderItemModel.setOrderStatus(order.getOrderStatus());
                         orderItemModel.setActive(order.isActive());
                         orderItemModel.setStoreId(order.getStore().getStoreId());
                         orderItemModels.add(orderItemModel);
-                    }
                 }
 
             }

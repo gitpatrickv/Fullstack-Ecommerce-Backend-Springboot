@@ -54,6 +54,14 @@ public class StoreServiceImpl implements StoreService {
             throw new IllegalArgumentException();
         }
     }
+
+    @Override
+    public StoreModel getStoreInfo(String email) {
+        Store store = storeRepository.findByUserEmail(email).get();
+        StoreModel storeModel = mapper.mapEntityToModel(store);
+        storeModel.setEmail(store.getUser().getEmail());
+        return storeModel;
+    }
 }
 
 

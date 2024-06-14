@@ -20,6 +20,7 @@ public class OrderItemModel {
     private String orderId;
     private boolean active;
     private String orderStatus;
+    private String orderStatusInfo;
     private Double orderTotalAmount;
     private String storeId;
 }

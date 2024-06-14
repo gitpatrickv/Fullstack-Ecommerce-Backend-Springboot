@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class StoreModel {
     @Valid
-
+    private String storeId;
     @NotBlank(message = "{store.name.required}")
     private String storeName;
     @NotBlank
@@ -22,4 +22,6 @@ public class StoreModel {
     @NotBlank(message = "{phone.number.required}")
     private String contactNumber;
     private Double shippingFee;
+    private String email;
+    private String photoUrl;
 }
