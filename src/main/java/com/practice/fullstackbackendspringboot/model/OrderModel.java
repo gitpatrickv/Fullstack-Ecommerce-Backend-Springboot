@@ -23,6 +23,6 @@ public class OrderModel {
     private String deliveryAddress;
     private String fullName;
     private String contactNumber;
-    private List<OrderItem> orderItems;
+    private List<OrderItemModel> orderItemModels;
 
 }

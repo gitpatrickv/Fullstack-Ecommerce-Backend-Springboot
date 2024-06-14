@@ -2,6 +2,8 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 
 import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
+import com.practice.fullstackbackendspringboot.model.OrderModel;
+import com.practice.fullstackbackendspringboot.model.response.AllOrdersResponse;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.OrderService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
@@ -200,26 +202,48 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderItemModel> getStoreOrdersByStatus(String email, String storeId, String status1) {
+    public AllOrdersResponse getStoreOrdersByStatus(String email, String storeId, String status1) {
         Optional<User> user = userRepository.findByEmail(email);
         List<Order> orders = orderRepository.findAllByStore_StoreId(storeId);
-        List<OrderItemModel> orderItemModels = new ArrayList<>();
+        List<OrderModel> orderModels = new ArrayList<>();
 
-        for(Order order : orders) {
-            List<OrderItem> orderItems = order.getOrderItems();
-            for(OrderItem orderItem : orderItems) {
-                if(order.isActive() && order.getOrderStatus().equals(status1)) {
-                        OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
-                        orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
-                        orderItemModel.setOrderStatus(order.getOrderStatus());
-                        orderItemModel.setActive(order.isActive());
-                        orderItemModel.setStoreId(order.getStore().getStoreId());
-                        orderItemModels.add(orderItemModel);
+        Map<String, List<Order>> listOfOrders = orders.stream().collect(Collectors.groupingBy(Order::getOrderId));
+
+        for(Map.Entry<String, List<Order>> orderMap : listOfOrders.entrySet()) {
+            List<Order> orderList = orderMap.getValue();
+            String orderId = orderMap.getKey();
+
+            Order order = orderRepository.findById(orderId).get();
+            if(order.isActive() && order.getOrderStatus().equals(status1)) {
+                OrderModel orderModel = new OrderModel();
+                orderModel.setOrderId(order.getOrderId());
+                orderModel.setOrderTotalAmount(order.getOrderTotalAmount());
+                orderModel.setPaymentMethod(order.getPaymentMethod());
+                orderModel.setActive(order.isActive());
+                orderModel.setOrderStatus(order.getOrderStatus());
+                orderModel.setOrderStatusInfo(order.getOrderStatusInfo());
+                orderModel.setDeliveryAddress(order.getDeliveryAddress());
+                orderModel.setFullName(order.getFullName());
+                orderModel.setContactNumber(order.getContactNumber());
+
+                List<OrderItemModel> orderItemModels = new ArrayList<>();
+                List<OrderItem> orderItems = order.getOrderItems();
+
+                for(OrderItem orderItem : orderItems) {
+                    OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+                    orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
+                    orderItemModel.setOrderStatus(order.getOrderStatus());
+                    orderItemModel.setActive(order.isActive());
+                    orderItemModel.setStoreId(order.getStore().getStoreId());
+                    orderItemModels.add(orderItemModel);
                 }
-
+                orderModel.setOrderItemModels(orderItemModels);
+                orderModels.add(orderModel);
             }
         }
-        return orderItemModels;
+
+
+        return new AllOrdersResponse(orderModels);
     }
 
 }

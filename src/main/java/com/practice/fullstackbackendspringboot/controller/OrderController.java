@@ -1,6 +1,7 @@
 package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
+import com.practice.fullstackbackendspringboot.model.response.AllOrdersResponse;
 import com.practice.fullstackbackendspringboot.service.OrderService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
@@ -68,7 +69,7 @@ public class OrderController {
 
     @GetMapping("/seller/get/pending/{storeId}")
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderItemModel> getStoreOrdersByPendingStatus(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
+    public AllOrdersResponse getStoreOrdersByPendingStatus(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
         String user =  userService.getUserFromToken(email);
         String status1 = StringUtil.PENDING;
         return orderService.getStoreOrdersByStatus(user, storeId, status1);
@@ -76,7 +77,7 @@ public class OrderController {
 
     @GetMapping("/seller/get/unpaid/{storeId}")
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderItemModel> getStoreOrdersByUnpaidStatus(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
+    public AllOrdersResponse getStoreOrdersByUnpaidStatus(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
         String user =  userService.getUserFromToken(email);
         String status1 = StringUtil.TO_PAY;
         return orderService.getStoreOrdersByStatus(user, storeId, status1);
