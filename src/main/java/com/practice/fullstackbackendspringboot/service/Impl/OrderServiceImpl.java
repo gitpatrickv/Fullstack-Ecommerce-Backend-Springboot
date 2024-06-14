@@ -55,6 +55,7 @@ public class OrderServiceImpl implements OrderService {
             order.setContactNumber(user.get().getContactNumber());
             order.setActive(true);
             order.setOrderStatus(StringUtil.PENDING);
+            order.setOrderStatusInfo(StringUtil.ORDER_CONFIRMATION);
             order.setPaymentMethod(StringUtil.CASH_ON_DELIVERY);
             order = orderRepository.save(order);
             Double storeTotalAmount = 0.0;
@@ -107,6 +108,7 @@ public class OrderServiceImpl implements OrderService {
             if(order.isPresent()){
                 Order orders = order.get();
                 orders.setOrderStatus(StringUtil.ORDER_CANCELLED);
+                orders.setOrderStatusInfo(StringUtil.ORDER_CANCELLED);
                 orders.setActive(false);
                 orderRepository.save(orders);
             }else{
@@ -156,6 +158,30 @@ public class OrderServiceImpl implements OrderService {
                 Order orders = order.get();
                 if(orders.isActive()) {
                     orders.setOrderStatus(StringUtil.TO_SHIP);
+                    orders.setOrderStatusInfo(StringUtil.SHIPPING_ORDER);
+                    orderRepository.save(orders);
+                }else{
+                    throw new IllegalArgumentException(StringUtil.ORDER_CANCELLED_OR_NOT_ACTIVE);
+                }
+            }else{
+                throw new IllegalArgumentException(StringUtil.ORDER_NOT_FOUND);
+            }
+        }else{
+            throw new IllegalArgumentException(StringUtil.USER_NOT_FOUND);
+        }
+    }
+
+    @Override
+    public void processOrder(String email, String orderId) {
+        Optional<User> user = userRepository.findByEmail(email);
+        Optional<Order> order = orderRepository.findById(orderId);
+
+        if(user.isPresent()){
+            if(order.isPresent()){
+                Order orders = order.get();
+                if(orders.isActive()) {
+                    orders.setOrderStatus(StringUtil.TO_PAY);
+                    orders.setOrderStatusInfo(StringUtil.PREPARE_ORDER);
                     orderRepository.save(orders);
                 }else{
                     throw new IllegalArgumentException(StringUtil.ORDER_CANCELLED_OR_NOT_ACTIVE);
@@ -183,6 +209,7 @@ public class OrderServiceImpl implements OrderService {
                     OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
                     orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
                     orderItemModel.setOrderStatus(order.getOrderStatus());
+                    orderItemModel.setOrderStatusInfo(order.getOrderStatusInfo());
                     orderItemModel.setActive(order.isActive());
                     orderItemModel.setStoreId(order.getStore().getStoreId());
                     orderModels.add(orderItemModel);
@@ -193,6 +220,7 @@ public class OrderServiceImpl implements OrderService {
                 OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
                 orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
                 orderItemModel.setOrderStatus(order.getOrderStatus());
+                orderItemModel.setOrderStatusInfo(order.getOrderStatusInfo());
                 orderItemModel.setActive(order.isActive());
                 orderItemModel.setStoreId(order.getStore().getStoreId());
                 orderModels.add(orderItemModel);

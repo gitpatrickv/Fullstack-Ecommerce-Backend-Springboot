@@ -37,9 +37,16 @@ public class OrderController {
         orderService.cancelOrder(user, orderId);
     }
     @PutMapping("/ship/{orderId}")
+    @ResponseStatus(HttpStatus.OK)
     public void shipOrder(@RequestHeader("Authorization") String email, @PathVariable (value="orderId") String orderId){
         String user = userService.getUserFromToken(email);
         orderService.shipOrder(user,orderId);
+    }
+    @PutMapping("/process/{orderId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void processOrder(@RequestHeader("Authorization") String email, @PathVariable (value="orderId") String orderId){
+        String user = userService.getUserFromToken(email);
+        orderService.processOrder(user,orderId);
     }
 
     @GetMapping("/get/to-pay")
