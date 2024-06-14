@@ -52,7 +52,7 @@ public class OrderServiceImpl implements OrderService {
             order.setFullName(user.get().getName());
             order.setContactNumber(user.get().getContactNumber());
             order.setActive(true);
-            order.setOrderStatus(StringUtil.TO_PAY);
+            order.setOrderStatus(StringUtil.PENDING);
             order.setPaymentMethod(StringUtil.CASH_ON_DELIVERY);
             order = orderRepository.save(order);
             Double storeTotalAmount = 0.0;
@@ -168,7 +168,7 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public List<OrderItemModel> getOrdersByStatus(String email, String status) {
+    public List<OrderItemModel> getOrdersByStatus(String email, String status1, String status2) {
         List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email);
 
         List<OrderItemModel> orderModels = new ArrayList<>();
@@ -176,16 +176,18 @@ public class OrderServiceImpl implements OrderService {
         for(OrderItem orderItem : orderItems){
             Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
 
-            if(order.getOrderStatus().equals(status) && order.isActive()) {
-                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
-                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
-                orderItemModel.setOrderStatus(order.getOrderStatus());
-                orderItemModel.setActive(order.isActive());
-                orderItemModel.setStoreId(order.getStore().getStoreId());
-                orderModels.add(orderItemModel);
+            if(order.isActive()) {
+                if(order.getOrderStatus().equals(status1) || order.getOrderStatus().equals(status2)) {
+                    OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+                    orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
+                    orderItemModel.setOrderStatus(order.getOrderStatus());
+                    orderItemModel.setActive(order.isActive());
+                    orderItemModel.setStoreId(order.getStore().getStoreId());
+                    orderModels.add(orderItemModel);
+                }
             }
 
-            if(order.getOrderStatus().equals(status) && !order.isActive()) {
+            if(order.getOrderStatus().equals(status1) && !order.isActive()) {
                 OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
                 orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
                 orderItemModel.setOrderStatus(order.getOrderStatus());

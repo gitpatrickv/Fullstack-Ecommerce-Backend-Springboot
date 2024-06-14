@@ -11,5 +11,5 @@ public interface OrderService {
     void cancelOrder(String email, String orderId);
     void buyAgain(String email, String orderId);
     void shipOrder(String email, String orderId);
-    List<OrderItemModel> getOrdersByStatus(String email, String status);
+    List<OrderItemModel> getOrdersByStatus(String email, String status1, String status2);
 }

@@ -45,8 +45,9 @@ public class OrderController {
     @ResponseStatus(HttpStatus.OK)
     public List<OrderItemModel> getOrdersByToPayStatus(@RequestHeader("Authorization") String email ){
         String user =  userService.getUserFromToken(email);
-        String status = StringUtil.TO_PAY;
-        return orderService.getOrdersByStatus(user, status);
+        String status1 = StringUtil.TO_PAY;
+        String status2 = StringUtil.PENDING;
+        return orderService.getOrdersByStatus(user, status1, status2);
     }
 
     @GetMapping("/get/to-ship")
@@ -54,7 +55,7 @@ public class OrderController {
     public List<OrderItemModel> getOrdersByToShipStatus(@RequestHeader("Authorization") String email){
         String user =  userService.getUserFromToken(email);
         String status = StringUtil.TO_SHIP;
-        return orderService.getOrdersByStatus(user, status);
+        return orderService.getOrdersByStatus(user, status, status);
     }
 
     @GetMapping("/get/cancelled")
@@ -62,6 +63,6 @@ public class OrderController {
     public List<OrderItemModel> getOrdersByCancelledStatus(@RequestHeader("Authorization") String email){
         String user =  userService.getUserFromToken(email);
         String status = StringUtil.ORDER_CANCELLED;
-        return orderService.getOrdersByStatus(user, status);
+        return orderService.getOrdersByStatus(user, status, status);
     }
 }
