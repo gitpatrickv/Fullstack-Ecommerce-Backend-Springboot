@@ -14,5 +14,4 @@ public class CartTotalModel {
     private Long qty;
     private Double totalShippingFee;
     private Double totalPayment;
-    private Long productCount;
 }

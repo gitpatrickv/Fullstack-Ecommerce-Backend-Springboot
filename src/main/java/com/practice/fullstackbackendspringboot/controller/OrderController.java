@@ -43,26 +43,35 @@ public class OrderController {
 
     @GetMapping("/get/to-pay")
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderItemModel> getOrdersByToPayStatus(@RequestHeader("Authorization") String email ){
+    public List<OrderItemModel> getCustomerOrdersByToPayStatus(@RequestHeader("Authorization") String email ){
         String user =  userService.getUserFromToken(email);
         String status1 = StringUtil.TO_PAY;
         String status2 = StringUtil.PENDING;
-        return orderService.getOrdersByStatus(user, status1, status2);
+        return orderService.getCustomerOrdersByStatus(user, status1, status2);
     }
 
     @GetMapping("/get/to-ship")
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderItemModel> getOrdersByToShipStatus(@RequestHeader("Authorization") String email){
+    public List<OrderItemModel> getCustomerOrdersByToShipStatus(@RequestHeader("Authorization") String email){
         String user =  userService.getUserFromToken(email);
         String status = StringUtil.TO_SHIP;
-        return orderService.getOrdersByStatus(user, status, status);
+        return orderService.getCustomerOrdersByStatus(user, status, status);
     }
 
     @GetMapping("/get/cancelled")
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderItemModel> getOrdersByCancelledStatus(@RequestHeader("Authorization") String email){
+    public List<OrderItemModel> getCustomerOrdersByCancelledStatus(@RequestHeader("Authorization") String email){
         String user =  userService.getUserFromToken(email);
         String status = StringUtil.ORDER_CANCELLED;
-        return orderService.getOrdersByStatus(user, status, status);
+        return orderService.getCustomerOrdersByStatus(user, status, status);
+    }
+
+    @GetMapping("/seller/get/unpaid/{storeId}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<OrderItemModel> getStoreOrdersByStatus(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
+        String user =  userService.getUserFromToken(email);
+        String status1 = StringUtil.TO_PAY;
+        String status2 = StringUtil.PENDING;
+        return orderService.getStoreOrdersByStatus(user, storeId, status1, status2);
     }
 }

@@ -21,7 +21,6 @@ public class CartTotal {
     private Long qty;
     private Double totalShippingFee;
     private Double totalPayment;
-    private Long productCount;
 
     @OneToOne(mappedBy = "cartTotal")
     private Cart cart;
