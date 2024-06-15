@@ -27,4 +27,5 @@ public class OrderItemModel {
     private String orderStatusInfo;
     private Double orderTotalAmount;
     private String storeId;
+    private String fullName;
 }

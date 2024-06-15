@@ -31,7 +31,7 @@ public class StoreController {
     }
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public StoreModel getStoreInfo(String email){
+    public StoreModel getStoreInfo(@RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
         return storeService.getStoreInfo(user);
     }

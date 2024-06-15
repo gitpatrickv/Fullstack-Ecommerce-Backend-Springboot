@@ -36,12 +36,7 @@ public class OrderController {
         String user = userService.getUserFromToken(email);
         orderService.cancelOrder(user, orderId);
     }
-    @PutMapping("/ship/{orderId}")
-    @ResponseStatus(HttpStatus.OK)
-    public void shipOrder(@RequestHeader("Authorization") String email, @PathVariable (value="orderId") String orderId){
-        String user = userService.getUserFromToken(email);
-        orderService.shipOrder(user,orderId);
-    }
+
     @PutMapping("/process/{orderId}")
     @ResponseStatus(HttpStatus.OK)
     public void processOrder(@RequestHeader("Authorization") String email, @PathVariable (value="orderId") String orderId){
@@ -66,6 +61,14 @@ public class OrderController {
         return orderService.getCustomerOrdersByStatus(user, status, status);
     }
 
+    @GetMapping("/get/to-receive")
+    @ResponseStatus(HttpStatus.OK)
+    public List<OrderItemModel> getCustomerOrdersByToReceiveStatus(@RequestHeader("Authorization") String email){
+        String user =  userService.getUserFromToken(email);
+        String status = StringUtil.TO_RECEIVE;
+        return orderService.getCustomerOrdersByStatus(user, status, status);
+    }
+
     @GetMapping("/get/cancelled")
     @ResponseStatus(HttpStatus.OK)
     public List<OrderItemModel> getCustomerOrdersByCancelledStatus(@RequestHeader("Authorization") String email){
@@ -87,6 +90,30 @@ public class OrderController {
     public AllOrdersResponse getStoreOrdersByUnpaidStatus(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
         String user =  userService.getUserFromToken(email);
         String status1 = StringUtil.TO_PAY;
+        return orderService.getStoreOrdersByStatus(user, storeId, status1);
+    }
+
+    @GetMapping("/seller/get/to-ship/{storeId}")
+    @ResponseStatus(HttpStatus.OK)
+    public AllOrdersResponse getStoreOrdersByToShipStatus(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
+        String user =  userService.getUserFromToken(email);
+        String status1 = StringUtil.TO_SHIP;
+        return orderService.getStoreOrdersByStatus(user, storeId, status1);
+    }
+
+    @GetMapping("/seller/get/shipping/{storeId}")
+    @ResponseStatus(HttpStatus.OK)
+    public AllOrdersResponse getStoreOrdersByToReceiveStatus(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
+        String user =  userService.getUserFromToken(email);
+        String status1 = StringUtil.TO_RECEIVE;
+        return orderService.getStoreOrdersByStatus(user, storeId, status1);
+    }
+
+    @GetMapping("/seller/get/cancelled/{storeId}") //TODO: not yet implemented in frontend
+    @ResponseStatus(HttpStatus.OK)
+    public AllOrdersResponse getStoreOrdersByToCancelled(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
+        String user =  userService.getUserFromToken(email);
+        String status1 = StringUtil.ORDER_CANCELLED;
         return orderService.getStoreOrdersByStatus(user, storeId, status1);
     }
 }

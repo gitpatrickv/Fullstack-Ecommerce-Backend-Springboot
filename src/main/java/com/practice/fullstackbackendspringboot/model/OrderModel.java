@@ -1,6 +1,5 @@
 package com.practice.fullstackbackendspringboot.model;
 
-import com.practice.fullstackbackendspringboot.entity.OrderItem;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

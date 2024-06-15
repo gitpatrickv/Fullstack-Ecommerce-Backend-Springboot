@@ -149,49 +149,27 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void shipOrder(String email, String orderId) { //TODO: implement it on sellers page, set up role base auth
-        Optional<User> user = userRepository.findByEmail(email);
-        Optional<Order> order = orderRepository.findById(orderId);
-
-        if(user.isPresent()){
-            if(order.isPresent()){
-                Order orders = order.get();
-                if(orders.isActive()) {
-                    orders.setOrderStatus(StringUtil.TO_SHIP);
-                    orders.setOrderStatusInfo(StringUtil.SHIPPING_ORDER);
-                    orderRepository.save(orders);
-                }else{
-                    throw new IllegalArgumentException(StringUtil.ORDER_CANCELLED_OR_NOT_ACTIVE);
-                }
-            }else{
-                throw new IllegalArgumentException(StringUtil.ORDER_NOT_FOUND);
-            }
-        }else{
-            throw new IllegalArgumentException(StringUtil.USER_NOT_FOUND);
-        }
-    }
-
-    @Override
     public void processOrder(String email, String orderId) {
-        Optional<User> user = userRepository.findByEmail(email);
+        userRepository.findByEmail(email);
         Optional<Order> order = orderRepository.findById(orderId);
 
-        if(user.isPresent()){
-            if(order.isPresent()){
                 Order orders = order.get();
-                if(orders.isActive()) {
+                if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.PENDING)) {
                     orders.setOrderStatus(StringUtil.TO_PAY);
                     orders.setOrderStatusInfo(StringUtil.PREPARE_ORDER);
                     orderRepository.save(orders);
-                }else{
-                    throw new IllegalArgumentException(StringUtil.ORDER_CANCELLED_OR_NOT_ACTIVE);
                 }
-            }else{
-                throw new IllegalArgumentException(StringUtil.ORDER_NOT_FOUND);
-            }
-        }else{
-            throw new IllegalArgumentException(StringUtil.USER_NOT_FOUND);
-        }
+                else if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_PAY)){
+                    orders.setOrderStatus(StringUtil.TO_SHIP);
+                    orders.setOrderStatusInfo(StringUtil.SHIPPING_ORDER);
+                    orderRepository.save(orders);
+                }
+                else if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_SHIP)){
+                    orders.setOrderStatus(StringUtil.TO_RECEIVE);
+                    orders.setOrderStatusInfo(StringUtil.OUT_FOR_DELIVERY);
+                    orderRepository.save(orders);
+                }
+
     }
 
 
@@ -231,7 +209,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public AllOrdersResponse getStoreOrdersByStatus(String email, String storeId, String status1) {
-        Optional<User> user = userRepository.findByEmail(email);
+        userRepository.findByEmail(email);
         List<Order> orders = orderRepository.findAllByStore_StoreId(storeId);
         List<OrderModel> orderModels = new ArrayList<>();
 
@@ -242,7 +220,8 @@ public class OrderServiceImpl implements OrderService {
             String orderId = orderMap.getKey();
 
             Order order = orderRepository.findById(orderId).get();
-            if(order.isActive() && order.getOrderStatus().equals(status1)) {
+            if(order.isActive() && order.getOrderStatus().equals(status1)
+                    || !order.isActive() && order.getOrderStatus().equals(status1)) {
                 OrderModel orderModel = new OrderModel();
                 orderModel.setOrderId(order.getOrderId());
                 orderModel.setOrderTotalAmount(order.getOrderTotalAmount());
@@ -263,6 +242,7 @@ public class OrderServiceImpl implements OrderService {
                     orderItemModel.setOrderStatus(order.getOrderStatus());
                     orderItemModel.setActive(order.isActive());
                     orderItemModel.setStoreId(order.getStore().getStoreId());
+                    orderItemModel.setFullName(order.getFullName());
                     orderItemModels.add(orderItemModel);
                 }
                 orderModel.setOrderItemModels(orderItemModels);
