@@ -133,18 +133,25 @@ public class OrderServiceImpl implements OrderService {
         Long quantity = 1L;
 
         for(OrderItem orderItem : orderItems){
-            Product product = productRepository.findById(orderItem.getProduct().getProductId()).get();
-            Cart cart = new Cart();
-            cart.setPhotoUrl(orderItem.getPhotoUrl());
-            cart.setPrice(orderItem.getPrice());
-            cart.setProductName(orderItem.getProductName());
-            cart.setQuantity(quantity);
-            cart.setStoreName(orderItem.getStoreName());
-            cart.setTotalAmount(orderItem.getPrice() * quantity);
-            cart.setProduct(product);
-            cart.setOrderItems(orderItems);
-            cart.setUser(user.get());
-            cartRepository.save(cart);
+            Optional<Cart> existingCart = cartRepository.findByProduct_ProductIdAndUserEmail(orderItem.getProduct().getProductId(), email);
+            Cart cart;
+
+            if(existingCart.isPresent()){
+                cart = existingCart.get();
+                cartRepository.save(cart);
+            } else {
+                cart = new Cart();
+                cart.setPhotoUrl(orderItem.getPhotoUrl());
+                cart.setPrice(orderItem.getPrice());
+                cart.setProductName(orderItem.getProductName());
+                cart.setQuantity(quantity);
+                cart.setStoreName(orderItem.getStoreName());
+                cart.setTotalAmount(orderItem.getPrice() * quantity);
+                cart.setProduct(orderItem.getProduct());
+                cart.setOrderItems(orderItems);
+                cart.setUser(user.get());
+                cartRepository.save(cart);
+            }
         }
     }
 
@@ -153,28 +160,28 @@ public class OrderServiceImpl implements OrderService {
         userRepository.findByEmail(email);
         Optional<Order> order = orderRepository.findById(orderId);
 
-                Order orders = order.get();
-                if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.PENDING)) {
-                    orders.setOrderStatus(StringUtil.TO_PAY);
-                    orders.setOrderStatusInfo(StringUtil.PREPARE_ORDER);
-                    orderRepository.save(orders);
-                }
-                else if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_PAY)){
-                    orders.setOrderStatus(StringUtil.TO_SHIP);
-                    orders.setOrderStatusInfo(StringUtil.SHIPPING_ORDER);
-                    orderRepository.save(orders);
-                }
-                else if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_SHIP)){
-                    orders.setOrderStatus(StringUtil.TO_RECEIVE);
-                    orders.setOrderStatusInfo(StringUtil.OUT_FOR_DELIVERY);
-                    orderRepository.save(orders);
-                }
-                else if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_RECEIVE)){
-                    orders.setOrderStatus(StringUtil.ORDER_COMPLETED);
-                    orders.setOrderStatusInfo(StringUtil.ORDER_DELIVERED);
-                    orders.setActive(false);
-                    orderRepository.save(orders);
-                }
+        Order orders = order.get();
+        if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.PENDING)) {
+            orders.setOrderStatus(StringUtil.TO_PAY);
+            orders.setOrderStatusInfo(StringUtil.PREPARE_ORDER);
+            orderRepository.save(orders);
+        }
+        else if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_PAY)){
+            orders.setOrderStatus(StringUtil.TO_SHIP);
+            orders.setOrderStatusInfo(StringUtil.SHIPPING_ORDER);
+            orderRepository.save(orders);
+        }
+        else if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_SHIP)){
+            orders.setOrderStatus(StringUtil.TO_RECEIVE);
+            orders.setOrderStatusInfo(StringUtil.OUT_FOR_DELIVERY);
+            orderRepository.save(orders);
+        }
+        else if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_RECEIVE)){
+            orders.setOrderStatus(StringUtil.ORDER_COMPLETED);
+            orders.setOrderStatusInfo(StringUtil.ORDER_DELIVERED);
+            orders.setActive(false);
+            orderRepository.save(orders);
+        }
     }
 
 
