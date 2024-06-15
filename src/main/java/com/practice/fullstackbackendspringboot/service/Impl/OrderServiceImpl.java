@@ -108,7 +108,7 @@ public class OrderServiceImpl implements OrderService {
             if(order.isPresent()){
                 Order orders = order.get();
                 orders.setOrderStatus(StringUtil.ORDER_CANCELLED);
-                orders.setOrderStatusInfo(StringUtil.ORDER_CANCELLED);
+                orders.setOrderStatusInfo(StringUtil.ORDER_IS_CANCELLED);
                 orders.setActive(false);
                 orderRepository.save(orders);
             }else{
@@ -169,7 +169,12 @@ public class OrderServiceImpl implements OrderService {
                     orders.setOrderStatusInfo(StringUtil.OUT_FOR_DELIVERY);
                     orderRepository.save(orders);
                 }
-
+                else if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_RECEIVE)){
+                    orders.setOrderStatus(StringUtil.ORDER_COMPLETED);
+                    orders.setOrderStatusInfo(StringUtil.ORDER_DELIVERED);
+                    orders.setActive(false);
+                    orderRepository.save(orders);
+                }
     }
 
 
@@ -249,7 +254,6 @@ public class OrderServiceImpl implements OrderService {
                 orderModels.add(orderModel);
             }
         }
-
 
         return new AllOrdersResponse(orderModels);
     }

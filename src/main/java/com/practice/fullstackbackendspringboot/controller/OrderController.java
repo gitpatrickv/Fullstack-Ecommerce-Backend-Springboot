@@ -77,6 +77,14 @@ public class OrderController {
         return orderService.getCustomerOrdersByStatus(user, status, status);
     }
 
+    @GetMapping("/get/completed")
+    @ResponseStatus(HttpStatus.OK)
+    public List<OrderItemModel> getCustomerOrdersByCompletedStatus(@RequestHeader("Authorization") String email){
+        String user =  userService.getUserFromToken(email);
+        String status = StringUtil.ORDER_COMPLETED;
+        return orderService.getCustomerOrdersByStatus(user, status, status);
+    }
+
     @GetMapping("/seller/get/pending/{storeId}")
     @ResponseStatus(HttpStatus.OK)
     public AllOrdersResponse getStoreOrdersByPendingStatus(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
@@ -109,11 +117,19 @@ public class OrderController {
         return orderService.getStoreOrdersByStatus(user, storeId, status1);
     }
 
-    @GetMapping("/seller/get/cancelled/{storeId}") //TODO: not yet implemented in frontend
+    @GetMapping("/seller/get/cancelled/{storeId}")
     @ResponseStatus(HttpStatus.OK)
     public AllOrdersResponse getStoreOrdersByToCancelled(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
         String user =  userService.getUserFromToken(email);
         String status1 = StringUtil.ORDER_CANCELLED;
+        return orderService.getStoreOrdersByStatus(user, storeId, status1);
+    }
+
+    @GetMapping("/seller/get/completed/{storeId}")
+    @ResponseStatus(HttpStatus.OK)
+    public AllOrdersResponse getStoreOrdersByCompletedOrders(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
+        String user =  userService.getUserFromToken(email);
+        String status1 = StringUtil.ORDER_COMPLETED;
         return orderService.getStoreOrdersByStatus(user, storeId, status1);
     }
 }
