@@ -148,6 +148,7 @@ public class OrderController {
     @ResponseStatus(HttpStatus.OK)
     public AllOrdersResponse getAllStoreOrder(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
         String user =  userService.getUserFromToken(email);
-        return orderService.getAllStoreOrders(user, storeId);
+        String status1 = "";
+        return orderService.getStoreOrdersByStatus(user, storeId, status1);
     }
 }
