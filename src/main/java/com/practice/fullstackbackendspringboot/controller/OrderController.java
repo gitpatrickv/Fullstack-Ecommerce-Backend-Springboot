@@ -43,14 +43,26 @@ public class OrderController {
         String user = userService.getUserFromToken(email);
         orderService.processOrder(user,orderId);
     }
-
+    @GetMapping("/get/all")
+    @ResponseStatus(HttpStatus.OK)
+    public List<OrderItemModel> getAllCustomerOrders(@RequestHeader("Authorization") String email ){
+        String user =  userService.getUserFromToken(email);
+        String status1 = "";
+        return orderService.getCustomerOrdersByStatus(user, status1);
+    }
+    @GetMapping("/get/pending")
+    @ResponseStatus(HttpStatus.OK)
+    public List<OrderItemModel> getCustomerOrdersByToPendingStatus(@RequestHeader("Authorization") String email ){
+        String user =  userService.getUserFromToken(email);
+        String status1 = StringUtil.PENDING;
+        return orderService.getCustomerOrdersByStatus(user, status1);
+    }
     @GetMapping("/get/to-pay")
     @ResponseStatus(HttpStatus.OK)
     public List<OrderItemModel> getCustomerOrdersByToPayStatus(@RequestHeader("Authorization") String email ){
         String user =  userService.getUserFromToken(email);
         String status1 = StringUtil.TO_PAY;
-        String status2 = StringUtil.PENDING;
-        return orderService.getCustomerOrdersByStatus(user, status1, status2);
+        return orderService.getCustomerOrdersByStatus(user, status1);
     }
 
     @GetMapping("/get/to-ship")
@@ -58,23 +70,22 @@ public class OrderController {
     public List<OrderItemModel> getCustomerOrdersByToShipStatus(@RequestHeader("Authorization") String email){
         String user =  userService.getUserFromToken(email);
         String status = StringUtil.TO_SHIP;
-        return orderService.getCustomerOrdersByStatus(user, status, status);
+        return orderService.getCustomerOrdersByStatus(user, status);
     }
 
     @GetMapping("/get/to-receive")
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderItemModel> getCustomerOrdersByToReceiveStatus(@RequestHeader("Authorization") String email){
-        String user =  userService.getUserFromToken(email);
+    public List<OrderItemModel> getCustomerOrdersByToReceiveStatus(@RequestHeader("Authorization") String email) {
+        String user = userService.getUserFromToken(email);
         String status = StringUtil.TO_RECEIVE;
-        return orderService.getCustomerOrdersByStatus(user, status, status);
+        return orderService.getCustomerOrdersByStatus(user, status);
     }
-
     @GetMapping("/get/cancelled")
     @ResponseStatus(HttpStatus.OK)
     public List<OrderItemModel> getCustomerOrdersByCancelledStatus(@RequestHeader("Authorization") String email){
         String user =  userService.getUserFromToken(email);
         String status = StringUtil.ORDER_CANCELLED;
-        return orderService.getCustomerOrdersByStatus(user, status, status);
+        return orderService.getCustomerOrdersByStatus(user, status);
     }
 
     @GetMapping("/get/completed")
@@ -82,7 +93,7 @@ public class OrderController {
     public List<OrderItemModel> getCustomerOrdersByCompletedStatus(@RequestHeader("Authorization") String email){
         String user =  userService.getUserFromToken(email);
         String status = StringUtil.ORDER_COMPLETED;
-        return orderService.getCustomerOrdersByStatus(user, status, status);
+        return orderService.getCustomerOrdersByStatus(user, status);
     }
 
     @GetMapping("/seller/get/pending/{storeId}")
@@ -131,5 +142,12 @@ public class OrderController {
         String user =  userService.getUserFromToken(email);
         String status1 = StringUtil.ORDER_COMPLETED;
         return orderService.getStoreOrdersByStatus(user, storeId, status1);
+    }
+
+    @GetMapping("/seller/get/all/{storeId}")
+    @ResponseStatus(HttpStatus.OK)
+    public AllOrdersResponse getAllStoreOrder(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
+        String user =  userService.getUserFromToken(email);
+        return orderService.getAllStoreOrders(user, storeId);
     }
 }
