@@ -17,12 +17,18 @@ public class StringUtil {
     public static final String ADMIN_ALREADY_EXISTS = "ADMIN USER ALREADY EXISTS!";
     public static final String PENDING = "PENDING";
     public static final String ORDER_CANCELLED = "CANCELLED";
+    public static final String ORDER_IS_CANCELLED = "Your order has been cancelled";
     public static final String ORDER_COMPLETED = "COMPLETED";
-    public static final String ORDER_DELIVERED = "DELIVERED";
+    public static final String ORDER_DELIVERED = "Your order has been delivered";
     public static final String ORDER_CANCELLED_OR_NOT_ACTIVE = "ORDER IS CANCELLED OR NOT ACTIVE";
     public static final String TO_PAY = "TO PAY";
     public static final String TO_SHIP = "TO SHIP";
+    public static final String TO_RECEIVE = "TO RECEIVE";
     public static final String ORDER_NOT_FOUND = "ORDER NOT FOUND";
+    public static final String PREPARE_ORDER = "Seller is preparing your order(s)";
+    public static final String ORDER_CONFIRMATION = "Order Confirmation";
+    public static final String SHIPPING_ORDER = "Seller is preparing to ship your order(s)";
+    public static final String OUT_FOR_DELIVERY ="Parcel is out for delivery";
     public static final String PRODUCT_NOT_FOUND = "PRODUCT NOT FOUND: ";
     public static final String PRODUCT_ALREADY_EXISTS = "PRODUCT ALREADY EXISTS!";
 }

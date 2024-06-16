@@ -2,6 +2,8 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 
 import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
+import com.practice.fullstackbackendspringboot.model.OrderModel;
+import com.practice.fullstackbackendspringboot.model.response.AllOrdersResponse;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.OrderService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
@@ -52,7 +54,8 @@ public class OrderServiceImpl implements OrderService {
             order.setFullName(user.get().getName());
             order.setContactNumber(user.get().getContactNumber());
             order.setActive(true);
-            order.setOrderStatus(StringUtil.TO_PAY);
+            order.setOrderStatus(StringUtil.PENDING);
+            order.setOrderStatusInfo(StringUtil.ORDER_CONFIRMATION);
             order.setPaymentMethod(StringUtil.CASH_ON_DELIVERY);
             order = orderRepository.save(order);
             Double storeTotalAmount = 0.0;
@@ -105,6 +108,7 @@ public class OrderServiceImpl implements OrderService {
             if(order.isPresent()){
                 Order orders = order.get();
                 orders.setOrderStatus(StringUtil.ORDER_CANCELLED);
+                orders.setOrderStatusInfo(StringUtil.ORDER_IS_CANCELLED);
                 orders.setActive(false);
                 orderRepository.save(orders);
             }else{
@@ -129,103 +133,125 @@ public class OrderServiceImpl implements OrderService {
         Long quantity = 1L;
 
         for(OrderItem orderItem : orderItems){
-            Product product = productRepository.findById(orderItem.getProduct().getProductId()).get();
-            Cart cart = new Cart();
-            cart.setPhotoUrl(orderItem.getPhotoUrl());
-            cart.setPrice(orderItem.getPrice());
-            cart.setProductName(orderItem.getProductName());
-            cart.setQuantity(quantity);
-            cart.setStoreName(orderItem.getStoreName());
-            cart.setTotalAmount(orderItem.getPrice() * quantity);
-            cart.setProduct(product);
-            cart.setOrderItems(orderItems);
-            cart.setUser(user.get());
-            cartRepository.save(cart);
+            Optional<Cart> existingCart = cartRepository.findByProduct_ProductIdAndUserEmail(orderItem.getProduct().getProductId(), email);
+            Cart cart;
+
+            if(existingCart.isPresent()){
+                cart = existingCart.get();
+                cartRepository.save(cart);
+            } else {
+                cart = new Cart();
+                cart.setPhotoUrl(orderItem.getPhotoUrl());
+                cart.setPrice(orderItem.getPrice());
+                cart.setProductName(orderItem.getProductName());
+                cart.setQuantity(quantity);
+                cart.setStoreName(orderItem.getStoreName());
+                cart.setTotalAmount(orderItem.getPrice() * quantity);
+                cart.setProduct(orderItem.getProduct());
+                cart.setOrderItems(orderItems);
+                cart.setUser(user.get());
+                cartRepository.save(cart);
+            }
         }
     }
 
     @Override
-    public void shipOrder(String email, String orderId) { //TODO: implement it on sellers page, set up role base auth
-        Optional<User> user = userRepository.findByEmail(email);
+    public void processOrder(String email, String orderId) {
+        userRepository.findByEmail(email);
         Optional<Order> order = orderRepository.findById(orderId);
 
-        if(user.isPresent()){
-            if(order.isPresent()){
-                Order orders = order.get();
-                if(orders.isActive()) {
-                    orders.setOrderStatus(StringUtil.TO_SHIP);
-                    orderRepository.save(orders);
-                }else{
-                    throw new IllegalArgumentException(StringUtil.ORDER_CANCELLED_OR_NOT_ACTIVE);
+        Order orders = order.get();
+        if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.PENDING)) {
+            orders.setOrderStatus(StringUtil.TO_PAY);
+            orders.setOrderStatusInfo(StringUtil.PREPARE_ORDER);
+            orderRepository.save(orders);
+        }
+        else if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_PAY)){
+            orders.setOrderStatus(StringUtil.TO_SHIP);
+            orders.setOrderStatusInfo(StringUtil.SHIPPING_ORDER);
+            orderRepository.save(orders);
+        }
+        else if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_SHIP)){
+            orders.setOrderStatus(StringUtil.TO_RECEIVE);
+            orders.setOrderStatusInfo(StringUtil.OUT_FOR_DELIVERY);
+            orderRepository.save(orders);
+        }
+        else if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_RECEIVE)){
+            orders.setOrderStatus(StringUtil.ORDER_COMPLETED);
+            orders.setOrderStatusInfo(StringUtil.ORDER_DELIVERED);
+            orders.setActive(false);
+            orderRepository.save(orders);
+        }
+    }
+
+
+    @Override
+    public List<OrderItemModel> getCustomerOrdersByStatus(String email, String status1) {
+        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email);
+
+        List<OrderItemModel> orderModels = new ArrayList<>();
+
+        for(OrderItem orderItem : orderItems){
+            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
+
+            if(order.isActive() && order.getOrderStatus().equals(status1)
+                    || !order.isActive() && order.getOrderStatus().equals(status1)
+                    || status1.isEmpty()) {
+                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
+                orderItemModel.setOrderStatus(order.getOrderStatus());
+                orderItemModel.setOrderStatusInfo(order.getOrderStatusInfo());
+                orderItemModel.setActive(order.isActive());
+                orderItemModel.setStoreId(order.getStore().getStoreId());
+                orderModels.add(orderItemModel);
+            }
+        }
+        return orderModels;
+    }
+
+    @Override
+    public AllOrdersResponse getStoreOrdersByStatus(String email, String storeId, String status1) {
+        userRepository.findByEmail(email);
+        List<Order> orders = orderRepository.findAllByStore_StoreId(storeId);
+        List<OrderModel> orderModels = new ArrayList<>();
+
+        Map<String, List<Order>> listOfOrders = orders.stream().collect(Collectors.groupingBy(Order::getOrderId));
+
+        for(Map.Entry<String, List<Order>> orderMap : listOfOrders.entrySet()) {
+            List<Order> orderList = orderMap.getValue();
+
+            for(Order order: orderList) {
+                if (order.isActive() && order.getOrderStatus().equals(status1)
+                        || !order.isActive() && order.getOrderStatus().equals(status1)
+                        || status1.isEmpty()) {
+                    OrderModel orderModel = new OrderModel();
+                    orderModel.setOrderId(order.getOrderId());
+                    orderModel.setOrderTotalAmount(order.getOrderTotalAmount());
+                    orderModel.setPaymentMethod(order.getPaymentMethod());
+                    orderModel.setActive(order.isActive());
+                    orderModel.setOrderStatus(order.getOrderStatus());
+                    orderModel.setOrderStatusInfo(order.getOrderStatusInfo());
+                    orderModel.setDeliveryAddress(order.getDeliveryAddress());
+                    orderModel.setFullName(order.getFullName());
+                    orderModel.setContactNumber(order.getContactNumber());
+
+                    List<OrderItemModel> orderItemModels = new ArrayList<>();
+                    List<OrderItem> orderItems = order.getOrderItems();
+
+                    for (OrderItem orderItem : orderItems) {
+                        OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+                        orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
+                        orderItemModel.setOrderStatus(order.getOrderStatus());
+                        orderItemModel.setActive(order.isActive());
+                        orderItemModel.setStoreId(order.getStore().getStoreId());
+                        orderItemModel.setFullName(order.getFullName());
+                        orderItemModels.add(orderItemModel);
+                    }
+                    orderModel.setOrderItemModels(orderItemModels);
+                    orderModels.add(orderModel);
                 }
-            }else{
-                throw new IllegalArgumentException(StringUtil.ORDER_NOT_FOUND);
-            }
-        }else{
-            throw new IllegalArgumentException(StringUtil.USER_NOT_FOUND);
-        }
-    }
-
-    @Override
-    public List<OrderItemModel> getOrdersByToPayStatus(String email) {
-        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email);
-
-        List<OrderItemModel> orderModels = new ArrayList<>();
-
-        for(OrderItem orderItem : orderItems){
-            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
-
-            if(order.getOrderStatus().equals(StringUtil.TO_PAY) && order.isActive()) {
-                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
-                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
-                orderItemModel.setOrderStatus(order.getOrderStatus());
-                orderItemModel.setActive(order.isActive());
-                orderItemModel.setStoreId(order.getStore().getStoreId());
-                orderModels.add(orderItemModel);
             }
         }
-        return orderModels;
-    }
-
-    @Override
-    public List<OrderItemModel> getOrdersByCancelledStatus(String email) {
-        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email);
-
-        List<OrderItemModel> orderModels = new ArrayList<>();
-
-        for(OrderItem orderItem : orderItems){
-            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
-
-            if(order.getOrderStatus().equals(StringUtil.ORDER_CANCELLED) && !order.isActive()) {
-                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
-                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
-                orderItemModel.setOrderStatus(order.getOrderStatus());
-                orderItemModel.setActive(order.isActive());
-                orderItemModel.setStoreId(order.getStore().getStoreId());
-                orderModels.add(orderItemModel);
-            }
-        }
-        return orderModels;
-    }
-
-    @Override
-    public List<OrderItemModel> getOrdersByToShipStatus(String email) {
-        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email);
-
-        List<OrderItemModel> orderModels = new ArrayList<>();
-
-        for(OrderItem orderItem : orderItems){
-            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
-
-            if(order.getOrderStatus().equals(StringUtil.TO_SHIP) && order.isActive()) {
-                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
-                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
-                orderItemModel.setOrderStatus(order.getOrderStatus());
-                orderItemModel.setActive(order.isActive());
-                orderItemModel.setStoreId(order.getStore().getStoreId());
-                orderModels.add(orderItemModel);
-            }
-        }
-        return orderModels;
+        return new AllOrdersResponse(orderModels);
     }
 }

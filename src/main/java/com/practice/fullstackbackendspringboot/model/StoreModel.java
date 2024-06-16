@@ -1,6 +1,5 @@
 package com.practice.fullstackbackendspringboot.model;
 
-import com.practice.fullstackbackendspringboot.validation.ConfirmPasswordValid;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -12,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class StoreModel {
     @Valid
-
+    private String storeId;
     @NotBlank(message = "{store.name.required}")
     private String storeName;
     @NotBlank
@@ -22,4 +21,6 @@ public class StoreModel {
     @NotBlank(message = "{phone.number.required}")
     private String contactNumber;
     private Double shippingFee;
+    private String email;
+    private String photoUrl;
 }

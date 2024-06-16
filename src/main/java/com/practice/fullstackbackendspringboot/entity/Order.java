@@ -18,6 +18,7 @@ public class Order extends AuditEntity{
     @GeneratedValue(strategy = GenerationType.UUID)
     private String orderId;
     private String orderStatus;
+    private String orderStatusInfo;
     private Double orderTotalAmount;
     private String paymentMethod;
     private boolean active;

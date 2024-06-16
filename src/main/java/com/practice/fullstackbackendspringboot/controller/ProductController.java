@@ -41,6 +41,14 @@ public class ProductController {
         return productService.getAllStoreProducts(storeId,pageNo,pageSize);
     }
 
+    @GetMapping("/store")
+    public AllProductsPageResponse getAllSellersProducts(@RequestHeader("Authorization") String email,
+                                                       @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                                       @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize){
+        String user = userService.getUserFromToken(email);
+        return productService.getAllSellersProducts(user,pageNo,pageSize);
+    }
+
     @GetMapping("/{productId}")
     @ResponseStatus(HttpStatus.OK)
     public ProductModel getProductById(@PathVariable (value="productId") String productId){

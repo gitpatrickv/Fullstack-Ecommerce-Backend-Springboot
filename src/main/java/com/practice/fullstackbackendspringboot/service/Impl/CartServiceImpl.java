@@ -146,7 +146,6 @@ public class CartServiceImpl implements CartService {
         long filteredItem = 0;
         Double totalShippingFee = 0.0;
 
-
         for(Cart cart : carts){
             Double cartTotalAmount = cart.getTotalAmount();
             total += cartTotalAmount;
@@ -156,7 +155,7 @@ public class CartServiceImpl implements CartService {
         }
 
         for(Cart cart : cartCount){
-            long itemCount = cart.getQuantity();
+            long itemCount = 1L;
             count += itemCount;
         }
 
@@ -169,7 +168,6 @@ public class CartServiceImpl implements CartService {
             Optional<Store> store = storeRepository.findByStoreName(storeName);
             Double shipFee = store.get().getShippingFee();
             totalShippingFee+=shipFee;
-
         }
 
         if(existingCartTotal.isPresent()){
@@ -182,7 +180,6 @@ public class CartServiceImpl implements CartService {
         cartTotal.setTotalPayment(total + totalShippingFee);
         cartTotalRepository.save(cartTotal);
         return cartTotalMapper.mapEntityToModel(cartTotal);
-
         }
 
         CartTotal cartTotal = new CartTotal();
