@@ -80,7 +80,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public List<CartModel> getAllProductsInCart(String email) {
-        return cartRepository.findAllByUserEmail(email)
+        return cartRepository.findAllByUserEmailOrderByCreatedDateDesc(email)
                 .stream()
                 .map(cartMapper::mapCartEntityToCartModel)
                 .toList();

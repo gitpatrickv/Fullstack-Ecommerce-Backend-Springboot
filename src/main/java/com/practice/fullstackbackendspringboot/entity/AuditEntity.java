@@ -22,7 +22,7 @@ public class AuditEntity {
             nullable = false,
             updatable=false
     )
-    private LocalDateTime createDate;
+    private LocalDateTime createdDate;
 
     @LastModifiedDate
     @Column(insertable = false)

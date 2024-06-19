@@ -11,6 +11,7 @@ import com.practice.fullstackbackendspringboot.utils.mapper.OrderItemMapper;
 import com.practice.fullstackbackendspringboot.utils.mapper.OrderMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -187,7 +188,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderItemModel> getCustomerOrdersByStatus(String email, String status1) {
-        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email);
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdDate");
+        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email, sort);
 
         List<OrderItemModel> orderModels = new ArrayList<>();
 

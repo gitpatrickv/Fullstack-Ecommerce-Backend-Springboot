@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -83,7 +84,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public AllProductsPageResponse getAllProducts(int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Product> products = productRepository.findAll(pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
@@ -107,7 +108,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public AllProductsPageResponse getAllStoreProducts(String storeId, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Product> products = productRepository.findAllByStore_StoreId(storeId, pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
@@ -152,7 +153,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public AllProductsPageResponse getAllSellersProducts(String email, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Optional<User> user = userRepository.findByEmail(email);
         Page<Product> products = productRepository.findAllByUserEmail(user.get().getEmail(), pageable);
         List<AllProductModel> productModels = new ArrayList<>();

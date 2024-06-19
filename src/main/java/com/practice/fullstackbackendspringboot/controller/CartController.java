@@ -82,7 +82,7 @@ public class CartController {
     @ResponseStatus(HttpStatus.OK)
     public void delete(@PathVariable String cartId, @RequestHeader("Authorization") String email) {
         String user = userService.getUserFromToken(email);
-        cartService.delete(cartId,email);
+        cartService.delete(cartId,user);
     }
     @DeleteMapping("/delete")
     public void deleteAllCarts(@RequestHeader("Authorization") String email) {
