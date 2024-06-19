@@ -7,7 +7,7 @@ public class StringUtil {
     public static final String ACCOUNT_EXISTS = "ACCOUNT ALREADY EXISTS!";
     public static final String DELETED = "PRODUCT DELETED!";
     public static final String INVALID_CREDENTIALS = "INVALID CREDENTIALS!";
-    public static final String USER_NOT_FOUND = "USER NOT FOUND!";
+    public static final String USER_NOT_FOUND = "USER NOT FOUND: ";
     public static final String LOGIN_SUCCESSFUL = "LOGIN SUCCESSFUL!";
     public static final String OUT_OF_STOCK = "PRODUCT IS OUT OF STOCK!";
     public static final String WRONG_PASSWORD = "WRONG PASSWORD!";
@@ -31,4 +31,6 @@ public class StringUtil {
     public static final String OUT_FOR_DELIVERY ="Parcel is out for delivery";
     public static final String PRODUCT_NOT_FOUND = "PRODUCT NOT FOUND: ";
     public static final String PRODUCT_ALREADY_EXISTS = "PRODUCT ALREADY EXISTS!";
+    public static final String CATEGORY_NOT_FOUND = "CATEGORY NOT FOUND";
+    public static final String STORE_NOT_FOUND = "STORE NOT FOUND: ";
 }

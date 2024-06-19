@@ -35,6 +35,7 @@ public class ProductController {
         return productService.getAllProducts(pageNo,pageSize);
     }
     @GetMapping("/store/{storeId}")
+    @ResponseStatus(HttpStatus.OK)
     public AllProductsPageResponse getAllStoreProducts(@PathVariable (value="storeId") String storeId,
                                                        @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
                                                        @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize){
@@ -42,11 +43,19 @@ public class ProductController {
     }
 
     @GetMapping("/store")
+    @ResponseStatus(HttpStatus.OK)
     public AllProductsPageResponse getAllSellersProducts(@RequestHeader("Authorization") String email,
                                                        @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
                                                        @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize){
         String user = userService.getUserFromToken(email);
         return productService.getAllSellersProducts(user,pageNo,pageSize);
+    }
+    @GetMapping("/category/{categoryId}")
+    @ResponseStatus(HttpStatus.OK)
+    public AllProductsPageResponse getAllProductsByCategory(@PathVariable(value="categoryId") Long categoryId,
+                                                            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                                            @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize){
+        return productService.getAllProductsByCategory(categoryId,pageNo,pageSize);
     }
 
     @GetMapping("/{productId}")
