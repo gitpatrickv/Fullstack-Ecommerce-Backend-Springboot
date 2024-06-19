@@ -41,6 +41,7 @@ public class ProductServiceImpl implements ProductService {
     private final ImageService imageService;
     private final InventoryService inventoryService;
     private final StoreRepository storeRepository;
+    private final CategoryRepository categoryRepository;
 
     @Transactional(rollbackOn = Exception.class)
     @Override
@@ -48,12 +49,14 @@ public class ProductServiceImpl implements ProductService {
         boolean isNew = productRepository.existsById(model.getProductId());
         Product product;
 
-        User user = userRepository.findByEmail(email).get();
-        Store store = storeRepository.findByUserEmail(email).get();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Store store = storeRepository.findByUserEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.STORE_NOT_FOUND + email));
+        Category category = categoryRepository.findById(model.getCategoryId()).orElseThrow(() -> new NoSuchElementException(StringUtil.CATEGORY_NOT_FOUND));
         if(!isNew) {
             product = mapper.mapProductModelToProductEntity(model);
             product.setUser(user);
             product.setStore(store);
+            product.setCategory(category);
         } else {
             product = productRepository.findById(model.getProductId()).get();
 
@@ -74,10 +77,10 @@ public class ProductServiceImpl implements ProductService {
                     .price(model.getPrice())
                     .quantity(model.getQuantity())
                     .build();
-            inventoryRepository.save(inventory);  //@TODO: implement item variation
+            inventoryRepository.save(inventory);
         }
 
-        imageService.uploadProductPhoto(savedProduct.getProductId(),file);      //@TODO: Refactor to upload multiple images at the same time
+        imageService.uploadProductPhoto(savedProduct.getProductId(),file);
 
         return mapper.mapProductEntityToProductModel(savedProduct);
     }
@@ -103,6 +106,29 @@ public class ProductServiceImpl implements ProductService {
             productModels.add(allProductModel);
         }
 
+        return new AllProductsPageResponse(productModels, pageResponse);
+    }
+
+    @Override
+    public AllProductsPageResponse getAllProductsByCategory(Long categoryId, int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Page<Product> products = productRepository.findAllByCategory_CategoryId(categoryId,pageable);
+        List<AllProductModel> productModels = new ArrayList<>();
+
+        PageResponse pageResponse = new PageResponse();
+        pageResponse.setPageNo(products.getNumber());
+        pageResponse.setPageSize(products.getSize());
+        pageResponse.setTotalElements(products.getTotalElements());
+        pageResponse.setTotalPages(products.getTotalPages());
+        pageResponse.setLast(products.isLast());
+
+        for (Product product : products) {
+            AllProductModel allProductModel = allProductMapper.mapProductEntityToProductModel(product);
+            allProductModel.setStoreId(product.getStore().getStoreId());
+            getPhotoUrl(product, allProductModel);
+            getPriceAndQuantity(product, allProductModel);
+            productModels.add(allProductModel);
+        }
         return new AllProductsPageResponse(productModels, pageResponse);
     }
 

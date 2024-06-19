@@ -34,24 +34,18 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public void uploadProductPhoto(String id, MultipartFile file) {
-        log.info("Saving picture for product ID: {}", id);
-
         Optional<Product> product = productRepository.findById(id);
-
         Image image = new Image();
         image.setProduct(product.get());
         image.setPhotoUrl(processProductImage(id, file));
         imageRepository.save(image);
-        log.info(image.getPhotoUrl());
     }
 
     @Override
     public void uploadUserPhoto(String email, MultipartFile file) {
-        log.info("Saving picture for user: {}", email);
         User user = userRepository.findByEmail(email).get();
         user.setPhotoUrl(processUserImage(email,file));
         userRepository.save(user);
-        log.info(user.getPhotoUrl());
     }
 
 
