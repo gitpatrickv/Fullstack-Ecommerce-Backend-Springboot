@@ -18,7 +18,6 @@ public class Inventory {
     private Long inventoryId;
     private Long quantity;
     private Double price;
-    private String skuCode;
 
     @ManyToOne
     @JoinColumn(name = "product_id")

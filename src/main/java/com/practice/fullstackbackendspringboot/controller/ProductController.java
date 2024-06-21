@@ -28,6 +28,14 @@ public class ProductController {
         return productService.saveProduct(model,user,file);
     }
 
+    @PostMapping("/update")
+    @ResponseStatus(HttpStatus.OK)
+    public ProductModel updateProduct( @RequestPart("product") @Valid ProductModel model,
+                                     @RequestHeader("Authorization") String email){
+        String user = userService.getUserFromToken(email);
+        return productService.updateProduct(model,user);
+    }
+
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public AllProductsPageResponse getAllProducts(@RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
@@ -50,7 +58,7 @@ public class ProductController {
         String user = userService.getUserFromToken(email);
         return productService.getAllSellersProducts(user,pageNo,pageSize);
     }
-    @GetMapping("/category/{categoryId}")
+    @GetMapping("/category/{categoryId}") //TODO: not yet implemented in the frontend
     @ResponseStatus(HttpStatus.OK)
     public AllProductsPageResponse getAllProductsByCategory(@PathVariable(value="categoryId") Long categoryId,
                                                             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,

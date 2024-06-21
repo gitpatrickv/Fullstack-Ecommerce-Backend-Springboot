@@ -46,43 +46,53 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(rollbackOn = Exception.class)
     @Override
     public ProductModel saveProduct(ProductModel model, String email, MultipartFile file) {
-        boolean isNew = productRepository.existsById(model.getProductId());
-        Product product;
 
         User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Store store = storeRepository.findByUserEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.STORE_NOT_FOUND + email));
         Category category = categoryRepository.findById(model.getCategoryId()).orElseThrow(() -> new NoSuchElementException(StringUtil.CATEGORY_NOT_FOUND));
-        if(!isNew) {
-            product = mapper.mapProductModelToProductEntity(model);
-            product.setUser(user);
-            product.setStore(store);
-            product.setCategory(category);
-        } else {
-            product = productRepository.findById(model.getProductId()).get();
 
-            if (model.getProductName() != null) {
-                product.setProductName(model.getProductName());
-            }
-            if(model.getProductDescription() != null){
-                product.setProductDescription(model.getProductDescription());
-            }
-        }
+        Product product = mapper.mapProductModelToProductEntity(model);
+        product.setUser(user);
+        product.setStore(store);
+        product.setCategory(category);
 
         Product savedProduct = productRepository.save(product);
 
-        boolean isExists = inventoryRepository.existsByProduct_ProductId(savedProduct.getProductId());
-        if (!isExists) {
-            Inventory inventory = Inventory.builder()
-                    .product(savedProduct)
-                    .price(model.getPrice())
-                    .quantity(model.getQuantity())
-                    .build();
-            inventoryRepository.save(inventory);
-        }
+        Inventory inventory = new Inventory();
+        inventory.setProduct(savedProduct);
+        inventory.setPrice(model.getPrice());
+        inventory.setQuantity(model.getQuantity());
+        inventoryRepository.save(inventory);
 
         imageService.uploadProductPhoto(savedProduct.getProductId(),file);
 
         return mapper.mapProductEntityToProductModel(savedProduct);
+    }
+
+    @Override
+    public ProductModel updateProduct(ProductModel model, String email) {
+        Product product = productRepository.findById(model.getProductId())
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
+        Inventory inventory = inventoryRepository.findByProduct_ProductId(model.getProductId())
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
+
+        if (model.getProductName() != null) {
+            product.setProductName(model.getProductName());
+        }
+        if(model.getProductDescription() != null){
+            product.setProductDescription(model.getProductDescription());
+        }
+        if(model.getPrice() != null){
+            inventory.setPrice(model.getPrice());
+        }
+        if(model.getQuantity() != null){
+            inventory.setQuantity(model.getQuantity());
+        }
+
+        productRepository.save(product);
+        inventoryRepository.save(inventory);
+
+        return mapper.mapProductEntityToProductModel(product);
     }
 
     @Override
