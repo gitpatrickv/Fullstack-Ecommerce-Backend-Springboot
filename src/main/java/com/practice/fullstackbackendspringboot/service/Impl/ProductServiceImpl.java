@@ -2,6 +2,7 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 
 import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.AllProductModel;
+import com.practice.fullstackbackendspringboot.model.InventoryModel;
 import com.practice.fullstackbackendspringboot.model.ProductModel;
 import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
 import com.practice.fullstackbackendspringboot.model.response.PageResponse;
@@ -11,6 +12,7 @@ import com.practice.fullstackbackendspringboot.service.InventoryService;
 import com.practice.fullstackbackendspringboot.service.ProductService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.AllProductMapper;
+import com.practice.fullstackbackendspringboot.utils.mapper.InventoryMapper;
 import com.practice.fullstackbackendspringboot.utils.mapper.ProductMapper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -42,6 +44,7 @@ public class ProductServiceImpl implements ProductService {
     private final InventoryService inventoryService;
     private final StoreRepository storeRepository;
     private final CategoryRepository categoryRepository;
+    private final InventoryMapper inventoryMapper;
 
     @Transactional(rollbackOn = Exception.class)
     @Override
@@ -56,17 +59,49 @@ public class ProductServiceImpl implements ProductService {
         product.setStore(store);
         product.setCategory(category);
 
-        Product savedProduct = productRepository.save(product);
+            List<Inventory> inventories = new ArrayList<>();
+            for(InventoryModel inv: model.getInventoryModels()) {
+                Inventory inventory = new Inventory();
+                inventory.setProduct(product);
+                inventory.setPrice(inv.getPrice());
+                inventory.setColors(inv.getColors());
+                inventory.setSizes(inv.getSizes());
+                inventory.setQuantity(inv.getQuantity());
+                inventories.add(inventory);
 
-        Inventory inventory = new Inventory();
-        inventory.setProduct(savedProduct);
-        inventory.setPrice(model.getPrice());
-        inventory.setQuantity(model.getQuantity());
-        inventoryRepository.save(inventory);
+            }
+            product.setInventory(inventories);
+            Product savedProduct = productRepository.save(product);
 
         imageService.uploadProductPhoto(savedProduct.getProductId(),file);
 
         return mapper.mapProductEntityToProductModel(savedProduct);
+    }
+
+    @Override
+    public ProductModel getProductById(String productId) {
+        Optional<Product> product = productRepository.findById(productId);
+        Product products = product.orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId));
+        List<Image> images = imageRepository.findAllPhotoUrlByProduct_ProductId(productId);
+        List<Inventory> inventories = inventoryRepository.findAllByProduct_ProductId(productId);
+
+        List<InventoryModel> inventoryModels = new ArrayList<>();
+        List<String> photoUrls = new ArrayList<>();
+
+        ProductModel productModel = mapper.mapProductEntityToProductModel(products);
+
+        for(Inventory inventory : inventories){
+            InventoryModel inventoryModel = inventoryMapper.mapInventoryEntityToInventoryModel(inventory);
+            inventoryModels.add(inventoryModel);
+        }
+
+        for(Image image : images){
+            photoUrls.add(image.getPhotoUrl());
+        }
+        productModel.setInventoryModels(inventoryModels);
+        productModel.setProductImage(photoUrls);
+        productModel.setStoreId(products.getStore().getStoreId());
+        return productModel;
     }
 
     @Override
@@ -209,26 +244,6 @@ public class ProductServiceImpl implements ProductService {
             productModels.add(allProductModel);
         }
         return new AllProductsPageResponse(productModels, pageResponse);
-    }
-
-    @Override
-    public ProductModel getProductById(String productId) {
-        Optional<Product> product = productRepository.findById(productId);
-        Product products = product.orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId));
-        Inventory inventory = inventoryRepository.findByProduct_ProductId(productId).get();
-        List<Image> images = imageRepository.findAllPhotoUrlByProduct_ProductId(productId);
-        List<String> photoUrls = new ArrayList<>();
-
-        ProductModel productModel = mapper.mapProductEntityToProductModel(products);
-
-        for(Image image : images){
-            photoUrls.add(image.getPhotoUrl());
-        }
-        productModel.setProductImage(photoUrls);
-        productModel.setPrice(inventory.getPrice());
-        productModel.setQuantity(inventory.getQuantity());
-        productModel.setStoreId(products.getStore().getStoreId());
-        return productModel;
     }
 
     @Override

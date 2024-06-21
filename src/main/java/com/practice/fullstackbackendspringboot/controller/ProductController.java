@@ -21,7 +21,7 @@ public class ProductController {
 
     @PostMapping(value = {"/save"},  consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @ResponseStatus(HttpStatus.OK)
-    public ProductModel saveProduct( @RequestPart("product") @Valid ProductModel model,
+    public ProductModel saveProduct( @RequestPart("product") ProductModel model,
                                      @RequestPart("file") MultipartFile file,
                                      @RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);

@@ -18,6 +18,8 @@ public class Inventory {
     private Long inventoryId;
     private Long quantity;
     private Double price;
+    private String colors;
+    private String sizes;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
