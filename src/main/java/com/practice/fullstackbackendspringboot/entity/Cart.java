@@ -25,6 +25,9 @@ public class Cart extends AuditEntity{
     private String productName;
     private boolean filter;
     private String photoUrl;
+    private String colors;
+    private String sizes;
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -38,5 +41,8 @@ public class Cart extends AuditEntity{
     private CartTotal cartTotal;
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "inventory_id")
+    private Inventory inventory;
 
 }

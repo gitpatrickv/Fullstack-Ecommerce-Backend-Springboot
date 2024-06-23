@@ -11,6 +11,8 @@ import java.util.Optional;
 public interface CartRepository extends JpaRepository<Cart, String> {
 
     Optional<Cart> findByProduct_ProductIdAndUserEmail(String productId, String email);
+    Optional<Cart> findByProduct_ProductIdAndInventory_InventoryIdAndUserEmail(String productId, Long inventoryId, String email);
+    Optional<Cart> findByColorsAndSizesAndProduct_ProductIdAndUserEmail(String colors, String sizes, String productId, String email);
     List<Cart> findAllByFilterAndUserEmail(boolean filter,String email);
     Optional<Cart> findByCartIdAndUserEmail(String cartId, String email);
     List<Cart> findAllByUserEmail(String email);
@@ -18,5 +20,6 @@ public interface CartRepository extends JpaRepository<Cart, String> {
     Optional<Cart> deleteByCartIdAndUserEmail(String cartId, String email);
     List<Cart> deleteAllByFilterTrueAndUserEmail(String email);
     List<Cart> findAllByFilterTrueAndUserEmail(String email);
+    List<Cart> findAllByFilterTrueAndUserEmailOrderByCreatedDateDesc(String email);
     List<Cart> findAllByUserEmailOrderByCreatedDateDesc(String email);
 }

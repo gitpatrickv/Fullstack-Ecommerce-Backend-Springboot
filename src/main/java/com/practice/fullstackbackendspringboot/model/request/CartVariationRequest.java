@@ -9,12 +9,17 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class QuantityRequest {
+public class CartVariationRequest {
 
     @Valid
 
     @NotNull(message = "{inventory.id.must.not.be.null}")
-    private Long inventoryId;
-    @NotNull(message = "{cart.id.must.not.be.null}")
-    private String cartId;
+    private String productId;
+    @NotNull(message = "{quantity.not.null}")
+    private Long quantity;
+    @NotNull
+    private String colors;
+    @NotNull
+    private String sizes;
+
 }

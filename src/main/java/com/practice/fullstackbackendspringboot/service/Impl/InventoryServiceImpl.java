@@ -18,7 +18,7 @@ public class InventoryServiceImpl implements InventoryService {
     private final InventoryMapper mapper;
 
     @Override
-    public InventoryModel getInventoryByProductId(String productId) {
+    public InventoryModel getInventoryByProductId(String productId) { //TODO: error here
 
         Inventory inventory = inventoryRepository.findByProduct_ProductId(productId).get();
 

@@ -4,6 +4,7 @@ import com.practice.fullstackbackendspringboot.entity.Cart;
 import com.practice.fullstackbackendspringboot.model.CartModel;
 import com.practice.fullstackbackendspringboot.model.CartTotalModel;
 import com.practice.fullstackbackendspringboot.model.request.CartRequest;
+import com.practice.fullstackbackendspringboot.model.request.CartVariationRequest;
 import com.practice.fullstackbackendspringboot.model.request.QuantityRequest;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 public interface CartService {
 
     CartModel addProductToCart(CartRequest cartRequest, String email);
+    CartModel addProductWithVariationToCart(CartVariationRequest cartRequest, String email);
     List<CartModel> getAllProductsInCart(String email);
     CartTotalModel getCartTotal(String email, boolean filter);
     void filterCartProducts(String cartId, String email);

@@ -3,6 +3,9 @@ package com.practice.fullstackbackendspringboot.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Builder
 @Getter
 @Setter
@@ -25,5 +28,10 @@ public class Inventory {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @OneToMany(mappedBy = "inventory")
+    private List<Cart> cart;
+
+    @OneToMany(mappedBy = "inventory", cascade = CascadeType.ALL)
+    private List<OrderItem> orderItems = new ArrayList<>();
 
 }

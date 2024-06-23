@@ -4,6 +4,7 @@ import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.CartModel;
 import com.practice.fullstackbackendspringboot.model.CartTotalModel;
 import com.practice.fullstackbackendspringboot.model.request.CartRequest;
+import com.practice.fullstackbackendspringboot.model.request.CartVariationRequest;
 import com.practice.fullstackbackendspringboot.model.request.QuantityRequest;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.CartService;
@@ -55,13 +56,13 @@ public class CartServiceImpl implements CartService {
                 cart.setTotalAmount(cart.getQuantity() * inventory.get().getPrice());
                 cartRepository.save(cart);
             }else{
-                log.info(StringUtil.OUT_OF_STOCK);
+                throw new IllegalArgumentException(StringUtil.OUT_OF_STOCK);
             }
         }else{
             cart = new Cart();
 
             if(cartRequest.getQuantity() > inventory.get().getQuantity()){
-                log.info(StringUtil.OUT_OF_STOCK);
+                throw new IllegalArgumentException(StringUtil.OUT_OF_STOCK);
             }else{
                 cart.setProduct(product.get());
                 cart.setQuantity(cartRequest.getQuantity());
@@ -71,6 +72,51 @@ public class CartServiceImpl implements CartService {
                 cart.setPhotoUrl(productImage.get().getPhotoUrl());
                 cart.setTotalAmount(inventory.get().getPrice() * cartRequest.getQuantity());
                 cart.setUser(user.get());
+                cart.setInventory(inventory.get());
+                cartRepository.save(cart);
+            }
+        }
+
+        return cartMapper.mapCartEntityToCartModel(cart);
+    }
+
+    @Override
+    public CartModel addProductWithVariationToCart(CartVariationRequest cartRequest, String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        Optional<Product> product = productRepository.findById(cartRequest.getProductId());
+        Optional<Image> productImage = imageRepository.findByProduct_ProductId(cartRequest.getProductId());
+        Optional<Inventory> inventory = inventoryRepository.findByColorsAndSizesAndProduct_ProductId(cartRequest.getColors(),cartRequest.getSizes(), cartRequest.getProductId());
+        Optional<Cart> existingCart = cartRepository.findByColorsAndSizesAndProduct_ProductIdAndUserEmail(cartRequest.getColors(), cartRequest.getSizes(),cartRequest.getProductId(),email);
+        Cart cart;
+        if(existingCart.isPresent()){
+            cart = existingCart.get();
+
+            if(cart.getQuantity() < inventory.get().getQuantity() &&
+                    cartRequest.getQuantity() < inventory.get().getQuantity()){
+
+                cart.setQuantity(cart.getQuantity() + cartRequest.getQuantity());
+                cart.setTotalAmount(cart.getQuantity() * inventory.get().getPrice());
+                cartRepository.save(cart);
+            }else{
+                throw new IllegalArgumentException(StringUtil.OUT_OF_STOCK);
+            }
+        }else{
+            cart = new Cart();
+
+            if(cartRequest.getQuantity() > inventory.get().getQuantity()){
+                throw new IllegalArgumentException(StringUtil.OUT_OF_STOCK);
+            }else{
+                cart.setProduct(product.get());
+                cart.setQuantity(cartRequest.getQuantity());
+                cart.setPrice(inventory.get().getPrice());
+                cart.setStoreName(product.get().getStore().getStoreName());
+                cart.setProductName(product.get().getProductName());
+                cart.setPhotoUrl(productImage.get().getPhotoUrl());
+                cart.setTotalAmount(inventory.get().getPrice() * cartRequest.getQuantity());
+                cart.setColors(cartRequest.getColors());
+                cart.setSizes(cartRequest.getSizes());
+                cart.setUser(user.get());
+                cart.setInventory(inventory.get());
                 cartRepository.save(cart);
             }
         }
@@ -129,7 +175,7 @@ public class CartServiceImpl implements CartService {
     @Override
     public List<CartModel> checkout(String email) {
         userRepository.findByEmail(email);
-        return cartRepository.findAllByFilterTrueAndUserEmail(email)
+        return cartRepository.findAllByFilterTrueAndUserEmailOrderByCreatedDateDesc(email)
                 .stream()
                 .map(cartMapper::mapCartEntityToCartModel)
                 .toList();
@@ -197,7 +243,7 @@ public class CartServiceImpl implements CartService {
     public void increaseQuantity(QuantityRequest quantityRequest, String email) {
         userRepository.findByEmail(email);
         Optional<Cart> existingCart = cartRepository.findByCartIdAndUserEmail(quantityRequest.getCartId(), email);
-        Optional<Inventory> inventory = inventoryRepository.findByProduct_ProductId(quantityRequest.getProductId());
+        Optional<Inventory> inventory = inventoryRepository.findById(quantityRequest.getInventoryId());
 
         if (existingCart.isPresent()){
             Cart cart = existingCart.get();
@@ -205,8 +251,6 @@ public class CartServiceImpl implements CartService {
                 cart.setQuantity(existingCart.get().getQuantity() + 1);
                 cart.setTotalAmount(existingCart.get().getQuantity() * inventory.get().getPrice());
                 cartRepository.save(cart);
-            }else{
-                log.info(StringUtil.OUT_OF_STOCK);
             }
         }
     }
@@ -215,7 +259,7 @@ public class CartServiceImpl implements CartService {
     public void decreaseQuantity(QuantityRequest quantityRequest, String email) {
         userRepository.findByEmail(email);
         Optional<Cart> existingCart = cartRepository.findByCartIdAndUserEmail(quantityRequest.getCartId(), email);
-        Optional<Inventory> inventory = inventoryRepository.findByProduct_ProductId(quantityRequest.getProductId());
+        Optional<Inventory> inventory = inventoryRepository.findById(quantityRequest.getInventoryId());
 
         if(existingCart.isPresent()){
             Cart cart = existingCart.get();

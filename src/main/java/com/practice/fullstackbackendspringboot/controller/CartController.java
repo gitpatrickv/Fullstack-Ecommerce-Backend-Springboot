@@ -3,6 +3,7 @@ package com.practice.fullstackbackendspringboot.controller;
 import com.practice.fullstackbackendspringboot.model.CartModel;
 import com.practice.fullstackbackendspringboot.model.CartTotalModel;
 import com.practice.fullstackbackendspringboot.model.request.CartRequest;
+import com.practice.fullstackbackendspringboot.model.request.CartVariationRequest;
 import com.practice.fullstackbackendspringboot.model.request.QuantityRequest;
 import com.practice.fullstackbackendspringboot.service.CartService;
 import com.practice.fullstackbackendspringboot.service.UserService;
@@ -26,6 +27,13 @@ public class CartController {
     public CartModel addProductToCart(@RequestBody @Valid CartRequest cartRequest, @RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
         return cartService.addProductToCart(cartRequest,user);
+    }
+
+    @PutMapping("/add/variations")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CartModel addProductWithVariationToCart(@RequestBody @Valid CartVariationRequest cartRequest, @RequestHeader("Authorization") String email){
+        String user = userService.getUserFromToken(email);
+        return cartService.addProductWithVariationToCart(cartRequest,user);
     }
 
     @GetMapping
