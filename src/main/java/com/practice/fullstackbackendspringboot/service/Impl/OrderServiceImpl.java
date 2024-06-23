@@ -64,7 +64,8 @@ public class OrderServiceImpl implements OrderService {
             List<OrderItem> orderItems = new ArrayList<>();
 
             for (Cart carts : storeCarts) {
-                Product product = productRepository.findById(carts.getProduct().getProductId()).get();
+                Optional<Product> product = productRepository.findById(carts.getProduct().getProductId());
+                Optional<Inventory> inventory = inventoryRepository.findById(carts.getInventory().getInventoryId());
                 OrderItem orderItem = new OrderItem();
 
                 orderItem.setQuantity(carts.getQuantity());
@@ -74,21 +75,19 @@ public class OrderServiceImpl implements OrderService {
                 orderItem.setProductName(carts.getProductName());
                 orderItem.setPhotoUrl(carts.getPhotoUrl());
                 orderItem.setUser(user.get());
+                orderItem.setColors(carts.getColors());
+                orderItem.setSizes(carts.getSizes());
                 orderItem.setOrder(order);
-                orderItem.setProduct(product);
+                orderItem.setProduct(product.get());
+                orderItem.setInventory(inventory.get());
                 storeTotalAmount += orderItem.getTotalAmount();
                 OrderItem savedOrderItems = orderItemRepository.save(orderItem);
                 orderItems.add(savedOrderItems);
 
-                Optional<Inventory> inventory = inventoryRepository.findByProduct_ProductId(carts.getProduct().getProductId());
-                if(inventory.isPresent()) {
-                    if (carts.getQuantity() > inventory.get().getQuantity()) {
-                        throw new IllegalArgumentException(StringUtil.OUT_OF_STOCK);
-                    } else {
-                        inventory.get().setQuantity(inventory.get().getQuantity() - carts.getQuantity());
-                    }
-                }else{
-                    throw new IllegalArgumentException(StringUtil.PRODUCT_NOT_FOUND);
+                if (carts.getQuantity() > inventory.get().getQuantity()) {
+                    throw new IllegalArgumentException(StringUtil.OUT_OF_STOCK);
+                } else {
+                    inventory.get().setQuantity(inventory.get().getQuantity() - carts.getQuantity());
                 }
             }
 
@@ -118,7 +117,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         for(OrderItem orderItem: orderItems){
-            Optional<Inventory> inventory = inventoryRepository.findByProduct_ProductId(orderItem.getProduct().getProductId());
+            Optional<Inventory> inventory = inventoryRepository.findById(orderItem.getInventory().getInventoryId());  //TODO: error here
             if(inventory.isPresent()){
                 inventory.get().setQuantity(inventory.get().getQuantity() + orderItem.getQuantity());
             }else{
@@ -134,7 +133,9 @@ public class OrderServiceImpl implements OrderService {
         Long quantity = 1L;
 
         for(OrderItem orderItem : orderItems){
-            Optional<Cart> existingCart = cartRepository.findByProduct_ProductIdAndUserEmail(orderItem.getProduct().getProductId(), email);
+            Optional<Cart> existingCart =
+                    cartRepository.findByProduct_ProductIdAndInventory_InventoryIdAndUserEmail(orderItem.getProduct().getProductId(),
+                            orderItem.getInventory().getInventoryId(), email);
             Cart cart;
 
             if(existingCart.isPresent()){
@@ -150,6 +151,9 @@ public class OrderServiceImpl implements OrderService {
                 cart.setTotalAmount(orderItem.getPrice() * quantity);
                 cart.setProduct(orderItem.getProduct());
                 cart.setOrderItems(orderItems);
+                cart.setSizes(orderItem.getSizes());
+                cart.setColors(orderItem.getColors());
+                cart.setInventory(orderItem.getInventory());
                 cart.setUser(user.get());
                 cartRepository.save(cart);
             }
@@ -184,7 +188,6 @@ public class OrderServiceImpl implements OrderService {
             orderRepository.save(orders);
         }
     }
-
 
     @Override
     public List<OrderItemModel> getCustomerOrdersByStatus(String email, String status1) {

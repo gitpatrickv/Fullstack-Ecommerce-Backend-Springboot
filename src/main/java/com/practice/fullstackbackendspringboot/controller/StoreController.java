@@ -17,7 +17,7 @@ public class StoreController {
     private final UserService userService;
     private final StoreService storeService;
 
-    @PostMapping
+    @PostMapping //TODO: not yet implemented in the frontend
     public ResponseEntity<StoreModel> createStore(@RequestBody @Valid StoreModel storeModel, @RequestHeader("Authorization") String email){
         try {
             String user = userService.getUserFromToken(email);

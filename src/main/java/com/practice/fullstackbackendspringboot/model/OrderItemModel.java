@@ -28,4 +28,6 @@ public class OrderItemModel {
     private Double orderTotalAmount;
     private String storeId;
     private String fullName;
+    private String colors;
+    private String sizes;
 }

@@ -21,11 +21,19 @@ public class ProductController {
 
     @PostMapping(value = {"/save"},  consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @ResponseStatus(HttpStatus.OK)
-    public ProductModel saveProduct( @RequestPart("product") @Valid ProductModel model,
+    public ProductModel saveProduct( @RequestPart("product") ProductModel model,
                                      @RequestPart("file") MultipartFile file,
                                      @RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
         return productService.saveProduct(model,user,file);
+    }
+
+    @PostMapping("/update")
+    @ResponseStatus(HttpStatus.OK)
+    public ProductModel updateProduct( @RequestPart("product") @Valid ProductModel model,
+                                     @RequestHeader("Authorization") String email){
+        String user = userService.getUserFromToken(email);
+        return productService.updateProduct(model,user);
     }
 
     @GetMapping
@@ -50,7 +58,7 @@ public class ProductController {
         String user = userService.getUserFromToken(email);
         return productService.getAllSellersProducts(user,pageNo,pageSize);
     }
-    @GetMapping("/category/{categoryId}")
+    @GetMapping("/category/{categoryId}") //TODO: not yet implemented in the frontend
     @ResponseStatus(HttpStatus.OK)
     public AllProductsPageResponse getAllProductsByCategory(@PathVariable(value="categoryId") Long categoryId,
                                                             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,

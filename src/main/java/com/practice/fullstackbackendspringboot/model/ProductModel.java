@@ -22,7 +22,6 @@ public class ProductModel {
 
     @Valid
 
-    @NotNull(message = "{product.id.must.not.be.null}")
     private String productId;
     @NotBlank(message = "{product.name.required}")
     private String productName;
@@ -38,4 +37,5 @@ public class ProductModel {
     private List<String> productImage = new ArrayList<>();
     private String storeId;
     private Long categoryId;
+    private List<InventoryModel> inventoryModels = new ArrayList<>();
 }

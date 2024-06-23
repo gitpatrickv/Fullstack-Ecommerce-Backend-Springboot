@@ -14,12 +14,12 @@ import java.util.List;
 public class CategoryController {
 
     private final CategoryService categoryService;
-    @PostMapping("/category/add")
+    @PostMapping("/category/add") //TODO: not yet implemented in the frontend
     @ResponseStatus(HttpStatus.OK)
     public CategoryModel createCategory(@RequestBody CategoryModel categoryModel) {
         return categoryService.createCategory(categoryModel);
     }
-    @GetMapping("/category/get/{categoryId}")
+    @GetMapping("/category/get/{categoryId}") //TODO: not yet implemented in the frontend
     @ResponseStatus(HttpStatus.OK)
     public CategoryModel findCategoryById(@PathVariable(value="categoryId") Long categoryId) {
         return categoryService.findCategoryById(categoryId);

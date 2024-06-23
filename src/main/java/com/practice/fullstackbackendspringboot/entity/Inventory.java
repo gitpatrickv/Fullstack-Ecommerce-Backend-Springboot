@@ -3,6 +3,9 @@ package com.practice.fullstackbackendspringboot.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Builder
 @Getter
 @Setter
@@ -18,11 +21,17 @@ public class Inventory {
     private Long inventoryId;
     private Long quantity;
     private Double price;
-    private String skuCode;
+    private String colors;
+    private String sizes;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @OneToMany(mappedBy = "inventory")
+    private List<Cart> cart;
+
+    @OneToMany(mappedBy = "inventory", cascade = CascadeType.ALL)
+    private List<OrderItem> orderItems = new ArrayList<>();
 
 }

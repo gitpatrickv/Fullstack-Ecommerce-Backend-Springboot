@@ -22,6 +22,8 @@ public class OrderItem extends AuditEntity{
     private String storeName;
     private String productName;
     private String photoUrl;
+    private String colors;
+    private String sizes;
 
     @ManyToOne
     @JoinColumn(name = "cart_id")
@@ -38,5 +40,9 @@ public class OrderItem extends AuditEntity{
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
+
+    @ManyToOne
+    @JoinColumn(name = "inventory_id")
+    private Inventory inventory;
 
 }

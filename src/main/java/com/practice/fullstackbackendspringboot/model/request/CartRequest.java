@@ -12,7 +12,7 @@ public class CartRequest {
 
     @Valid
 
-    @NotNull(message = "{inventory.id.must.not.be.null}")
+    @NotNull(message = "{product.id.must.not.be.null}")
     private String productId;
     @NotNull(message = "{quantity.not.null}")
     private Long quantity;
