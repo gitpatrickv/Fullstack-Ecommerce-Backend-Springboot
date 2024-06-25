@@ -36,6 +36,6 @@ public class ProductModel {
     private String storeName;
     private List<String> productImage = new ArrayList<>();
     private String storeId;
-    private Long categoryId;
+    private String categoryId;
     private List<InventoryModel> inventoryModels = new ArrayList<>();
 }

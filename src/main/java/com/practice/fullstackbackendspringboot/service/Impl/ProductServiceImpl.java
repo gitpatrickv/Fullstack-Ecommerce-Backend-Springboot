@@ -155,7 +155,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public AllProductsPageResponse getAllProductsByCategory(Long categoryId, int pageNo, int pageSize) {
+    public AllProductsPageResponse getAllProductsByCategory(String categoryId, int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Product> products = productRepository.findAllByCategory_CategoryId(categoryId,pageable);
         List<AllProductModel> productModels = new ArrayList<>();
@@ -172,6 +172,7 @@ public class ProductServiceImpl implements ProductService {
             allProductModel.setStoreId(product.getStore().getStoreId());
             getPhotoUrl(product, allProductModel);
             getPriceAndQuantity(product, allProductModel);
+            allProductModel.setCategoryName(product.getCategory().getCategoryName());
             productModels.add(allProductModel);
         }
         return new AllProductsPageResponse(productModels, pageResponse);

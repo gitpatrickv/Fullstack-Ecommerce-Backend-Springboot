@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CategoryModel {
-    private Long categoryId;
+    private String categoryId;
     private String categoryName;
     private String categoryPhotoUrl;
 }

@@ -30,6 +30,7 @@ public class AllProductModel {
     private String photoUrl;
     private String storeId;
     private String storeName;
-    private Long categoryId;
+    private String categoryId;
+    private String categoryName;
 
 }

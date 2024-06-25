@@ -24,7 +24,7 @@ public class CategoryController {
     }
     @GetMapping("/category/get/{categoryId}") //TODO: not yet implemented in the frontend
     @ResponseStatus(HttpStatus.OK)
-    public CategoryModel findCategoryById(@PathVariable(value="categoryId") Long categoryId) {
+    public CategoryModel findCategoryById(@PathVariable(value="categoryId") String categoryId) {
         return categoryService.findCategoryById(categoryId);
     }
     @GetMapping("/category")

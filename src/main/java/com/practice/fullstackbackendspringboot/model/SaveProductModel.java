@@ -14,6 +14,6 @@ public class SaveProductModel{
 
     private String productName;
     private String productDescription;
-    private Long categoryId;
+    private String categoryId;
     private List<InventoryModel> inventoryModels = new ArrayList<>();
 }

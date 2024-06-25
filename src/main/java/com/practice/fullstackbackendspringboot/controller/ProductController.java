@@ -59,9 +59,9 @@ public class ProductController {
         String user = userService.getUserFromToken(email);
         return productService.getAllSellersProducts(user,pageNo,pageSize);
     }
-    @GetMapping("/category/{categoryId}") //TODO: not yet implemented in the frontend
+    @GetMapping("/category/{categoryId}")
     @ResponseStatus(HttpStatus.OK)
-    public AllProductsPageResponse getAllProductsByCategory(@PathVariable(value="categoryId") Long categoryId,
+    public AllProductsPageResponse getAllProductsByCategory(@PathVariable(value="categoryId") String categoryId,
                                                             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
                                                             @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize){
         return productService.getAllProductsByCategory(categoryId,pageNo,pageSize);
