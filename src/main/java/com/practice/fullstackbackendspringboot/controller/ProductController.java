@@ -1,6 +1,7 @@
 package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.ProductModel;
+import com.practice.fullstackbackendspringboot.model.SaveProductModel;
 import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
 import com.practice.fullstackbackendspringboot.service.ProductService;
 import com.practice.fullstackbackendspringboot.service.UserService;
@@ -21,16 +22,16 @@ public class ProductController {
 
     @PostMapping(value = {"/save"},  consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @ResponseStatus(HttpStatus.OK)
-    public ProductModel saveProduct( @RequestPart("product") ProductModel model,
-                                     @RequestPart("file") MultipartFile file,
-                                     @RequestHeader("Authorization") String email){
+    public void saveProduct(@RequestPart("product") SaveProductModel model,
+                                        @RequestPart("file") MultipartFile file,
+                                        @RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
-        return productService.saveProduct(model,user,file);
+        productService.saveProduct(model,user,file);
     }
 
     @PostMapping("/update")
     @ResponseStatus(HttpStatus.OK)
-    public ProductModel updateProduct( @RequestPart("product") @Valid ProductModel model,
+    public ProductModel updateProduct( @RequestBody @Valid ProductModel model,
                                      @RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
         return productService.updateProduct(model,user);

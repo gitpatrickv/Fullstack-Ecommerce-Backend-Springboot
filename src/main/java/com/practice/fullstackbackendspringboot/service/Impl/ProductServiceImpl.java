@@ -4,6 +4,7 @@ import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.AllProductModel;
 import com.practice.fullstackbackendspringboot.model.InventoryModel;
 import com.practice.fullstackbackendspringboot.model.ProductModel;
+import com.practice.fullstackbackendspringboot.model.SaveProductModel;
 import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
 import com.practice.fullstackbackendspringboot.model.response.PageResponse;
 import com.practice.fullstackbackendspringboot.repository.*;
@@ -32,6 +33,7 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 @Slf4j
+@Transactional(rollbackOn = Exception.class)
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
@@ -46,21 +48,21 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final InventoryMapper inventoryMapper;
 
-    @Transactional(rollbackOn = Exception.class)
     @Override
-    public ProductModel saveProduct(ProductModel model, String email, MultipartFile file) {
-
+    public void saveProduct(SaveProductModel model, String email, MultipartFile file) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Store store = storeRepository.findByUserEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.STORE_NOT_FOUND + email));
         Category category = categoryRepository.findById(model.getCategoryId()).orElseThrow(() -> new NoSuchElementException(StringUtil.CATEGORY_NOT_FOUND));
 
-        Product product = mapper.mapProductModelToProductEntity(model);
+        Product product = new Product();
+        product.setProductName(model.getProductName());
+        product.setProductDescription(model.getProductDescription());
         product.setUser(user);
         product.setStore(store);
         product.setCategory(category);
 
             List<Inventory> inventories = new ArrayList<>();
-            for(InventoryModel inv: model.getInventoryModels()) {
+            for(InventoryModel inv : model.getInventoryModels()) {
                 Inventory inventory = new Inventory();
                 inventory.setProduct(product);
                 inventory.setPrice(inv.getPrice());
@@ -74,8 +76,6 @@ public class ProductServiceImpl implements ProductService {
             Product savedProduct = productRepository.save(product);
 
         imageService.uploadProductPhoto(savedProduct.getProductId(),file);
-
-        return mapper.mapProductEntityToProductModel(savedProduct);
     }
 
     @Override
@@ -105,7 +105,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductModel updateProduct(ProductModel model, String email) {
+    public ProductModel updateProduct(ProductModel model, String email) {  //TODO: not yet implemented in the frontend
         Product product = productRepository.findById(model.getProductId())
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
         Inventory inventory = inventoryRepository.findByProduct_ProductId(model.getProductId())

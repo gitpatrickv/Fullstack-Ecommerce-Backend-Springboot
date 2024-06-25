@@ -3,6 +3,7 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 import com.practice.fullstackbackendspringboot.entity.Category;
 import com.practice.fullstackbackendspringboot.model.CategoryModel;
 import com.practice.fullstackbackendspringboot.repository.CategoryRepository;
+import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.service.CategoryService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.CategoryMapper;
@@ -18,12 +19,13 @@ import java.util.Optional;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
     private final CategoryMapper categoryMapper;
 
 
     @Override
-    public CategoryModel createCategory(CategoryModel categoryModel) {
-
+    public CategoryModel createCategory(CategoryModel categoryModel, String email) {
+        userRepository.findByEmail(email);
         Category category;
 
         if(categoryModel.getCategoryId() != null && categoryRepository.existsById(categoryModel.getCategoryId())){

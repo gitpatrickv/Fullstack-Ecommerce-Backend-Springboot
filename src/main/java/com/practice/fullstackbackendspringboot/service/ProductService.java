@@ -1,12 +1,13 @@
 package com.practice.fullstackbackendspringboot.service;
 
 import com.practice.fullstackbackendspringboot.model.ProductModel;
+import com.practice.fullstackbackendspringboot.model.SaveProductModel;
 import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface ProductService {
 
-    ProductModel saveProduct(ProductModel model, String email, MultipartFile file);
+    void saveProduct(SaveProductModel model, String email, MultipartFile file);
     ProductModel updateProduct(ProductModel model, String email);
     AllProductsPageResponse getAllProducts(int pageNo, int pageSize);
     AllProductsPageResponse getAllStoreProducts(String storeId, int pageNo, int PageSize);

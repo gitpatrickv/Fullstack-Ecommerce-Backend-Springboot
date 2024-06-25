@@ -36,6 +36,8 @@ public class SecurityConfig {
                                         .requestMatchers("/api/store/**").hasAuthority(SELLER.name())
                                         .requestMatchers("/api/cart/**").hasAuthority(USER.name())
 
+                                        .requestMatchers(HttpMethod.POST, "/api/product/category/add").hasAuthority(ADMIN.name())
+
                                         .requestMatchers(HttpMethod.POST, "/api/product/save").hasAuthority(SELLER.name())
                                         .requestMatchers(HttpMethod.DELETE,"/api/product/delete/**").hasAnyAuthority(SELLER.name(), ADMIN.name())
                                         .requestMatchers("/api/product/**").permitAll()
