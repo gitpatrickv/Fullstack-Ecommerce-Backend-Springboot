@@ -117,7 +117,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         for(OrderItem orderItem: orderItems){
-            Optional<Inventory> inventory = inventoryRepository.findById(orderItem.getInventory().getInventoryId());  //TODO: error here
+            Optional<Inventory> inventory = inventoryRepository.findById(orderItem.getInventory().getInventoryId());
             if(inventory.isPresent()){
                 inventory.get().setQuantity(inventory.get().getQuantity() + orderItem.getQuantity());
             }else{
@@ -133,29 +133,34 @@ public class OrderServiceImpl implements OrderService {
         Long quantity = 1L;
 
         for(OrderItem orderItem : orderItems){
-            Optional<Cart> existingCart =
-                    cartRepository.findByProduct_ProductIdAndInventory_InventoryIdAndUserEmail(orderItem.getProduct().getProductId(),
+            Optional<Cart> existingCart = cartRepository.findByProduct_ProductIdAndInventory_InventoryIdAndUserEmail(
+                            orderItem.getProduct().getProductId(),
                             orderItem.getInventory().getInventoryId(), email);
+
             Cart cart;
 
             if(existingCart.isPresent()){
                 cart = existingCart.get();
                 cartRepository.save(cart);
             } else {
-                cart = new Cart();
-                cart.setPhotoUrl(orderItem.getPhotoUrl());
-                cart.setPrice(orderItem.getPrice());
-                cart.setProductName(orderItem.getProductName());
-                cart.setQuantity(quantity);
-                cart.setStoreName(orderItem.getStoreName());
-                cart.setTotalAmount(orderItem.getPrice() * quantity);
-                cart.setProduct(orderItem.getProduct());
-                cart.setOrderItems(orderItems);
-                cart.setSizes(orderItem.getSizes());
-                cart.setColors(orderItem.getColors());
-                cart.setInventory(orderItem.getInventory());
-                cart.setUser(user.get());
-                cartRepository.save(cart);
+                Optional<Product> product = productRepository.findById(orderItem.getProduct().getProductId());
+
+                if(!product.get().isDeleted()) {
+                    cart = new Cart();
+                    cart.setPhotoUrl(orderItem.getPhotoUrl());
+                    cart.setPrice(orderItem.getPrice());
+                    cart.setProductName(orderItem.getProductName());
+                    cart.setQuantity(quantity);
+                    cart.setStoreName(orderItem.getStoreName());
+                    cart.setTotalAmount(orderItem.getPrice() * quantity);
+                    cart.setProduct(orderItem.getProduct());
+                    cart.setOrderItems(orderItems);
+                    cart.setSizes(orderItem.getSizes());
+                    cart.setColors(orderItem.getColors());
+                    cart.setInventory(orderItem.getInventory());
+                    cart.setUser(user.get());
+                    cartRepository.save(cart);
+                }
             }
         }
     }

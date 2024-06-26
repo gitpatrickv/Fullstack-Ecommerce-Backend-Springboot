@@ -81,7 +81,7 @@ public class ProductController {
         return productService.searchProduct(search, pageNo, pageSize);
     }
     @DeleteMapping("/delete/{productId}")
-    public void delete(@PathVariable (value="productId") String productId, @RequestHeader("Authorization") String email){
+    public void delete(@PathVariable (value="productId", required = false) String productId, @RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
         productService.delete(productId, user);
     }

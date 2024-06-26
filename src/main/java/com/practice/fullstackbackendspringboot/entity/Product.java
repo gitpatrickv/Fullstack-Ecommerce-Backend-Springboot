@@ -19,6 +19,7 @@ public class Product extends AuditEntity{
     private String productId;
     private String productName;
     private String productDescription;
+    private boolean deleted;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Inventory> inventory = new ArrayList<>();
@@ -37,7 +38,7 @@ public class Product extends AuditEntity{
     @JoinColumn(name = "store_id")
     private Store store;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product")
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @ManyToOne

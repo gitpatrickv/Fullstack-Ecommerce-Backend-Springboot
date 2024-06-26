@@ -9,7 +9,6 @@ import com.practice.fullstackbackendspringboot.model.response.AllProductsPageRes
 import com.practice.fullstackbackendspringboot.model.response.PageResponse;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.ImageService;
-import com.practice.fullstackbackendspringboot.service.InventoryService;
 import com.practice.fullstackbackendspringboot.service.ProductService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.AllProductMapper;
@@ -43,10 +42,10 @@ public class ProductServiceImpl implements ProductService {
     private final ImageRepository imageRepository;
     private final AllProductMapper allProductMapper;
     private final ImageService imageService;
-    private final InventoryService inventoryService;
     private final StoreRepository storeRepository;
     private final CategoryRepository categoryRepository;
     private final InventoryMapper inventoryMapper;
+    private final FavoritesRepository favoritesRepository;
 
     @Override
     public void saveProduct(SaveProductModel model, String email, MultipartFile file) {
@@ -108,7 +107,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductModel updateProduct(ProductModel model, String email) {  //TODO: not yet implemented in the frontend
         Product product = productRepository.findById(model.getProductId())
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
-        Inventory inventory = inventoryRepository.findByProduct_ProductId(model.getProductId())
+        Inventory inventory = inventoryRepository.findByProduct_ProductId(model.getProductId()) //TODO: error here
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
 
         if (model.getProductName() != null) {
@@ -133,7 +132,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public AllProductsPageResponse getAllProducts(int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
-        Page<Product> products = productRepository.findAll(pageable);
+        Page<Product> products = productRepository.findAllByDeletedFalse(pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
         PageResponse pageResponse = new PageResponse();
@@ -157,7 +156,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public AllProductsPageResponse getAllProductsByCategory(String categoryId, int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
-        Page<Product> products = productRepository.findAllByCategory_CategoryId(categoryId,pageable);
+        Page<Product> products = productRepository.findAllByDeletedFalseAndCategory_CategoryId(categoryId,pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
         PageResponse pageResponse = new PageResponse();
@@ -181,7 +180,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public AllProductsPageResponse getAllStoreProducts(String storeId, int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
-        Page<Product> products = productRepository.findAllByStore_StoreId(storeId, pageable);
+        Page<Product> products = productRepository.findAllByDeletedFalseAndStore_StoreId(storeId, pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
         PageResponse pageResponse = new PageResponse();
@@ -204,7 +203,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public AllProductsPageResponse searchProduct(String search, int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo,pageSize);
-        Page<Product> products = productRepository.findByProductNameContainingIgnoreCaseOrStore_StoreNameContainingIgnoreCase(search,search, pageable);
+        Page<Product> products = productRepository.findByDeletedFalseAndProductNameContainingIgnoreCaseOrStore_StoreNameContainingIgnoreCase(search,search, pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
         PageResponse pageResponse = new PageResponse();
@@ -227,7 +226,7 @@ public class ProductServiceImpl implements ProductService {
     public AllProductsPageResponse getAllSellersProducts(String email, int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Optional<User> user = userRepository.findByEmail(email);
-        Page<Product> products = productRepository.findAllByUserEmail(user.get().getEmail(), pageable);
+        Page<Product> products = productRepository.findAllByDeletedFalseAndUserEmail(user.get().getEmail(), pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
         PageResponse pageResponse = new PageResponse();
@@ -250,7 +249,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void delete(String productId, String email) {
         userRepository.findByEmail(email);
-        productRepository.deleteById(productId);
+        Optional<Product> product = productRepository.findById(productId);
+
+        if(product.isPresent()){
+            Product prod = product.get();
+            prod.setDeleted(true);
+        }
+
+        favoritesRepository.deleteAllByProductId(productId);
     }
 
     private void getPhotoUrl(Product product, AllProductModel productModel){
