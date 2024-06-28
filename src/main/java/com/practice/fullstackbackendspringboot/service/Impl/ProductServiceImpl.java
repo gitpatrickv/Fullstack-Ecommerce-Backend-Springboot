@@ -240,6 +240,13 @@ public class ProductServiceImpl implements ProductService {
             getPhotoUrl(product, allProductModel);
             getPriceAndQuantity(product, allProductModel);
             allProductModel.setStoreName(product.getStore().getStoreName());
+
+            List<Inventory> inventories = inventoryRepository.findAllByProduct_ProductId(product.getProductId());
+            List<InventoryModel> inv = inventories.stream()
+                    .map(inventoryMapper::mapInventoryEntityToInventoryModel)
+                    .toList();
+
+            allProductModel.setInventoryModels(inv);
             productModels.add(allProductModel);
         }
         return new AllProductsPageResponse(productModels, pageResponse);

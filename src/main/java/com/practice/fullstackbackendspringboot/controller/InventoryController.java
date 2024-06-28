@@ -1,7 +1,8 @@
 package com.practice.fullstackbackendspringboot.controller;
 
-import com.practice.fullstackbackendspringboot.model.InventoryModel;
+import com.practice.fullstackbackendspringboot.model.request.AddStockRequest;
 import com.practice.fullstackbackendspringboot.service.InventoryService;
+import com.practice.fullstackbackendspringboot.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -12,10 +13,12 @@ import org.springframework.web.bind.annotation.*;
 public class InventoryController {
 
     private final InventoryService inventoryService;
+    private final UserService userService;
 
-    @GetMapping("/{productId}")
+    @PostMapping("/add")
     @ResponseStatus(HttpStatus.OK)
-    public InventoryModel getInventoryByProductId(@PathVariable (value="productId") String productId){
-        return inventoryService.getInventoryByProductId(productId);
+    public void addInventoryStock(@RequestHeader("Authorization") String email, @RequestBody AddStockRequest request){
+        String user = userService.getUserFromToken(email);
+        inventoryService.addInventoryStock(user, request);
     }
 }

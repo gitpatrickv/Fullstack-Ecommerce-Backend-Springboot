@@ -1,28 +1,33 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
 import com.practice.fullstackbackendspringboot.entity.Inventory;
-import com.practice.fullstackbackendspringboot.model.InventoryModel;
+import com.practice.fullstackbackendspringboot.model.request.AddStockRequest;
 import com.practice.fullstackbackendspringboot.repository.InventoryRepository;
-import com.practice.fullstackbackendspringboot.repository.ProductRepository;
 import com.practice.fullstackbackendspringboot.service.InventoryService;
-import com.practice.fullstackbackendspringboot.utils.mapper.InventoryMapper;
+import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class InventoryServiceImpl implements InventoryService {
 
     private final InventoryRepository inventoryRepository;
-    private final ProductRepository productRepository;
-    private final InventoryMapper mapper;
 
     @Override
-    public InventoryModel getInventoryByProductId(String productId) { //TODO: error here
+    public void addInventoryStock(String email, AddStockRequest request) {
 
-        Inventory inventory = inventoryRepository.findByProduct_ProductId(productId).get();
+        Optional<Inventory> inventory = inventoryRepository.findById(request.getInventoryId());
 
-        return mapper.mapInventoryEntityToInventoryModel(inventory);
-
+        if(inventory.isPresent()){
+            Inventory inv = inventory.get();
+            inv.setQuantity(request.getQuantity());
+            inventoryRepository.save(inv);
+        }else{
+            throw new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND);
+        }
     }
 }
