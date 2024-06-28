@@ -79,8 +79,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductModel getProductById(String productId) {
-        Optional<Product> product = productRepository.findById(productId);
-        Product products = product.orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId));
+        Product products = productRepository.findById(productId).orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId));
         List<Image> images = imageRepository.findAllPhotoUrlByProduct_ProductId(productId);
         List<Inventory> inventories = inventoryRepository.findAllByProduct_ProductId(productId);
 

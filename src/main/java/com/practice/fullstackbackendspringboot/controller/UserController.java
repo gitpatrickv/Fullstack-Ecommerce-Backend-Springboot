@@ -15,9 +15,10 @@ import org.springframework.web.bind.annotation.*;
 public class  UserController {
 
     private final UserService userService;
+
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserModel register(@RequestBody @Valid UserModel userModel){
+    public LoginResponse register(@RequestBody @Valid UserModel userModel){
         return userService.register(userModel);
     }
 

@@ -17,6 +17,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
@@ -29,9 +30,10 @@ public class UserServiceImpl implements UserService {
     private final UserMapper mapper;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
-    public UserModel register(UserModel userModel) {
+    public LoginResponse register(UserModel userModel) {
 
         boolean isEmailExists = userRepository.existsByEmailIgnoreCase(userModel.getEmail());
 
@@ -40,8 +42,20 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = mapper.mapUserModelToUserEntity(userModel);
-        User saveUser = userRepository.save(user);
-        return mapper.mapUserEntityToUserModel(saveUser);
+        userRepository.save(user);
+
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(userModel.getEmail(), userModel.getPassword()));
+
+            return LoginResponse.builder()
+                    .jwtToken(jwtService.generateToken(authentication))
+                    .role(authentication.getAuthorities().iterator().next().getAuthority())
+                    .build();
+        } catch (AuthenticationException e) {
+            throw new BadCredentialsException(StringUtil.INVALID_CREDENTIALS);
+        }
+
     }
 
     @Override
