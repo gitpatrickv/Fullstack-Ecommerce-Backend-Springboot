@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface ProductService {
 
-    void saveProduct(SaveProductModel model, String email, MultipartFile file);
+    void saveProduct(SaveProductModel model, String email, MultipartFile[] files);
     void updateProduct(UpdateProductRequest request, String email);
     AllProductsPageResponse getAllProducts(int pageNo, int pageSize);
     AllProductsPageResponse getAllStoreProducts(String storeId, int pageNo, int PageSize);

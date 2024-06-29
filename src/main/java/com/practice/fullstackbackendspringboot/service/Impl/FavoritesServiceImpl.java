@@ -28,7 +28,7 @@ public class FavoritesServiceImpl implements FavoritesService {
     public void addToFavorites(String email, String productId) {
         Optional<User> user = userRepository.findByEmail(email);
         Optional<Product> product = productRepository.findById(productId);
-        Optional<Image> image = imageRepository.findByProduct_ProductId(productId);
+        List<Image> image = imageRepository.findAllPhotoUrlByProduct_ProductId(productId);
         Optional<Favorites> favorite = favoritesRepository.findByProductIdAndUserEmail(productId, user.get().getEmail());
         Favorites favorites;
         if(favorite.isPresent() && favorite.get().isFavorites()){
@@ -37,7 +37,7 @@ public class FavoritesServiceImpl implements FavoritesService {
             favoritesRepository.delete(favorites);
         }else {
             favorites = new Favorites();
-            favorites.setPhotoUrl(image.get().getPhotoUrl());
+            favorites.setPhotoUrl(image.get(0).getPhotoUrl());
             favorites.setProductId(product.get().getProductId());
             favorites.setPrice(product.get().getInventory().get(0).getPrice());
             favorites.setProductName(product.get().getProductName());

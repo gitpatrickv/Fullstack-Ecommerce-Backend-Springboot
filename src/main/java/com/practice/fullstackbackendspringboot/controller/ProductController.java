@@ -24,10 +24,10 @@ public class ProductController {
     @PostMapping(value = {"/save"},  consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @ResponseStatus(HttpStatus.OK)
     public void saveProduct(@RequestPart("product") SaveProductModel model,
-                                        @RequestPart("file") MultipartFile file,
+                                        @RequestPart("file") MultipartFile[] files,
                                         @RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
-        productService.saveProduct(model,user,file);
+        productService.saveProduct(model,user,files);
     }
 
     @PutMapping("/update")

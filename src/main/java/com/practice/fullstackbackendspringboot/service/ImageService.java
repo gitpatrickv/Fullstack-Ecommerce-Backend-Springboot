@@ -6,7 +6,7 @@ import java.io.IOException;
 
 public interface ImageService {
 
-    void uploadProductPhoto(String id, MultipartFile file);
+    void uploadProductPhoto(String productId, MultipartFile[] files);
     void uploadUserPhoto(String email, MultipartFile file);
     public byte[] getPhoto(String filename) throws IOException;
 

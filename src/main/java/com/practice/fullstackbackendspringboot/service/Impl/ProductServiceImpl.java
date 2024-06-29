@@ -49,7 +49,7 @@ public class ProductServiceImpl implements ProductService {
     private final FavoritesRepository favoritesRepository;
 
     @Override
-    public void saveProduct(SaveProductModel model, String email, MultipartFile file) {
+    public void saveProduct(SaveProductModel model, String email, MultipartFile[] files) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Store store = storeRepository.findByUserEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.STORE_NOT_FOUND + email));
         Category category = categoryRepository.findById(model.getCategoryId()).orElseThrow(() -> new NoSuchElementException(StringUtil.CATEGORY_NOT_FOUND));
@@ -75,7 +75,7 @@ public class ProductServiceImpl implements ProductService {
             product.setInventory(inventories);
             Product savedProduct = productRepository.save(product);
 
-        imageService.uploadProductPhoto(savedProduct.getProductId(),file);
+        imageService.uploadProductPhoto(savedProduct.getProductId(),files);
     }
 
     @Override

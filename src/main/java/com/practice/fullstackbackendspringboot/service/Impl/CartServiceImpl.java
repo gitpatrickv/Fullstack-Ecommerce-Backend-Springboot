@@ -42,7 +42,7 @@ public class CartServiceImpl implements CartService {
 
         Optional<User> user = userRepository.findByEmail(email);
         Optional<Product> product = productRepository.findById(cartRequest.getProductId());
-        Optional<Image> productImage = imageRepository.findByProduct_ProductId(cartRequest.getProductId());
+        List<Image> productImage = imageRepository.findAllPhotoUrlByProduct_ProductId(cartRequest.getProductId());
         Optional<Inventory> inventory = inventoryRepository.findByProduct_ProductId(cartRequest.getProductId());
         Optional<Cart> existingCart = cartRepository.findByProduct_ProductIdAndUserEmail(cartRequest.getProductId(),email);
         Cart cart;
@@ -69,7 +69,7 @@ public class CartServiceImpl implements CartService {
                 cart.setPrice(inventory.get().getPrice());
                 cart.setStoreName(product.get().getStore().getStoreName());
                 cart.setProductName(product.get().getProductName());
-                cart.setPhotoUrl(productImage.get().getPhotoUrl());
+                cart.setPhotoUrl(productImage.get(0).getPhotoUrl());
                 cart.setTotalAmount(inventory.get().getPrice() * cartRequest.getQuantity());
                 cart.setUser(user.get());
                 cart.setInventory(inventory.get());
@@ -84,7 +84,7 @@ public class CartServiceImpl implements CartService {
     public CartModel addProductWithVariationToCart(CartVariationRequest cartRequest, String email) {
         Optional<User> user = userRepository.findByEmail(email);
         Optional<Product> product = productRepository.findById(cartRequest.getProductId());
-        Optional<Image> productImage = imageRepository.findByProduct_ProductId(cartRequest.getProductId());
+        List<Image> productImage = imageRepository.findAllPhotoUrlByProduct_ProductId(cartRequest.getProductId());
         Optional<Inventory> inventory = inventoryRepository.findByColorsAndSizesAndProduct_ProductId(cartRequest.getColors(),cartRequest.getSizes(), cartRequest.getProductId());
         Optional<Cart> existingCart = cartRepository.findByColorsAndSizesAndProduct_ProductIdAndUserEmail(cartRequest.getColors(), cartRequest.getSizes(),cartRequest.getProductId(),email);
         Cart cart;
@@ -111,7 +111,7 @@ public class CartServiceImpl implements CartService {
                 cart.setPrice(inventory.get().getPrice());
                 cart.setStoreName(product.get().getStore().getStoreName());
                 cart.setProductName(product.get().getProductName());
-                cart.setPhotoUrl(productImage.get().getPhotoUrl());
+                cart.setPhotoUrl(productImage.get(0).getPhotoUrl());
                 cart.setTotalAmount(inventory.get().getPrice() * cartRequest.getQuantity());
                 cart.setColors(cartRequest.getColors());
                 cart.setSizes(cartRequest.getSizes());
