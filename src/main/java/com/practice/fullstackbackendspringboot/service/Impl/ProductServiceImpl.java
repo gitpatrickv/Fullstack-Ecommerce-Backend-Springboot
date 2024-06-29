@@ -5,6 +5,7 @@ import com.practice.fullstackbackendspringboot.model.AllProductModel;
 import com.practice.fullstackbackendspringboot.model.InventoryModel;
 import com.practice.fullstackbackendspringboot.model.ProductModel;
 import com.practice.fullstackbackendspringboot.model.SaveProductModel;
+import com.practice.fullstackbackendspringboot.model.request.UpdateProductRequest;
 import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
 import com.practice.fullstackbackendspringboot.model.response.PageResponse;
 import com.practice.fullstackbackendspringboot.repository.*;
@@ -103,29 +104,19 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductModel updateProduct(ProductModel model, String email) {  //TODO: not yet implemented in the frontend
-        Product product = productRepository.findById(model.getProductId())
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
-        Inventory inventory = inventoryRepository.findByProduct_ProductId(model.getProductId()) //TODO: error here
+    public void updateProduct(UpdateProductRequest request, String email) {
+        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
 
-        if (model.getProductName() != null) {
-            product.setProductName(model.getProductName());
+        if (request.getProductName() != null) {
+            product.setProductName(request.getProductName());
         }
-        if(model.getProductDescription() != null){
-            product.setProductDescription(model.getProductDescription());
+        if(request.getProductDescription() != null){
+            product.setProductDescription(request.getProductDescription());
         }
-        if(model.getPrice() != null){
-            inventory.setPrice(model.getPrice());
-        }
-        if(model.getQuantity() != null){
-            inventory.setQuantity(model.getQuantity());
-        }
-
         productRepository.save(product);
-        inventoryRepository.save(inventory);
 
-        return mapper.mapProductEntityToProductModel(product);
     }
 
     @Override

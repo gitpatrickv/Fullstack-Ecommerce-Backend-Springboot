@@ -2,6 +2,7 @@ package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.ProductModel;
 import com.practice.fullstackbackendspringboot.model.SaveProductModel;
+import com.practice.fullstackbackendspringboot.model.request.UpdateProductRequest;
 import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
 import com.practice.fullstackbackendspringboot.service.ProductService;
 import com.practice.fullstackbackendspringboot.service.UserService;
@@ -29,12 +30,12 @@ public class ProductController {
         productService.saveProduct(model,user,file);
     }
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     @ResponseStatus(HttpStatus.OK)
-    public ProductModel updateProduct( @RequestBody @Valid ProductModel model,
+    public void updateProduct(@RequestBody @Valid UpdateProductRequest request,
                                      @RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
-        return productService.updateProduct(model,user);
+        productService.updateProduct(request,user);
     }
 
     @GetMapping

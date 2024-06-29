@@ -35,6 +35,7 @@ public class AllProductModel {
     private String storeName;
     private String categoryId;
     private String categoryName;
+    private String productDescription;
     List<InventoryModel> inventoryModels = new ArrayList<>();
 
 }
