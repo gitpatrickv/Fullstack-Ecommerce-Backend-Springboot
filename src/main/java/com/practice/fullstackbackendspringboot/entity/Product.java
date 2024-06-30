@@ -18,8 +18,10 @@ public class Product extends AuditEntity{
     @GeneratedValue(strategy = GenerationType.UUID)
     private String productId;
     private String productName;
+    @Column(length = 1000)
     private String productDescription;
     private boolean deleted;
+    private Long productSold = 0L;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Inventory> inventory = new ArrayList<>();

@@ -37,5 +37,6 @@ public class AllProductModel {
     private String categoryName;
     private String productDescription;
     List<InventoryModel> inventoryModels = new ArrayList<>();
+    private Long productSold;
 
 }

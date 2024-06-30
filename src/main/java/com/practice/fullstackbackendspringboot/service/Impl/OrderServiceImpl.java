@@ -87,8 +87,13 @@ public class OrderServiceImpl implements OrderService {
                 if (carts.getQuantity() > inventory.get().getQuantity()) {
                     throw new IllegalArgumentException(StringUtil.OUT_OF_STOCK);
                 } else {
-                    inventory.get().setQuantity(inventory.get().getQuantity() - carts.getQuantity());
+                    Inventory inv = inventory.get();
+                    inv.setQuantity(inv.getQuantity() - carts.getQuantity());
+                    inventoryRepository.save(inv);
                 }
+                Product product1 = product.get();
+                product1.setProductSold(product1.getProductSold() + carts.getQuantity());
+                productRepository.save(product1);
             }
 
             order.setOrderTotalAmount(storeTotalAmount + store.get().getShippingFee());
@@ -119,9 +124,18 @@ public class OrderServiceImpl implements OrderService {
         for(OrderItem orderItem: orderItems){
             Optional<Inventory> inventory = inventoryRepository.findById(orderItem.getInventory().getInventoryId());
             if(inventory.isPresent()){
-                inventory.get().setQuantity(inventory.get().getQuantity() + orderItem.getQuantity());
+                Inventory inv = inventory.get();
+                inv.setQuantity(inv.getQuantity() + orderItem.getQuantity());
+                inventoryRepository.save(inv);
             }else{
                 throw new IllegalArgumentException(StringUtil.PRODUCT_NOT_FOUND);
+            }
+
+            Optional<Product> product = productRepository.findById(orderItem.getProduct().getProductId());
+            if(product.isPresent()){
+                Product product1 = product.get();
+                product1.setProductSold(product1.getProductSold() - orderItem.getQuantity());
+                productRepository.save(product1);
             }
         }
     }
