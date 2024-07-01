@@ -217,6 +217,7 @@ public class ProductServiceImpl implements ProductService {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
         Optional<User> user = userRepository.findByEmail(email);
         Page<Product> products = productRepository.findAllByDeletedFalseAndUserEmail(user.get().getEmail(), pageable);
+        Sort sort = Sort.by(Sort.Direction.DESC, "colors");
         List<AllProductModel> productModels = new ArrayList<>();
 
         PageResponse pageResponse = new PageResponse();
@@ -232,7 +233,7 @@ public class ProductServiceImpl implements ProductService {
             getPriceAndQuantity(product, allProductModel);
             allProductModel.setStoreName(product.getStore().getStoreName());
 
-            List<Inventory> inventories = inventoryRepository.findAllByProduct_ProductId(product.getProductId());
+            List<Inventory> inventories = inventoryRepository.findAllByProduct_ProductId(product.getProductId(), sort);
             List<InventoryModel> inv = inventories.stream()
                     .map(inventoryMapper::mapInventoryEntityToInventoryModel)
                     .toList();
