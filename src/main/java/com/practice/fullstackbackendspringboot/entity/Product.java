@@ -32,6 +32,9 @@ public class Product extends AuditEntity{
     @OneToMany(mappedBy = "product")
     private List<Cart> cart = new ArrayList<>();
 
+    @OneToMany(mappedBy = "product")
+    private List<Rating> ratings = new ArrayList<>();
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
