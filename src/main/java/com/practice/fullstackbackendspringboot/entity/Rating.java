@@ -12,7 +12,7 @@ import lombok.*;
 public class Rating {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private Long ratingId;
     @Column(name="rating")
     private Double rating;
 

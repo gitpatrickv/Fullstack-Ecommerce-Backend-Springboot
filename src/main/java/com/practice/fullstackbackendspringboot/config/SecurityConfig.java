@@ -46,6 +46,10 @@ public class SecurityConfig {
                                         .requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
                                         .requestMatchers(HttpMethod.POST, "/api/user/register").permitAll()
 
+                                        .requestMatchers(HttpMethod.POST, "api/product/rate").hasAuthority(USER.name())
+                                        .requestMatchers( "/api/rating/**").permitAll()
+
+
                                         .requestMatchers("/api/user/favorites/**").hasAuthority(USER.name())
                                         .requestMatchers("/api/user/image/**").permitAll()
 
