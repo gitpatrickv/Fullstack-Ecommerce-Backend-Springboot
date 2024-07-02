@@ -49,7 +49,6 @@ public class RatingServiceImpl implements RatingService {
     @Override
     public RatingModel getProductRatingAverage(String productId) {
         List<Rating> ratings = ratingRepository.findAllByProduct_ProductId(productId);
-        RatingModel ratingModel;
         Double ratingTotal = 0.0;
         double totalNumberOfUserRating = 0.0;
 
@@ -64,7 +63,7 @@ public class RatingServiceImpl implements RatingService {
         double avg = ratingTotal / totalNumberOfUserRating;
         Double roundedAvg = Math.round(avg * 10.0) / 10.0;
 
-        ratingModel = new RatingModel();
+        RatingModel ratingModel = new RatingModel();
         ratingModel.setRatingAverage(roundedAvg);
         ratingModel.setTotalNumberOfUserRating(totalNumberOfUserRating);
         ratingModel.setProductId(productId);
