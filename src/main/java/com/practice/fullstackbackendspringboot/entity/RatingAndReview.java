@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "rating_and_review")
-public class RatingAndReview {
+public class RatingAndReview extends AuditEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long reviewId;

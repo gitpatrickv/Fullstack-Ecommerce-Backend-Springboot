@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface RatingRepository extends JpaRepository<RatingAndReview, Long> {
+public interface RatingAndReviewRepository extends JpaRepository<RatingAndReview, Long> {
 
     Boolean existsByUserEmailAndProduct_ProductId(String email, String productId);
     List<RatingAndReview> findAllByProduct_ProductId(String productId);

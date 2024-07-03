@@ -1,5 +1,6 @@
 package com.practice.fullstackbackendspringboot.controller;
 
+import com.practice.fullstackbackendspringboot.model.RatingAndReviewModel;
 import com.practice.fullstackbackendspringboot.model.request.RatingAverageRequest;
 import com.practice.fullstackbackendspringboot.model.request.RateProductRequest;
 import com.practice.fullstackbackendspringboot.service.RatingAndReviewService;
@@ -7,6 +8,8 @@ import com.practice.fullstackbackendspringboot.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -25,5 +28,9 @@ public class RatingAndReviewController {
     @ResponseStatus(HttpStatus.OK)
     public RatingAverageRequest getProductRatingAverage(@PathVariable String productId){
         return ratingAndReviewService.getProductRatingAverage(productId);
+    }
+    @GetMapping("/product/review/get/{productId}")
+    public List<RatingAndReviewModel> getAllRatingAndReview(@PathVariable String productId){
+        return ratingAndReviewService.getAllRatingAndReview(productId);
     }
 }

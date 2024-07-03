@@ -3,17 +3,20 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 import com.practice.fullstackbackendspringboot.entity.Product;
 import com.practice.fullstackbackendspringboot.entity.RatingAndReview;
 import com.practice.fullstackbackendspringboot.entity.User;
+import com.practice.fullstackbackendspringboot.model.RatingAndReviewModel;
 import com.practice.fullstackbackendspringboot.model.request.RatingAverageRequest;
 import com.practice.fullstackbackendspringboot.model.request.RateProductRequest;
 import com.practice.fullstackbackendspringboot.repository.ProductRepository;
-import com.practice.fullstackbackendspringboot.repository.RatingRepository;
+import com.practice.fullstackbackendspringboot.repository.RatingAndReviewRepository;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.service.RatingAndReviewService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
+import com.practice.fullstackbackendspringboot.utils.mapper.RatingAndReviewMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -24,14 +27,15 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
 
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
-    private final RatingRepository ratingRepository;
+    private final RatingAndReviewRepository ratingAndReviewRepository;
+    private final RatingAndReviewMapper ratingAndReviewMapper;
 
     @Override   //TODO: not yet implemented in the frontend
     public void rateAndReviewProduct(String email, RateProductRequest request) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + request.getProductId()));
-        boolean isExists = ratingRepository.existsByUserEmailAndProduct_ProductId(email, request.getProductId());
+        boolean isExists = ratingAndReviewRepository.existsByUserEmailAndProduct_ProductId(email, request.getProductId());
 
         if(request.getRating() > 5){
             throw new IllegalArgumentException(StringUtil.RATING_EXCEEDS_MAXIMUM);
@@ -43,13 +47,13 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
             rating.setReview(request.getReview());
             rating.setProduct(product);
             rating.setUser(user);
-            ratingRepository.save(rating);
+            ratingAndReviewRepository.save(rating);
         }
     }
 
     @Override
     public RatingAverageRequest getProductRatingAverage(String productId) {
-        List<RatingAndReview> ratings = ratingRepository.findAllByProduct_ProductId(productId);
+        List<RatingAndReview> ratings = ratingAndReviewRepository.findAllByProduct_ProductId(productId);
         Double ratingTotal = 0.0;
         double totalNumberOfUserRating = 0.0;
 
@@ -69,6 +73,24 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
         ratingAverageRequest.setTotalNumberOfUserRating(totalNumberOfUserRating);
         ratingAverageRequest.setProductId(productId);
         return ratingAverageRequest;
+    }
+
+    @Override   //TODO: not yet implemented in the frontend
+    public List<RatingAndReviewModel> getAllRatingAndReview(String productId) {
+        List<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByProduct_ProductId(productId);
+        List<RatingAndReviewModel> ratingAndReviewModelList = new ArrayList<>();
+
+        for(RatingAndReview ratingAndReview : ratingAndReviews){
+
+            RatingAndReviewModel ratingAndReviewModel = ratingAndReviewMapper.mapEntityToModel(ratingAndReview);
+            ratingAndReviewModel.setName(ratingAndReview.getUser().getName());
+            ratingAndReviewModel.setPhotoUrl(ratingAndReview.getUser().getPhotoUrl());
+            ratingAndReviewModel.setCreatedDate(ratingAndReview.getCreatedDate());
+            ratingAndReviewModelList.add(ratingAndReviewModel);
+        }
+
+        return ratingAndReviewModelList;
+
     }
 
 }
