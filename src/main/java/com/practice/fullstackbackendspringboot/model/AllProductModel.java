@@ -9,6 +9,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
 
 @Data
@@ -30,6 +33,10 @@ public class AllProductModel {
     private String photoUrl;
     private String storeId;
     private String storeName;
-    private Long categoryId;
+    private String categoryId;
+    private String categoryName;
+    private String productDescription;
+    List<InventoryModel> inventoryModels = new ArrayList<>();
+    private Long productSold;
 
 }

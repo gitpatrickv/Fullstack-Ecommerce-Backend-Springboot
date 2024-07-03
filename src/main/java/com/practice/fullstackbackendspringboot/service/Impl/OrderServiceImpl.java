@@ -87,8 +87,13 @@ public class OrderServiceImpl implements OrderService {
                 if (carts.getQuantity() > inventory.get().getQuantity()) {
                     throw new IllegalArgumentException(StringUtil.OUT_OF_STOCK);
                 } else {
-                    inventory.get().setQuantity(inventory.get().getQuantity() - carts.getQuantity());
+                    Inventory inv = inventory.get();
+                    inv.setQuantity(inv.getQuantity() - carts.getQuantity());
+                    inventoryRepository.save(inv);
                 }
+                Product product1 = product.get();
+                product1.setProductSold(product1.getProductSold() + carts.getQuantity());
+                productRepository.save(product1);
             }
 
             order.setOrderTotalAmount(storeTotalAmount + store.get().getShippingFee());
@@ -117,11 +122,20 @@ public class OrderServiceImpl implements OrderService {
         }
 
         for(OrderItem orderItem: orderItems){
-            Optional<Inventory> inventory = inventoryRepository.findById(orderItem.getInventory().getInventoryId());  //TODO: error here
+            Optional<Inventory> inventory = inventoryRepository.findById(orderItem.getInventory().getInventoryId());
             if(inventory.isPresent()){
-                inventory.get().setQuantity(inventory.get().getQuantity() + orderItem.getQuantity());
+                Inventory inv = inventory.get();
+                inv.setQuantity(inv.getQuantity() + orderItem.getQuantity());
+                inventoryRepository.save(inv);
             }else{
                 throw new IllegalArgumentException(StringUtil.PRODUCT_NOT_FOUND);
+            }
+
+            Optional<Product> product = productRepository.findById(orderItem.getProduct().getProductId());
+            if(product.isPresent()){
+                Product product1 = product.get();
+                product1.setProductSold(product1.getProductSold() - orderItem.getQuantity());
+                productRepository.save(product1);
             }
         }
     }
@@ -133,29 +147,34 @@ public class OrderServiceImpl implements OrderService {
         Long quantity = 1L;
 
         for(OrderItem orderItem : orderItems){
-            Optional<Cart> existingCart =
-                    cartRepository.findByProduct_ProductIdAndInventory_InventoryIdAndUserEmail(orderItem.getProduct().getProductId(),
+            Optional<Cart> existingCart = cartRepository.findByProduct_ProductIdAndInventory_InventoryIdAndUserEmail(
+                            orderItem.getProduct().getProductId(),
                             orderItem.getInventory().getInventoryId(), email);
+
             Cart cart;
 
             if(existingCart.isPresent()){
                 cart = existingCart.get();
                 cartRepository.save(cart);
             } else {
-                cart = new Cart();
-                cart.setPhotoUrl(orderItem.getPhotoUrl());
-                cart.setPrice(orderItem.getPrice());
-                cart.setProductName(orderItem.getProductName());
-                cart.setQuantity(quantity);
-                cart.setStoreName(orderItem.getStoreName());
-                cart.setTotalAmount(orderItem.getPrice() * quantity);
-                cart.setProduct(orderItem.getProduct());
-                cart.setOrderItems(orderItems);
-                cart.setSizes(orderItem.getSizes());
-                cart.setColors(orderItem.getColors());
-                cart.setInventory(orderItem.getInventory());
-                cart.setUser(user.get());
-                cartRepository.save(cart);
+                Optional<Product> product = productRepository.findById(orderItem.getProduct().getProductId());
+
+                if(!product.get().isDeleted()) {
+                    cart = new Cart();
+                    cart.setPhotoUrl(orderItem.getPhotoUrl());
+                    cart.setPrice(orderItem.getPrice());
+                    cart.setProductName(orderItem.getProductName());
+                    cart.setQuantity(quantity);
+                    cart.setStoreName(orderItem.getStoreName());
+                    cart.setTotalAmount(orderItem.getPrice() * quantity);
+                    cart.setProduct(orderItem.getProduct());
+                    cart.setOrderItems(orderItems);
+                    cart.setSizes(orderItem.getSizes());
+                    cart.setColors(orderItem.getColors());
+                    cart.setInventory(orderItem.getInventory());
+                    cart.setUser(user.get());
+                    cartRepository.save(cart);
+                }
             }
         }
     }

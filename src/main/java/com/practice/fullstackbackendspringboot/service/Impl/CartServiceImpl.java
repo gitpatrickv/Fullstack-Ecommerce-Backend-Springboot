@@ -10,7 +10,6 @@ import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.CartService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.CartMapper;
-import com.practice.fullstackbackendspringboot.utils.mapper.CartTotalMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,17 +31,15 @@ public class CartServiceImpl implements CartService {
     private final ProductRepository productRepository;
     private final InventoryRepository inventoryRepository;
     private final ImageRepository imageRepository;
-    private final CartTotalRepository cartTotalRepository;
     private final StoreRepository storeRepository;
     private final CartMapper cartMapper;
-    private final CartTotalMapper cartTotalMapper;
 
     @Override
     public CartModel addProductToCart(CartRequest cartRequest, String email) {
 
         Optional<User> user = userRepository.findByEmail(email);
         Optional<Product> product = productRepository.findById(cartRequest.getProductId());
-        Optional<Image> productImage = imageRepository.findByProduct_ProductId(cartRequest.getProductId());
+        List<Image> productImage = imageRepository.findAllPhotoUrlByProduct_ProductId(cartRequest.getProductId());
         Optional<Inventory> inventory = inventoryRepository.findByProduct_ProductId(cartRequest.getProductId());
         Optional<Cart> existingCart = cartRepository.findByProduct_ProductIdAndUserEmail(cartRequest.getProductId(),email);
         Cart cart;
@@ -69,7 +66,7 @@ public class CartServiceImpl implements CartService {
                 cart.setPrice(inventory.get().getPrice());
                 cart.setStoreName(product.get().getStore().getStoreName());
                 cart.setProductName(product.get().getProductName());
-                cart.setPhotoUrl(productImage.get().getPhotoUrl());
+                cart.setPhotoUrl(productImage.get(0).getPhotoUrl());
                 cart.setTotalAmount(inventory.get().getPrice() * cartRequest.getQuantity());
                 cart.setUser(user.get());
                 cart.setInventory(inventory.get());
@@ -84,7 +81,7 @@ public class CartServiceImpl implements CartService {
     public CartModel addProductWithVariationToCart(CartVariationRequest cartRequest, String email) {
         Optional<User> user = userRepository.findByEmail(email);
         Optional<Product> product = productRepository.findById(cartRequest.getProductId());
-        Optional<Image> productImage = imageRepository.findByProduct_ProductId(cartRequest.getProductId());
+        List<Image> productImage = imageRepository.findAllPhotoUrlByProduct_ProductId(cartRequest.getProductId());
         Optional<Inventory> inventory = inventoryRepository.findByColorsAndSizesAndProduct_ProductId(cartRequest.getColors(),cartRequest.getSizes(), cartRequest.getProductId());
         Optional<Cart> existingCart = cartRepository.findByColorsAndSizesAndProduct_ProductIdAndUserEmail(cartRequest.getColors(), cartRequest.getSizes(),cartRequest.getProductId(),email);
         Cart cart;
@@ -111,7 +108,7 @@ public class CartServiceImpl implements CartService {
                 cart.setPrice(inventory.get().getPrice());
                 cart.setStoreName(product.get().getStore().getStoreName());
                 cart.setProductName(product.get().getProductName());
-                cart.setPhotoUrl(productImage.get().getPhotoUrl());
+                cart.setPhotoUrl(productImage.get(0).getPhotoUrl());
                 cart.setTotalAmount(inventory.get().getPrice() * cartRequest.getQuantity());
                 cart.setColors(cartRequest.getColors());
                 cart.setSizes(cartRequest.getSizes());
@@ -186,7 +183,7 @@ public class CartServiceImpl implements CartService {
         User user = userRepository.findByEmail(email).get();
         List<Cart> carts = cartRepository.findAllByFilterAndUserEmail(true,email);
         List<Cart> cartCount = cartRepository.findAllByUserEmail(email);
-        Optional<CartTotal> existingCartTotal = cartTotalRepository.findByUserEmail(email);
+
         Double total = 0.0;
         long count = 0;
         long filteredItem = 0;
@@ -216,27 +213,14 @@ public class CartServiceImpl implements CartService {
             totalShippingFee+=shipFee;
         }
 
-        if(existingCartTotal.isPresent()){
-        CartTotal cartTotal = existingCartTotal.get();
-        cartTotal.setCartTotal(total);
-        cartTotal.setCartItems(count);
-        cartTotal.setQty(filteredItem);
-        cartTotal.setUser(user);
-        cartTotal.setTotalShippingFee(totalShippingFee);
-        cartTotal.setTotalPayment(total + totalShippingFee);
-        cartTotalRepository.save(cartTotal);
-        return cartTotalMapper.mapEntityToModel(cartTotal);
-        }
+        CartTotalModel cartTotalModel = new CartTotalModel();
+        cartTotalModel.setCartTotal(total);
+        cartTotalModel.setCartItems(count);
+        cartTotalModel.setQty(filteredItem);
+        cartTotalModel.setTotalShippingFee(totalShippingFee);
+        cartTotalModel.setTotalPayment(total + totalShippingFee);
+        return cartTotalModel;
 
-        CartTotal cartTotal = new CartTotal();
-        cartTotal.setCartTotal(total);
-        cartTotal.setCartItems(count);
-        cartTotal.setQty(filteredItem);
-        cartTotal.setUser(user);
-        cartTotal.setTotalShippingFee(totalShippingFee);
-        cartTotal.setTotalPayment(total + totalShippingFee);
-        cartTotalRepository.save(cartTotal);
-        return cartTotalMapper.mapEntityToModel(cartTotal);
     }
 
     @Override

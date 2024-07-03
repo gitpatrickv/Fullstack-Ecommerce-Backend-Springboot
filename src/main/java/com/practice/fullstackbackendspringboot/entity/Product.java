@@ -18,7 +18,10 @@ public class Product extends AuditEntity{
     @GeneratedValue(strategy = GenerationType.UUID)
     private String productId;
     private String productName;
+    @Column(length = 1000)
     private String productDescription;
+    private boolean deleted;
+    private Long productSold = 0L;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Inventory> inventory = new ArrayList<>();
@@ -29,6 +32,9 @@ public class Product extends AuditEntity{
     @OneToMany(mappedBy = "product")
     private List<Cart> cart = new ArrayList<>();
 
+    @OneToMany(mappedBy = "product")
+    private List<Rating> ratings = new ArrayList<>();
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -37,7 +43,7 @@ public class Product extends AuditEntity{
     @JoinColumn(name = "store_id")
     private Store store;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product")
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @ManyToOne

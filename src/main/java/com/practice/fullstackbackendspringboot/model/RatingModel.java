@@ -7,8 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CategoryModel {
-    private String categoryId;
-    private String categoryName;
-    private String categoryPhotoUrl;
+public class RatingModel {
+
+    private String productId;
+    private Double totalNumberOfUserRating;
+    private Double ratingAverage;
+
 }

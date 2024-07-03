@@ -1,10 +1,11 @@
 package com.practice.fullstackbackendspringboot.service;
 
 import com.practice.fullstackbackendspringboot.model.StoreModel;
+import com.practice.fullstackbackendspringboot.model.request.CreateStoreRequest;
 
 public interface StoreService {
 
-    StoreModel createStore(StoreModel storeModel, String email);
+    void createStore(CreateStoreRequest request, String email);
     StoreModel getStoreInfo(String email);
 
 

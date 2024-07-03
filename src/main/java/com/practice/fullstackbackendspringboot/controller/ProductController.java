@@ -1,6 +1,8 @@
 package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.ProductModel;
+import com.practice.fullstackbackendspringboot.model.SaveProductModel;
+import com.practice.fullstackbackendspringboot.model.request.UpdateProductRequest;
 import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
 import com.practice.fullstackbackendspringboot.service.ProductService;
 import com.practice.fullstackbackendspringboot.service.UserService;
@@ -21,19 +23,19 @@ public class ProductController {
 
     @PostMapping(value = {"/save"},  consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @ResponseStatus(HttpStatus.OK)
-    public ProductModel saveProduct( @RequestPart("product") ProductModel model,
-                                     @RequestPart("file") MultipartFile file,
-                                     @RequestHeader("Authorization") String email){
+    public void saveProduct(@RequestPart("product") SaveProductModel model,
+                                        @RequestPart("file") MultipartFile[] files,
+                                        @RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
-        return productService.saveProduct(model,user,file);
+        productService.saveProduct(model,user,files);
     }
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     @ResponseStatus(HttpStatus.OK)
-    public ProductModel updateProduct( @RequestPart("product") @Valid ProductModel model,
+    public void updateProduct(@RequestBody @Valid UpdateProductRequest request,
                                      @RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
-        return productService.updateProduct(model,user);
+        productService.updateProduct(request,user);
     }
 
     @GetMapping
@@ -58,9 +60,9 @@ public class ProductController {
         String user = userService.getUserFromToken(email);
         return productService.getAllSellersProducts(user,pageNo,pageSize);
     }
-    @GetMapping("/category/{categoryId}") //TODO: not yet implemented in the frontend
+    @GetMapping("/category/{categoryId}")
     @ResponseStatus(HttpStatus.OK)
-    public AllProductsPageResponse getAllProductsByCategory(@PathVariable(value="categoryId") Long categoryId,
+    public AllProductsPageResponse getAllProductsByCategory(@PathVariable(value="categoryId") String categoryId,
                                                             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
                                                             @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize){
         return productService.getAllProductsByCategory(categoryId,pageNo,pageSize);
@@ -80,7 +82,7 @@ public class ProductController {
         return productService.searchProduct(search, pageNo, pageSize);
     }
     @DeleteMapping("/delete/{productId}")
-    public void delete(@PathVariable (value="productId") String productId, @RequestHeader("Authorization") String email){
+    public void delete(@PathVariable (value="productId", required = false) String productId, @RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
         productService.delete(productId, user);
     }

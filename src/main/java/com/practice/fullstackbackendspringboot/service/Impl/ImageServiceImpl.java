@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -33,12 +34,16 @@ public class ImageServiceImpl implements ImageService {
     private final UserRepository userRepository;
 
     @Override
-    public void uploadProductPhoto(String id, MultipartFile file) {
-        Optional<Product> product = productRepository.findById(id);
-        Image image = new Image();
-        image.setProduct(product.get());
-        image.setPhotoUrl(processProductImage(id, file));
-        imageRepository.save(image);
+    public void uploadProductPhoto(String productId, MultipartFile[] files) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId));
+
+        for(MultipartFile file : files){
+            Image image = new Image();
+            image.setProduct(product);
+            image.setPhotoUrl(processProductImage(productId, file));
+            imageRepository.save(image);
+        }
     }
 
     @Override
@@ -48,14 +53,13 @@ public class ImageServiceImpl implements ImageService {
         userRepository.save(user);
     }
 
-
     @Override
     public byte[] getPhoto(String filename) throws IOException {
         return Files.readAllBytes(Paths.get(StringUtil.PHOTO_DIRECTORY + filename));
     }
 
-    private String processProductImage(String id, MultipartFile image) {
-        String filename = id+image.getOriginalFilename();
+    private String processProductImage(String productId, MultipartFile image) {
+        String filename = productId + "_" + System.currentTimeMillis() + "_" + image.getOriginalFilename();
         try {
             Path fileStorageLocation = Paths.get(StringUtil.PHOTO_DIRECTORY).toAbsolutePath().normalize();
 

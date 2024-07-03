@@ -20,8 +20,8 @@ public class ProductImageController {
     private final UserService userService;
 
     @PostMapping("/product/image/upload")
-    public void uploadProductPhoto(@RequestParam(value = "id") String id, @RequestParam(value = "file") MultipartFile file) {
-        imageService.uploadProductPhoto(id, file);
+    public void uploadProductPhoto(@RequestParam(value = "id") String productId, @RequestParam(value = "file") MultipartFile[] files) {
+        imageService.uploadProductPhoto(productId, files);
     }
     @PostMapping("/user/image/upload")
     public void uploadUserPhoto(@RequestHeader("Authorization") String email,  @RequestParam(value = "file") MultipartFile file) {

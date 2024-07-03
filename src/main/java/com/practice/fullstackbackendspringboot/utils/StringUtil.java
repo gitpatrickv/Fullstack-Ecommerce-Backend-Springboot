@@ -33,4 +33,5 @@ public class StringUtil {
     public static final String PRODUCT_ALREADY_EXISTS = "PRODUCT ALREADY EXISTS!";
     public static final String CATEGORY_NOT_FOUND = "CATEGORY NOT FOUND";
     public static final String STORE_NOT_FOUND = "STORE NOT FOUND: ";
+    public static final String RATING_EXCEEDS_MAXIMUM = "Invalid rating: Rating must not be greater than 5";
 }
