@@ -11,4 +11,5 @@ public class RateProductRequest {
 
     private String productId;
     private Double rating;
+    private String review;
 }

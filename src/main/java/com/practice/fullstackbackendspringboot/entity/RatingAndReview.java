@@ -8,13 +8,15 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "ratings")
-public class Rating {
+@Table(name = "rating_and_review")
+public class RatingAndReview {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long ratingId;
+    private Long reviewId;
     @Column(name="rating")
     private Double rating;
+    @Column(length = 1000)
+    private String review;
 
     @ManyToOne
     @JoinColumn(name="user_id")

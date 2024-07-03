@@ -54,7 +54,7 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<OrderItem> orderItems = new ArrayList<>();
     @OneToMany(mappedBy = "user")
-    private List<Rating> ratings = new ArrayList<>();
+    private List<RatingAndReview> ratingAndReviews = new ArrayList<>();
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
