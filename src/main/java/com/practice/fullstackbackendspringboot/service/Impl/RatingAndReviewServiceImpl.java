@@ -76,17 +76,18 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
     }
 
     @Override
-    public List<RatingAndReviewModel> getAllRatingAndReview(String productId) {
+    public List<RatingAndReviewModel> getAllRatingAndReview(String productId, Double rating, String status) {
         List<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByProduct_ProductId(productId);
         List<RatingAndReviewModel> ratingAndReviewModelList = new ArrayList<>();
 
         for(RatingAndReview ratingAndReview : ratingAndReviews){
-
-            RatingAndReviewModel ratingAndReviewModel = ratingAndReviewMapper.mapEntityToModel(ratingAndReview);
-            ratingAndReviewModel.setName(ratingAndReview.getUser().getName());
-            ratingAndReviewModel.setPhotoUrl(ratingAndReview.getUser().getPhotoUrl());
-            ratingAndReviewModel.setCreatedDate(ratingAndReview.getCreatedDate());
-            ratingAndReviewModelList.add(ratingAndReviewModel);
+            if(ratingAndReview.getRating().equals(rating) || status.isEmpty()) {
+                RatingAndReviewModel ratingAndReviewModel = ratingAndReviewMapper.mapEntityToModel(ratingAndReview);
+                ratingAndReviewModel.setName(ratingAndReview.getUser().getName());
+                ratingAndReviewModel.setPhotoUrl(ratingAndReview.getUser().getPhotoUrl());
+                ratingAndReviewModel.setCreatedDate(ratingAndReview.getCreatedDate());
+                ratingAndReviewModelList.add(ratingAndReviewModel);
+            }
         }
 
         return ratingAndReviewModelList;

@@ -10,5 +10,5 @@ public interface RatingAndReviewService {
 
     void rateAndReviewProduct(String email, RateProductRequest request);
     RatingAverageRequest getProductRatingAverage(String productId);
-    List<RatingAndReviewModel> getAllRatingAndReview(String productId);
+    List<RatingAndReviewModel> getAllRatingAndReview(String productId, Double rating, String status);
 }
