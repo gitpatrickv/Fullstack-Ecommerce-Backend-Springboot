@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface FavoritesRepository extends JpaRepository<Favorites, Long> {
 
-    Optional<Favorites> findByProductIdAndUserEmail(String productId, String email);
+    Optional<Favorites> findByProduct_ProductIdAndUserEmail(String productId, String email);
     List<Favorites> findAllByUserEmail(String email);
-    void deleteAllByProductId(String productId);
+    void deleteAllByProduct_ProductId(String productId);
 }

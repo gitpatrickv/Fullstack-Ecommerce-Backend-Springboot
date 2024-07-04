@@ -75,7 +75,7 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
         return ratingAverageRequest;
     }
 
-    @Override   //TODO: not yet implemented in the frontend
+    @Override
     public List<RatingAndReviewModel> getAllRatingAndReview(String productId) {
         List<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByProduct_ProductId(productId);
         List<RatingAndReviewModel> ratingAndReviewModelList = new ArrayList<>();

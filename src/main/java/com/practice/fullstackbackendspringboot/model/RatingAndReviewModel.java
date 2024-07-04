@@ -1,7 +1,6 @@
 package com.practice.fullstackbackendspringboot.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.practice.fullstackbackendspringboot.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -14,10 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,7 +34,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void placeOrder(String email) {
-        Optional<User> user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         List<Cart> cart = cartRepository.findAllByFilterTrueAndUserEmail(email);
 
         Map<String, List<Cart>> cartsByStore = cart.stream()
@@ -51,9 +49,10 @@ public class OrderServiceImpl implements OrderService {
 
             Order order = new Order();
             order.setStore(store.get());
-            order.setDeliveryAddress(user.get().getAddress());
-            order.setFullName(user.get().getName());
-            order.setContactNumber(user.get().getContactNumber());
+            order.setBuyer(user);
+            order.setDeliveryAddress(user.getAddress());
+            order.setFullName(user.getName());
+            order.setContactNumber(user.getContactNumber());
             order.setActive(true);
             order.setOrderStatus(StringUtil.PENDING);
             order.setOrderStatusInfo(StringUtil.ORDER_CONFIRMATION);
@@ -74,7 +73,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItem.setStoreName(carts.getStoreName());
                 orderItem.setProductName(carts.getProductName());
                 orderItem.setPhotoUrl(carts.getPhotoUrl());
-                orderItem.setUser(user.get());
+                orderItem.setUser(user);
                 orderItem.setColors(carts.getColors());
                 orderItem.setSizes(carts.getSizes());
                 orderItem.setOrder(order);

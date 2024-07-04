@@ -14,11 +14,12 @@ public class Favorites {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long favoriteId;
-    private String productId;
-    private String productName;
-    private Double price;
-    private String photoUrl;
     private boolean favorites;
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
 }

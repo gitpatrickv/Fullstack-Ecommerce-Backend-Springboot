@@ -254,7 +254,7 @@ public class ProductServiceImpl implements ProductService {
             prod.setDeleted(true);
         }
 
-        favoritesRepository.deleteAllByProductId(productId);
+        favoritesRepository.deleteAllByProduct_ProductId(productId);
     }
 
     private void getPhotoUrl(Product product, AllProductModel productModel){

@@ -44,8 +44,9 @@ public class User implements UserDetails {
     private List<Cart> cart;
     @OneToMany(mappedBy = "user")
     private List<Product> product;
+    @OneToMany(mappedBy = "buyer")
+    private List<Order> order;
     @OneToOne(mappedBy = "user")
-
     private Store store;
     @OneToOne
     private Image image;
