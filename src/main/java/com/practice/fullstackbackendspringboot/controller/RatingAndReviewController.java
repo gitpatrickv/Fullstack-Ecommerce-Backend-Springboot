@@ -1,8 +1,9 @@
 package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.RatingAndReviewModel;
-import com.practice.fullstackbackendspringboot.model.request.RatingAverageRequest;
 import com.practice.fullstackbackendspringboot.model.request.RateProductRequest;
+import com.practice.fullstackbackendspringboot.model.response.NumberOfUserRatingResponse;
+import com.practice.fullstackbackendspringboot.model.response.RatingAverageResponse;
 import com.practice.fullstackbackendspringboot.service.RatingAndReviewService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class RatingAndReviewController {
     }
     @GetMapping("/rating/{productId}")
     @ResponseStatus(HttpStatus.OK)
-    public RatingAverageRequest getProductRatingAverage(@PathVariable String productId){
+    public RatingAverageResponse getProductRatingAverage(@PathVariable String productId){
         return ratingAndReviewService.getProductRatingAverage(productId);
     }
     @GetMapping("/product/review/get/all/{productId}")
@@ -69,5 +70,9 @@ public class RatingAndReviewController {
         Double rating = 1.0;
         String status = "1";
         return ratingAndReviewService.getAllRatingAndReview(productId, rating, status);
+    }
+    @GetMapping("/product/rating/get/{productId}")
+    public NumberOfUserRatingResponse getTotalUserRating(@PathVariable String productId){
+        return ratingAndReviewService.getTotalUserRating(productId);
     }
 }

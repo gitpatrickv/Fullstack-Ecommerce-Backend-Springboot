@@ -4,8 +4,9 @@ import com.practice.fullstackbackendspringboot.entity.Product;
 import com.practice.fullstackbackendspringboot.entity.RatingAndReview;
 import com.practice.fullstackbackendspringboot.entity.User;
 import com.practice.fullstackbackendspringboot.model.RatingAndReviewModel;
-import com.practice.fullstackbackendspringboot.model.request.RatingAverageRequest;
 import com.practice.fullstackbackendspringboot.model.request.RateProductRequest;
+import com.practice.fullstackbackendspringboot.model.response.NumberOfUserRatingResponse;
+import com.practice.fullstackbackendspringboot.model.response.RatingAverageResponse;
 import com.practice.fullstackbackendspringboot.repository.ProductRepository;
 import com.practice.fullstackbackendspringboot.repository.RatingAndReviewRepository;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
@@ -52,7 +53,7 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
     }
 
     @Override
-    public RatingAverageRequest getProductRatingAverage(String productId) {
+    public RatingAverageResponse getProductRatingAverage(String productId) {
         List<RatingAndReview> ratings = ratingAndReviewRepository.findAllByProduct_ProductId(productId);
         Double ratingTotal = 0.0;
         double totalNumberOfUserRating = 0.0;
@@ -68,11 +69,11 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
         double avg = ratingTotal / totalNumberOfUserRating;
         Double roundedAvg = Math.round(avg * 10.0) / 10.0;
 
-        RatingAverageRequest ratingAverageRequest = new RatingAverageRequest();
-        ratingAverageRequest.setRatingAverage(roundedAvg);
-        ratingAverageRequest.setTotalNumberOfUserRating(totalNumberOfUserRating);
-        ratingAverageRequest.setProductId(productId);
-        return ratingAverageRequest;
+        RatingAverageResponse ratingAverageResponse = new RatingAverageResponse();
+        ratingAverageResponse.setRatingAverage(roundedAvg);
+        ratingAverageResponse.setTotalNumberOfUserRating(totalNumberOfUserRating);
+        ratingAverageResponse.setProductId(productId);
+        return ratingAverageResponse;
     }
 
     @Override
@@ -92,6 +93,51 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
 
         return ratingAndReviewModelList;
 
+    }
+
+    @Override
+    public NumberOfUserRatingResponse getTotalUserRating(String productId) {
+        List<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByProduct_ProductId(productId);
+        double total5StarRating = 0.0;
+        double total4StarRating = 0.0;
+        double total3StarRating = 0.0;
+        double total2StarRating = 0.0;
+        double total1StarRating = 0.0;
+
+        for(RatingAndReview ratingAndReview : ratingAndReviews){
+            if(ratingAndReview.getRating().equals(5.0)){
+                double numberOfUser = 1.0;
+                total5StarRating += numberOfUser;
+            }
+
+            if(ratingAndReview.getRating().equals(4.0)){
+                double numberOfUser = 1.0;
+                total4StarRating += numberOfUser;
+            }
+
+            if(ratingAndReview.getRating().equals(3.0)){
+                double numberOfUser = 1.0;
+                total3StarRating += numberOfUser;
+            }
+
+            if(ratingAndReview.getRating().equals(2.0)){
+                double numberOfUser = 1.0;
+                total2StarRating += numberOfUser;
+            }
+
+            if(ratingAndReview.getRating().equals(1.0)){
+                double numberOfUser = 1.0;
+                total1StarRating += numberOfUser;
+            }
+        }
+        NumberOfUserRatingResponse numberOfUserRatingResponse = new NumberOfUserRatingResponse();
+        numberOfUserRatingResponse.setTotal5StarUserRating(total5StarRating);
+        numberOfUserRatingResponse.setTotal4StarUserRating(total4StarRating);
+        numberOfUserRatingResponse.setTotal3StarUserRating(total3StarRating);
+        numberOfUserRatingResponse.setTotal2StarUserRating(total2StarRating);
+        numberOfUserRatingResponse.setTotal1StarUserRating(total1StarRating);
+
+        return numberOfUserRatingResponse;
     }
 
 }
