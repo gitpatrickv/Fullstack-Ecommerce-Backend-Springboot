@@ -1,16 +1,14 @@
 package com.practice.fullstackbackendspringboot.controller;
 
-import com.practice.fullstackbackendspringboot.model.RatingAndReviewModel;
 import com.practice.fullstackbackendspringboot.model.request.RateProductRequest;
 import com.practice.fullstackbackendspringboot.model.response.NumberOfUserRatingResponse;
+import com.practice.fullstackbackendspringboot.model.response.RatingAndReviewResponse;
 import com.practice.fullstackbackendspringboot.model.response.RatingAverageResponse;
 import com.practice.fullstackbackendspringboot.service.RatingAndReviewService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -31,45 +29,50 @@ public class RatingAndReviewController {
         return ratingAndReviewService.getProductRatingAverage(productId);
     }
     @GetMapping("/product/review/get/all/{productId}")
-    public List<RatingAndReviewModel> getAllRatingAndReview(@PathVariable String productId){
-        Double rating = 0.0;
-        String status = "";
-        return ratingAndReviewService.getAllRatingAndReview(productId, rating, status);
+    public RatingAndReviewResponse getAllRatingAndReview(@PathVariable String productId,
+                                                         @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                                         @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize){
+        return ratingAndReviewService.getAllRating(productId, pageNo, pageSize);
     }
 
     @GetMapping("/product/review/get/5/{productId}")
-    public List<RatingAndReviewModel> get5StarRating(@PathVariable String productId){
+    public RatingAndReviewResponse get5StarRating(@PathVariable String productId,
+                                                  @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                                  @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize){
         Double rating = 5.0;
-        String status = "5";
-        return ratingAndReviewService.getAllRatingAndReview(productId, rating, status);
+        return ratingAndReviewService.getAllRatingAndReview(productId, pageNo, pageSize, rating);
     }
 
     @GetMapping("/product/review/get/4/{productId}")
-    public List<RatingAndReviewModel> get4StarRating(@PathVariable String productId){
+    public RatingAndReviewResponse get4StarRating(@PathVariable String productId,
+                                                  @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                                  @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize){
         Double rating = 4.0;
-        String status = "4";
-        return ratingAndReviewService.getAllRatingAndReview(productId, rating, status);
+        return ratingAndReviewService.getAllRatingAndReview(productId, pageNo, pageSize, rating);
     }
 
     @GetMapping("/product/review/get/3/{productId}")
-    public List<RatingAndReviewModel> get3StarRating(@PathVariable String productId){
+    public RatingAndReviewResponse get3StarRating(@PathVariable String productId,
+                                                  @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                                  @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize){
         Double rating = 3.0;
-        String status = "3";
-        return ratingAndReviewService.getAllRatingAndReview(productId, rating, status);
+        return ratingAndReviewService.getAllRatingAndReview(productId, pageNo, pageSize, rating);
     }
 
     @GetMapping("/product/review/get/2/{productId}")
-    public List<RatingAndReviewModel> get2StarRating(@PathVariable String productId){
+    public RatingAndReviewResponse get2StarRating(@PathVariable String productId,
+                                                  @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                                  @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize){
         Double rating = 2.0;
-        String status = "2";
-        return ratingAndReviewService.getAllRatingAndReview(productId, rating, status);
+        return ratingAndReviewService.getAllRatingAndReview(productId, pageNo, pageSize, rating);
     }
 
     @GetMapping("/product/review/get/1/{productId}")
-    public List<RatingAndReviewModel> get1StarRating(@PathVariable String productId){
+    public RatingAndReviewResponse get1StarRating(@PathVariable String productId,
+                                                  @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                                  @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize){
         Double rating = 1.0;
-        String status = "1";
-        return ratingAndReviewService.getAllRatingAndReview(productId, rating, status);
+        return ratingAndReviewService.getAllRatingAndReview(productId, pageNo, pageSize, rating);
     }
     @GetMapping("/product/rating/get/{productId}")
     public NumberOfUserRatingResponse getTotalUserRating(@PathVariable String productId){

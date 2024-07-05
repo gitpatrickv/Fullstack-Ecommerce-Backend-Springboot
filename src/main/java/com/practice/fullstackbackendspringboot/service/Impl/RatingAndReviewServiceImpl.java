@@ -6,6 +6,8 @@ import com.practice.fullstackbackendspringboot.entity.User;
 import com.practice.fullstackbackendspringboot.model.RatingAndReviewModel;
 import com.practice.fullstackbackendspringboot.model.request.RateProductRequest;
 import com.practice.fullstackbackendspringboot.model.response.NumberOfUserRatingResponse;
+import com.practice.fullstackbackendspringboot.model.response.PageResponse;
+import com.practice.fullstackbackendspringboot.model.response.RatingAndReviewResponse;
 import com.practice.fullstackbackendspringboot.model.response.RatingAverageResponse;
 import com.practice.fullstackbackendspringboot.repository.ProductRepository;
 import com.practice.fullstackbackendspringboot.repository.RatingAndReviewRepository;
@@ -15,6 +17,10 @@ import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.RatingAndReviewMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -77,12 +83,20 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
     }
 
     @Override
-    public List<RatingAndReviewModel> getAllRatingAndReview(String productId, Double rating, String status) {
-        List<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByProduct_ProductId(productId);
+    public RatingAndReviewResponse getAllRatingAndReview(String productId, int pageNo, int pageSize, Double rating) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Page<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByRatingAndProduct_ProductId(rating, productId, pageable);
         List<RatingAndReviewModel> ratingAndReviewModelList = new ArrayList<>();
 
+        PageResponse pageResponse = new PageResponse();
+        pageResponse.setPageNo(ratingAndReviews.getNumber());
+        pageResponse.setPageSize(ratingAndReviews.getSize());
+        pageResponse.setTotalElements(ratingAndReviews.getTotalElements());
+        pageResponse.setTotalPages(ratingAndReviews.getTotalPages());
+        pageResponse.setLast(ratingAndReviews.isLast());
+
         for(RatingAndReview ratingAndReview : ratingAndReviews){
-            if(ratingAndReview.getRating().equals(rating) || status.isEmpty()) {
+            if(ratingAndReview.getRating().equals(rating)) {
                 RatingAndReviewModel ratingAndReviewModel = ratingAndReviewMapper.mapEntityToModel(ratingAndReview);
                 ratingAndReviewModel.setName(ratingAndReview.getUser().getName());
                 ratingAndReviewModel.setPhotoUrl(ratingAndReview.getUser().getPhotoUrl());
@@ -90,14 +104,36 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
                 ratingAndReviewModelList.add(ratingAndReviewModel);
             }
         }
+        return new RatingAndReviewResponse(ratingAndReviewModelList, pageResponse);
+    }
 
-        return ratingAndReviewModelList;
+    @Override
+    public RatingAndReviewResponse getAllRating(String productId, int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Page<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByProduct_ProductId(productId, pageable);
+        List<RatingAndReviewModel> ratingAndReviewModelList = new ArrayList<>();
 
+        PageResponse pageResponse = new PageResponse();
+        pageResponse.setPageNo(ratingAndReviews.getNumber());
+        pageResponse.setPageSize(ratingAndReviews.getSize());
+        pageResponse.setTotalElements(ratingAndReviews.getTotalElements());
+        pageResponse.setTotalPages(ratingAndReviews.getTotalPages());
+        pageResponse.setLast(ratingAndReviews.isLast());
+
+        for(RatingAndReview ratingAndReview : ratingAndReviews){
+            RatingAndReviewModel ratingAndReviewModel = ratingAndReviewMapper.mapEntityToModel(ratingAndReview);
+            ratingAndReviewModel.setName(ratingAndReview.getUser().getName());
+            ratingAndReviewModel.setPhotoUrl(ratingAndReview.getUser().getPhotoUrl());
+            ratingAndReviewModel.setCreatedDate(ratingAndReview.getCreatedDate());
+            ratingAndReviewModelList.add(ratingAndReviewModel);
+        }
+        return new RatingAndReviewResponse(ratingAndReviewModelList, pageResponse);
     }
 
     @Override
     public NumberOfUserRatingResponse getTotalUserRating(String productId) {
         List<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByProduct_ProductId(productId);
+        double allStarRating = 0.0;
         double total5StarRating = 0.0;
         double total4StarRating = 0.0;
         double total3StarRating = 0.0;
@@ -129,8 +165,12 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
                 double numberOfUser = 1.0;
                 total1StarRating += numberOfUser;
             }
+
+            double numberOfUser = 1.0;
+            allStarRating += numberOfUser;
         }
         NumberOfUserRatingResponse numberOfUserRatingResponse = new NumberOfUserRatingResponse();
+        numberOfUserRatingResponse.setOverallTotalUserRating(allStarRating);
         numberOfUserRatingResponse.setTotal5StarUserRating(total5StarRating);
         numberOfUserRatingResponse.setTotal4StarUserRating(total4StarRating);
         numberOfUserRatingResponse.setTotal3StarUserRating(total3StarRating);
@@ -139,5 +179,4 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
 
         return numberOfUserRatingResponse;
     }
-
 }
