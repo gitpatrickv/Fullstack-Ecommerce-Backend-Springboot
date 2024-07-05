@@ -3,7 +3,6 @@ package com.practice.fullstackbackendspringboot.controller;
 import com.practice.fullstackbackendspringboot.model.request.RateProductRequest;
 import com.practice.fullstackbackendspringboot.model.response.NumberOfUserRatingResponse;
 import com.practice.fullstackbackendspringboot.model.response.RatingAndReviewResponse;
-import com.practice.fullstackbackendspringboot.model.response.RatingAverageResponse;
 import com.practice.fullstackbackendspringboot.service.RatingAndReviewService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +21,6 @@ public class RatingAndReviewController {
     public void rateAndReviewProduct(@RequestHeader("Authorization") String email, @RequestBody RateProductRequest request){
         String user = userService.getUserFromToken(email);
         ratingAndReviewService.rateAndReviewProduct(user,request);
-    }
-    @GetMapping("/rating/{productId}")
-    @ResponseStatus(HttpStatus.OK)
-    public RatingAverageResponse getProductRatingAverage(@PathVariable String productId){
-        return ratingAndReviewService.getProductRatingAverage(productId);
     }
     @GetMapping("/product/review/get/all/{productId}")
     public RatingAndReviewResponse getAllRatingAndReview(@PathVariable String productId,

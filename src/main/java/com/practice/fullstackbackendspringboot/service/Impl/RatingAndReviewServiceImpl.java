@@ -8,7 +8,6 @@ import com.practice.fullstackbackendspringboot.model.request.RateProductRequest;
 import com.practice.fullstackbackendspringboot.model.response.NumberOfUserRatingResponse;
 import com.practice.fullstackbackendspringboot.model.response.PageResponse;
 import com.practice.fullstackbackendspringboot.model.response.RatingAndReviewResponse;
-import com.practice.fullstackbackendspringboot.model.response.RatingAverageResponse;
 import com.practice.fullstackbackendspringboot.repository.ProductRepository;
 import com.practice.fullstackbackendspringboot.repository.RatingAndReviewRepository;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
@@ -56,30 +55,6 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
             rating.setUser(user);
             ratingAndReviewRepository.save(rating);
         }
-    }
-
-    @Override
-    public RatingAverageResponse getProductRatingAverage(String productId) {
-        List<RatingAndReview> ratings = ratingAndReviewRepository.findAllByProduct_ProductId(productId);
-        Double ratingTotal = 0.0;
-        double totalNumberOfUserRating = 0.0;
-
-        for(RatingAndReview rating : ratings){
-            Double rate = rating.getRating();
-            ratingTotal += rate;
-
-            double numberOfUser = 1.0;
-            totalNumberOfUserRating += numberOfUser;
-        }
-
-        double avg = ratingTotal / totalNumberOfUserRating;
-        Double roundedAvg = Math.round(avg * 10.0) / 10.0;
-
-        RatingAverageResponse ratingAverageResponse = new RatingAverageResponse();
-        ratingAverageResponse.setRatingAverage(roundedAvg);
-        ratingAverageResponse.setTotalNumberOfUserRating(totalNumberOfUserRating);
-        ratingAverageResponse.setProductId(productId);
-        return ratingAverageResponse;
     }
 
     @Override
@@ -133,6 +108,7 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
     @Override
     public NumberOfUserRatingResponse getTotalUserRating(String productId) {
         List<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByProduct_ProductId(productId);
+        double ratingTotal = 0.0;
         double allStarRating = 0.0;
         double total5StarRating = 0.0;
         double total4StarRating = 0.0;
@@ -168,8 +144,16 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
 
             double numberOfUser = 1.0;
             allStarRating += numberOfUser;
+
+            Double rate = ratingAndReview.getRating();
+            ratingTotal += rate;
         }
+
+        double avg = ratingTotal / allStarRating;
+        Double roundedAvg = Math.round(avg * 10.0) / 10.0;
+
         NumberOfUserRatingResponse numberOfUserRatingResponse = new NumberOfUserRatingResponse();
+        numberOfUserRatingResponse.setRatingAverage(roundedAvg);
         numberOfUserRatingResponse.setOverallTotalUserRating(allStarRating);
         numberOfUserRatingResponse.setTotal5StarUserRating(total5StarRating);
         numberOfUserRatingResponse.setTotal4StarUserRating(total4StarRating);

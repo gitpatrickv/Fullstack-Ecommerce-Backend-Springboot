@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NumberOfUserRatingResponse {
+    private Double ratingAverage;
     private Double overallTotalUserRating;
     private Double total1StarUserRating;
     private Double total2StarUserRating;
