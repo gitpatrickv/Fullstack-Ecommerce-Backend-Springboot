@@ -22,4 +22,5 @@ public class CartModel {
     private String colors;
     private String sizes;
     private Long inventoryId;
+    private Long stockRemaining;
 }

@@ -30,4 +30,5 @@ public class OrderItemModel {
     private String fullName;
     private String colors;
     private String sizes;
+    private String productId;
 }

@@ -216,6 +216,7 @@ public class OrderServiceImpl implements OrderService {
 
         for(OrderItem orderItem : orderItems){
             Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
+            Product product = productRepository.findById(orderItem.getProduct().getProductId()).get();
 
             if(order.isActive() && order.getOrderStatus().equals(status1)
                     || !order.isActive() && order.getOrderStatus().equals(status1)
@@ -226,6 +227,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItemModel.setOrderStatusInfo(order.getOrderStatusInfo());
                 orderItemModel.setActive(order.isActive());
                 orderItemModel.setStoreId(order.getStore().getStoreId());
+                orderItemModel.setProductId(product.getProductId());
                 orderModels.add(orderItemModel);
             }
         }
