@@ -16,7 +16,7 @@ public class RatingAndReviewController {
 
     private final RatingAndReviewService ratingAndReviewService;
     private final UserService userService;
-    @PostMapping("/product/review")   //TODO: not yet implemented in the frontend
+    @PostMapping("/product/review")
     @ResponseStatus(HttpStatus.OK)
     public void rateAndReviewProduct(@RequestHeader("Authorization") String email, @RequestBody RateProductRequest request){
         String user = userService.getUserFromToken(email);

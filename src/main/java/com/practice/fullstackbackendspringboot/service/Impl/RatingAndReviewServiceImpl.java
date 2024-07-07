@@ -1,5 +1,6 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
+import com.practice.fullstackbackendspringboot.entity.OrderItem;
 import com.practice.fullstackbackendspringboot.entity.Product;
 import com.practice.fullstackbackendspringboot.entity.RatingAndReview;
 import com.practice.fullstackbackendspringboot.entity.User;
@@ -8,6 +9,7 @@ import com.practice.fullstackbackendspringboot.model.request.RateProductRequest;
 import com.practice.fullstackbackendspringboot.model.response.NumberOfUserRatingResponse;
 import com.practice.fullstackbackendspringboot.model.response.PageResponse;
 import com.practice.fullstackbackendspringboot.model.response.RatingAndReviewResponse;
+import com.practice.fullstackbackendspringboot.repository.OrderItemRepository;
 import com.practice.fullstackbackendspringboot.repository.ProductRepository;
 import com.practice.fullstackbackendspringboot.repository.RatingAndReviewRepository;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -35,8 +38,9 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
     private final ProductRepository productRepository;
     private final RatingAndReviewRepository ratingAndReviewRepository;
     private final RatingAndReviewMapper ratingAndReviewMapper;
+    private final OrderItemRepository orderItemRepository;
 
-    @Override   //TODO: not yet implemented in the frontend
+    @Override
     public void rateAndReviewProduct(String email, RateProductRequest request) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Product product = productRepository.findById(request.getProductId())
@@ -54,6 +58,14 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
             rating.setProduct(product);
             rating.setUser(user);
             ratingAndReviewRepository.save(rating);
+
+            Optional<OrderItem> orderItem = orderItemRepository.findByIdAndUserEmail(request.getId(), email);
+
+            if(orderItem.isPresent()){
+                OrderItem item = orderItem.get();
+                item.setRated(!item.isRated());
+                orderItemRepository.save(item);
+            }
         }
     }
 

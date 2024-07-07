@@ -1,16 +1,12 @@
 package com.practice.fullstackbackendspringboot.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonInclude(NON_DEFAULT)
 public class OrderItemModel {
 
     private Long id;
@@ -31,4 +27,5 @@ public class OrderItemModel {
     private String colors;
     private String sizes;
     private String productId;
+    private boolean rated;
 }

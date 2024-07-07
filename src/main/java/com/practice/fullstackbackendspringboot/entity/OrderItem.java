@@ -24,6 +24,7 @@ public class OrderItem extends AuditEntity{
     private String photoUrl;
     private String colors;
     private String sizes;
+    private boolean rated;
 
     @ManyToOne
     @JoinColumn(name = "cart_id")
