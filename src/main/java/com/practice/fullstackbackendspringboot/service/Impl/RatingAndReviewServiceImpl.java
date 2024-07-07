@@ -45,13 +45,11 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + request.getProductId()));
-        boolean isExists = ratingAndReviewRepository.existsByUserEmailAndProduct_ProductId(email, request.getProductId());
+        List<OrderItem> orderItems = orderItemRepository.findAllByRatedFalseAndProduct_ProductIdAndUserEmail(request.getProductId(),email);
 
         if(request.getRating() > 5){
             throw new IllegalArgumentException(StringUtil.RATING_EXCEEDS_MAXIMUM);
         }
-
-        if(!isExists){
             RatingAndReview rating = new RatingAndReview();
             rating.setRating(request.getRating());
             rating.setReview(request.getReview());
@@ -59,14 +57,10 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
             rating.setUser(user);
             ratingAndReviewRepository.save(rating);
 
-            Optional<OrderItem> orderItem = orderItemRepository.findByIdAndUserEmail(request.getId(), email);
-
-            if(orderItem.isPresent()){
-                OrderItem item = orderItem.get();
-                item.setRated(!item.isRated());
-                orderItemRepository.save(item);
+            for(OrderItem orderItem : orderItems){
+                orderItem.setRated(!orderItem.isRated());
+                orderItemRepository.save(orderItem);
             }
-        }
     }
 
     @Override
