@@ -14,7 +14,7 @@ public interface ProductService {
     AllProductsPageResponse getAllStoreProducts(String storeId, int pageNo, int PageSize);
     ProductModel getProductById(String productId);
     void delete(String productId, String email);
-    AllProductsPageResponse searchProduct(String search, int pageNo, int pageSize);
+    AllProductsPageResponse searchProduct(String search, int pageNo, int pageSize, String sortBy);
     AllProductsPageResponse getAllSellersProducts(String email, int pageNo, int pageSize);
     AllProductsPageResponse getAllProductsByCategory(String categoryId, int pageNo, int pageSize);
 

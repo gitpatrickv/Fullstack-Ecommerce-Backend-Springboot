@@ -78,8 +78,9 @@ public class ProductController {
     @ResponseStatus(HttpStatus.OK)
     public AllProductsPageResponse searchProduct(@RequestParam (value = "keyword") String search,
                                                  @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
-                                                 @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize){
-        return productService.searchProduct(search, pageNo, pageSize);
+                                                 @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize,
+                                                 @RequestParam(defaultValue = "productName", required = false) String sortBy){
+        return productService.searchProduct(search, pageNo, pageSize, sortBy);
     }
     @DeleteMapping("/delete/{productId}")
     public void delete(@PathVariable (value="productId", required = false) String productId, @RequestHeader("Authorization") String email){
