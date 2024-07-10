@@ -209,7 +209,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderItemModel> getCustomerOrdersByStatus(String email, String status1) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdDate");
+        Sort sort = Sort.by(Sort.Direction.DESC, StringUtil.Created_Date);
         List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email, sort);
 
         List<OrderItemModel> orderModels = new ArrayList<>();

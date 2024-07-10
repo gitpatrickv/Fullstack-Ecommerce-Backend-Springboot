@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -64,8 +63,8 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
     }
 
     @Override
-    public RatingAndReviewResponse getAllRatingAndReview(String productId, int pageNo, int pageSize, Double rating) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+    public RatingAndReviewResponse getReviewByRatingValue(String productId, int pageNo, int pageSize, Double rating) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, StringUtil.Created_Date));
         Page<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByRatingAndProduct_ProductId(rating, productId, pageable);
         List<RatingAndReviewModel> ratingAndReviewModelList = new ArrayList<>();
 
@@ -89,8 +88,8 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
     }
 
     @Override
-    public RatingAndReviewResponse getAllRating(String productId, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+    public RatingAndReviewResponse getAllProductRatingAndReview(String productId, int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, StringUtil.Created_Date));
         Page<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByProduct_ProductId(productId, pageable);
         List<RatingAndReviewModel> ratingAndReviewModelList = new ArrayList<>();
 

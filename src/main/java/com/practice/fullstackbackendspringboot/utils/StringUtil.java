@@ -34,4 +34,8 @@ public class StringUtil {
     public static final String CATEGORY_NOT_FOUND = "CATEGORY NOT FOUND";
     public static final String STORE_NOT_FOUND = "STORE NOT FOUND: ";
     public static final String RATING_EXCEEDS_MAXIMUM = "Invalid rating: Rating must not be greater than 5";
+    public static final String Created_Date = "createdDate";
+    public static final String Product_Sold = "productSold";
+    public static final String Product_Name = "productName";
+    public static final String Color = "colors";
 }

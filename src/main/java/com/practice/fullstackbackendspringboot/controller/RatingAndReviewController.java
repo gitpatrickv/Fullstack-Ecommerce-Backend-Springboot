@@ -23,10 +23,10 @@ public class RatingAndReviewController {
         ratingAndReviewService.rateAndReviewProduct(user,request);
     }
     @GetMapping("/product/review/get/all/{productId}")
-    public RatingAndReviewResponse getAllRatingAndReview(@PathVariable String productId,
+    public RatingAndReviewResponse getAllProductRatingAndReview(@PathVariable String productId,
                                                          @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
                                                          @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize){
-        return ratingAndReviewService.getAllRating(productId, pageNo, pageSize);
+        return ratingAndReviewService.getAllProductRatingAndReview(productId, pageNo, pageSize);
     }
 
     @GetMapping("/product/review/get/5/{productId}")
@@ -34,7 +34,7 @@ public class RatingAndReviewController {
                                                   @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
                                                   @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize){
         Double rating = 5.0;
-        return ratingAndReviewService.getAllRatingAndReview(productId, pageNo, pageSize, rating);
+        return ratingAndReviewService.getReviewByRatingValue(productId, pageNo, pageSize, rating);
     }
 
     @GetMapping("/product/review/get/4/{productId}")
@@ -42,7 +42,7 @@ public class RatingAndReviewController {
                                                   @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
                                                   @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize){
         Double rating = 4.0;
-        return ratingAndReviewService.getAllRatingAndReview(productId, pageNo, pageSize, rating);
+        return ratingAndReviewService.getReviewByRatingValue(productId, pageNo, pageSize, rating);
     }
 
     @GetMapping("/product/review/get/3/{productId}")
@@ -50,7 +50,7 @@ public class RatingAndReviewController {
                                                   @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
                                                   @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize){
         Double rating = 3.0;
-        return ratingAndReviewService.getAllRatingAndReview(productId, pageNo, pageSize, rating);
+        return ratingAndReviewService.getReviewByRatingValue(productId, pageNo, pageSize, rating);
     }
 
     @GetMapping("/product/review/get/2/{productId}")
@@ -58,7 +58,7 @@ public class RatingAndReviewController {
                                                   @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
                                                   @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize){
         Double rating = 2.0;
-        return ratingAndReviewService.getAllRatingAndReview(productId, pageNo, pageSize, rating);
+        return ratingAndReviewService.getReviewByRatingValue(productId, pageNo, pageSize, rating);
     }
 
     @GetMapping("/product/review/get/1/{productId}")
@@ -66,7 +66,7 @@ public class RatingAndReviewController {
                                                   @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
                                                   @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize){
         Double rating = 1.0;
-        return ratingAndReviewService.getAllRatingAndReview(productId, pageNo, pageSize, rating);
+        return ratingAndReviewService.getReviewByRatingValue(productId, pageNo, pageSize, rating);
     }
     @GetMapping("/product/rating/get/{productId}")
     public NumberOfUserRatingResponse getTotalUserRating(@PathVariable String productId){

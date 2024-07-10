@@ -7,7 +7,7 @@ import com.practice.fullstackbackendspringboot.model.response.RatingAndReviewRes
 public interface RatingAndReviewService {
 
     void rateAndReviewProduct(String email, RateProductRequest request);
-    RatingAndReviewResponse getAllRatingAndReview(String productId, int pageNo, int pageSize, Double rating);
+    RatingAndReviewResponse getReviewByRatingValue(String productId, int pageNo, int pageSize, Double rating);
     NumberOfUserRatingResponse getTotalUserRating(String productId);
-    RatingAndReviewResponse getAllRating(String productId, int pageNo, int pageSize);
+    RatingAndReviewResponse getAllProductRatingAndReview(String productId, int pageNo, int pageSize);
 }

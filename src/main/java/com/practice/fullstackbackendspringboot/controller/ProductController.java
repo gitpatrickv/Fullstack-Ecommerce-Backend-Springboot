@@ -4,6 +4,7 @@ import com.practice.fullstackbackendspringboot.model.ProductModel;
 import com.practice.fullstackbackendspringboot.model.SaveProductModel;
 import com.practice.fullstackbackendspringboot.model.request.UpdateProductRequest;
 import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
+import com.practice.fullstackbackendspringboot.model.response.SellersProductsPageResponse;
 import com.practice.fullstackbackendspringboot.service.ProductService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import jakarta.validation.Valid;
@@ -54,9 +55,9 @@ public class ProductController {
 
     @GetMapping("/store")
     @ResponseStatus(HttpStatus.OK)
-    public AllProductsPageResponse getAllSellersProducts(@RequestHeader("Authorization") String email,
-                                                       @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
-                                                       @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize){
+    public SellersProductsPageResponse getAllSellersProducts(@RequestHeader("Authorization") String email,
+                                                             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                                             @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize){
         String user = userService.getUserFromToken(email);
         return productService.getAllSellersProducts(user,pageNo,pageSize);
     }
