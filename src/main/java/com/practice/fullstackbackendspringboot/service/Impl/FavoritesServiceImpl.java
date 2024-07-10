@@ -6,7 +6,10 @@ import com.practice.fullstackbackendspringboot.entity.Product;
 import com.practice.fullstackbackendspringboot.entity.User;
 import com.practice.fullstackbackendspringboot.model.AllProductModel;
 import com.practice.fullstackbackendspringboot.model.FavoritesModel;
-import com.practice.fullstackbackendspringboot.repository.*;
+import com.practice.fullstackbackendspringboot.repository.CartRepository;
+import com.practice.fullstackbackendspringboot.repository.FavoritesRepository;
+import com.practice.fullstackbackendspringboot.repository.ProductRepository;
+import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.service.FavoritesService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.FavoritesMapper;
@@ -80,7 +83,7 @@ public class FavoritesServiceImpl implements FavoritesService {
 
             AllProductModel favoritesModel = new AllProductModel();
             favoritesModel.setProductName(product.get().getProductName());
-            favoritesModel.setPrice(product.get().getInventory().get(0).getPrice());
+            favoritesModel.setPrice(product.get().getInventory().iterator().next().getPrice());
             favoritesModel.setPhotoUrl(product.get().getImage().get(0).getPhotoUrl());
             favoritesModel.setProductId(product.get().getProductId());
             favoritesModel.setProductSold(product.get().getProductSold());

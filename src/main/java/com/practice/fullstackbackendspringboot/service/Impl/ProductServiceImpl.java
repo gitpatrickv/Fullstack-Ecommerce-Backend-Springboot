@@ -25,10 +25,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -61,7 +59,8 @@ public class ProductServiceImpl implements ProductService {
         product.setStore(store);
         product.setCategory(category);
 
-            List<Inventory> inventories = new ArrayList<>();
+            Set<Inventory> inventories = new HashSet<>();
+
             for(InventoryModel inv : model.getInventoryModels()) {
                 Inventory inventory = new Inventory();
                 inventory.setProduct(product);
@@ -70,8 +69,8 @@ public class ProductServiceImpl implements ProductService {
                 inventory.setSizes(inv.getSizes());
                 inventory.setQuantity(inv.getQuantity());
                 inventories.add(inventory);
-
             }
+
             product.setInventory(inventories);
             Product savedProduct = productRepository.save(product);
 
@@ -82,7 +81,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductModel getProductById(String productId) {
         Product products = productRepository.findById(productId).orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId));
         List<Image> images = imageRepository.findAllPhotoUrlByProduct_ProductId(productId);
-        List<Inventory> inventories = inventoryRepository.findAllByProduct_ProductId(productId);
+        Set<Inventory> inventories = inventoryRepository.findAllByProduct_ProductId(productId);
 
         List<InventoryModel> inventoryModels = new ArrayList<>();
         List<String> photoUrls = new ArrayList<>();
@@ -233,10 +232,10 @@ public class ProductServiceImpl implements ProductService {
             getPriceAndQuantity(product, allProductModel);
             allProductModel.setStoreName(product.getStore().getStoreName());
 
-            List<Inventory> inventories = inventoryRepository.findAllByProduct_ProductId(product.getProductId(), sort);
-            List<InventoryModel> inv = inventories.stream()
+            Set<Inventory> inventories = inventoryRepository.findAllByProduct_ProductId(product.getProductId(), sort);
+            Set<InventoryModel> inv = inventories.stream()
                     .map(inventoryMapper::mapInventoryEntityToInventoryModel)
-                    .toList();
+                    .collect(Collectors.toSet());
 
             allProductModel.setInventoryModels(inv);
             productModels.add(allProductModel);
@@ -266,9 +265,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private void getPriceAndQuantity(Product product, AllProductModel productModel){
-        List<Inventory> inventories = product.getInventory();
+        Set<Inventory> inventories = product.getInventory();
         if(inventories != null && !inventories.isEmpty()){
-            Inventory inventory = inventories.get(0);
+            Inventory inventory = inventories.iterator().next();
             productModel.setPrice(inventory.getPrice());
             productModel.setQuantity(inventory.getQuantity());
         }

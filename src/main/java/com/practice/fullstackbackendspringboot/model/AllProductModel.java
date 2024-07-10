@@ -9,8 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
 
@@ -36,7 +36,7 @@ public class AllProductModel {
     private String categoryId;
     private String categoryName;
     private String productDescription;
-    List<InventoryModel> inventoryModels = new ArrayList<>();
+    Set<InventoryModel> inventoryModels = new HashSet<>();
     private Long productSold;
 
 }

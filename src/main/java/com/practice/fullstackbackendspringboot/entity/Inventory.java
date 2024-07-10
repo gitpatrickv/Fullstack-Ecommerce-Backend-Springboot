@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "inventory")
+@EqualsAndHashCode(of = {"product", "colors", "sizes"})
 public class Inventory {
 
     @Id
