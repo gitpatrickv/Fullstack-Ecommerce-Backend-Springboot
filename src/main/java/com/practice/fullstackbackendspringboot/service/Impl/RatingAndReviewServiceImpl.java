@@ -1,18 +1,12 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
-import com.practice.fullstackbackendspringboot.entity.OrderItem;
-import com.practice.fullstackbackendspringboot.entity.Product;
-import com.practice.fullstackbackendspringboot.entity.RatingAndReview;
-import com.practice.fullstackbackendspringboot.entity.User;
+import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.RatingAndReviewModel;
 import com.practice.fullstackbackendspringboot.model.request.RateProductRequest;
 import com.practice.fullstackbackendspringboot.model.response.NumberOfUserRatingResponse;
 import com.practice.fullstackbackendspringboot.model.response.PageResponse;
 import com.practice.fullstackbackendspringboot.model.response.RatingAndReviewResponse;
-import com.practice.fullstackbackendspringboot.repository.OrderItemRepository;
-import com.practice.fullstackbackendspringboot.repository.ProductRepository;
-import com.practice.fullstackbackendspringboot.repository.RatingAndReviewRepository;
-import com.practice.fullstackbackendspringboot.repository.UserRepository;
+import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.RatingAndReviewService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.RatingAndReviewMapper;
@@ -38,6 +32,7 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
     private final RatingAndReviewRepository ratingAndReviewRepository;
     private final RatingAndReviewMapper ratingAndReviewMapper;
     private final OrderItemRepository orderItemRepository;
+    private final OrderRepository orderRepository;
 
     @Override
     public void rateAndReviewProduct(String email, RateProductRequest request) {
@@ -49,6 +44,7 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
         if(request.getRating() > 5){
             throw new IllegalArgumentException(StringUtil.RATING_EXCEEDS_MAXIMUM);
         }
+
             RatingAndReview rating = new RatingAndReview();
             rating.setRating(request.getRating());
             rating.setReview(request.getReview());
@@ -60,6 +56,14 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
                 orderItem.setRated(!orderItem.isRated());
                 orderItemRepository.save(orderItem);
             }
+
+        Boolean isExists = orderItemRepository.existsAllByRatedFalseAndOrder_OrderIdAndUserEmail(orderItems.get(0).getOrder().getOrderId(), email);
+
+        if(!isExists){
+            Order order = orderItems.get(0).getOrder();
+            order.setOrderStatus(StringUtil.RATED);
+            orderRepository.save(order);
+        }
     }
 
     @Override

@@ -19,7 +19,8 @@ public class StringUtil {
     public static final String ORDER_CANCELLED = "CANCELLED";
     public static final String ORDER_IS_CANCELLED = "Your order has been cancelled";
     public static final String ORDER_COMPLETED = "COMPLETED";
-    public static final String ORDER_DELIVERED = "Your order has been delivered";
+    public static final String RATED = "RATED";
+    public static final String ORDER_DELIVERED = "Parcel has been delivered";
     public static final String ORDER_CANCELLED_OR_NOT_ACTIVE = "ORDER IS CANCELLED OR NOT ACTIVE";
     public static final String TO_PAY = "TO PAY";
     public static final String TO_SHIP = "TO SHIP";

@@ -93,8 +93,7 @@ public class OrderController {
     @ResponseStatus(HttpStatus.OK)
     public List<OrderItemModel> getCustomerOrdersByCompletedStatus(@RequestHeader("Authorization") String email){
         String user =  userService.getUserFromToken(email);
-        String status = StringUtil.ORDER_COMPLETED;
-        return orderService.getCustomerOrdersByStatus(user, status);
+        return orderService.getCustomerOrdersByCompletedAndRatedStatus(user);
     }
 
     @GetMapping("/seller/get/pending/{storeId}")

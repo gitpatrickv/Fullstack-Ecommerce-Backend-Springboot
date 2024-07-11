@@ -13,6 +13,7 @@ public interface OrderService {
     void buyAgain(String email, String orderId);
     void processOrder(String email, String orderId);
     List<OrderItemModel> getCustomerOrdersByStatus(String email, String status1);
+    List<OrderItemModel> getCustomerOrdersByCompletedAndRatedStatus(String email);
     AllOrdersResponse getStoreOrdersByStatus(String email, String storeId, String status1);
     Set<OrderItemModel> getCustomerOrdersByOrderIdToRate(String email, String orderId);
 }

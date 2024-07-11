@@ -235,6 +235,31 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public List<OrderItemModel> getCustomerOrdersByCompletedAndRatedStatus(String email) {
+        Sort sort = Sort.by(Sort.Direction.DESC, StringUtil.Created_Date);
+        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email, sort);
+
+        List<OrderItemModel> orderModels = new ArrayList<>();
+
+        for(OrderItem orderItem : orderItems){
+            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
+            Product product = productRepository.findById(orderItem.getProduct().getProductId()).get();
+
+            if(order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED) || order.getOrderStatus().equals(StringUtil.RATED)) {
+                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
+                orderItemModel.setOrderStatus(order.getOrderStatus());
+                orderItemModel.setOrderStatusInfo(order.getOrderStatusInfo());
+                orderItemModel.setActive(order.isActive());
+                orderItemModel.setStoreId(order.getStore().getStoreId());
+                orderItemModel.setProductId(product.getProductId());
+                orderModels.add(orderItemModel);
+            }
+        }
+        return orderModels;
+    }
+
+    @Override
     public AllOrdersResponse getStoreOrdersByStatus(String email, String storeId, String status1) {
         userRepository.findByEmail(email);
         List<Order> orders = orderRepository.findAllByStore_StoreId(storeId);
