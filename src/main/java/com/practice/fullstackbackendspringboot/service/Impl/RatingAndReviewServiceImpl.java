@@ -39,7 +39,7 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + request.getProductId()));
-        List<OrderItem> orderItems = orderItemRepository.findAllByRatedFalseAndProduct_ProductIdAndUserEmail(request.getProductId(),email);
+        List<OrderItem> orderItems = orderItemRepository.findAllByRatedFalseAndProduct_ProductIdAndOrder_OrderIdAndUserEmail(request.getProductId(),request.getOrderId(),email);
 
         if(request.getRating() > 5){
             throw new IllegalArgumentException(StringUtil.RATING_EXCEEDS_MAXIMUM);
@@ -57,10 +57,10 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
                 orderItemRepository.save(orderItem);
             }
 
-        Boolean isExists = orderItemRepository.existsAllByRatedFalseAndOrder_OrderIdAndUserEmail(orderItems.get(0).getOrder().getOrderId(), email);
+        Boolean isExists = orderItemRepository.existsAllByRatedFalseAndOrder_OrderIdAndUserEmail(request.getOrderId(), email);
 
         if(!isExists){
-            Order order = orderItems.get(0).getOrder();
+            Order order = orderRepository.findById(request.getOrderId()).get();
             order.setOrderStatus(StringUtil.RATED);
             orderRepository.save(order);
         }
