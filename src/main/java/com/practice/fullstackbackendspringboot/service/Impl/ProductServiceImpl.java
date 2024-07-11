@@ -1,13 +1,11 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
 import com.practice.fullstackbackendspringboot.entity.*;
-import com.practice.fullstackbackendspringboot.model.AllProductModel;
-import com.practice.fullstackbackendspringboot.model.InventoryModel;
-import com.practice.fullstackbackendspringboot.model.ProductModel;
-import com.practice.fullstackbackendspringboot.model.SaveProductModel;
+import com.practice.fullstackbackendspringboot.model.*;
 import com.practice.fullstackbackendspringboot.model.request.UpdateProductRequest;
 import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
 import com.practice.fullstackbackendspringboot.model.response.PageResponse;
+import com.practice.fullstackbackendspringboot.model.response.SellersProductsPageResponse;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.ImageService;
 import com.practice.fullstackbackendspringboot.service.ProductService;
@@ -15,6 +13,7 @@ import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.AllProductMapper;
 import com.practice.fullstackbackendspringboot.utils.mapper.InventoryMapper;
 import com.practice.fullstackbackendspringboot.utils.mapper.ProductMapper;
+import com.practice.fullstackbackendspringboot.utils.mapper.SellersProductMapper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,10 +24,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -47,6 +44,7 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final InventoryMapper inventoryMapper;
     private final FavoritesRepository favoritesRepository;
+    private final SellersProductMapper sellersProductMapper;
 
     @Override
     public void saveProduct(SaveProductModel model, String email, MultipartFile[] files) {
@@ -61,7 +59,8 @@ public class ProductServiceImpl implements ProductService {
         product.setStore(store);
         product.setCategory(category);
 
-            List<Inventory> inventories = new ArrayList<>();
+            Set<Inventory> inventories = new HashSet<>();
+
             for(InventoryModel inv : model.getInventoryModels()) {
                 Inventory inventory = new Inventory();
                 inventory.setProduct(product);
@@ -70,8 +69,8 @@ public class ProductServiceImpl implements ProductService {
                 inventory.setSizes(inv.getSizes());
                 inventory.setQuantity(inv.getQuantity());
                 inventories.add(inventory);
-
             }
+
             product.setInventory(inventories);
             Product savedProduct = productRepository.save(product);
 
@@ -82,7 +81,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductModel getProductById(String productId) {
         Product products = productRepository.findById(productId).orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId));
         List<Image> images = imageRepository.findAllPhotoUrlByProduct_ProductId(productId);
-        List<Inventory> inventories = inventoryRepository.findAllByProduct_ProductId(productId);
+        Set<Inventory> inventories = inventoryRepository.findAllByProduct_ProductId(productId);
 
         List<InventoryModel> inventoryModels = new ArrayList<>();
         List<String> photoUrls = new ArrayList<>();
@@ -121,7 +120,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public AllProductsPageResponse getAllProducts(int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, StringUtil.Created_Date));
         Page<Product> products = productRepository.findAllByDeletedFalse(pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
@@ -145,7 +144,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public AllProductsPageResponse getAllProductsByCategory(String categoryId, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, StringUtil.Created_Date));
         Page<Product> products = productRepository.findAllByDeletedFalseAndCategory_CategoryId(categoryId,pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
@@ -169,7 +168,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public AllProductsPageResponse getAllStoreProducts(String storeId, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, StringUtil.Created_Date));
         Page<Product> products = productRepository.findAllByDeletedFalseAndStore_StoreId(storeId, pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
@@ -191,9 +190,18 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public AllProductsPageResponse searchProduct(String search, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo,pageSize);
+    public AllProductsPageResponse searchProduct(String search, int pageNo, int pageSize, String sortBy) {
+        Sort sort = Sort.by(StringUtil.Product_Name).ascending();
+
+        if(StringUtil.Product_Sold.equals(sortBy)){
+            sort = Sort.by(StringUtil.Product_Sold).descending();
+        } else if(StringUtil.Created_Date.equals(sortBy)){
+            sort = Sort.by(StringUtil.Created_Date).descending();
+        }
+
+        Pageable pageable = PageRequest.of(pageNo,pageSize, sort);
         Page<Product> products = productRepository.findByDeletedFalseAndProductNameContainingIgnoreCaseOrStore_StoreNameContainingIgnoreCase(search,search, pageable);
+
         List<AllProductModel> productModels = new ArrayList<>();
 
         PageResponse pageResponse = new PageResponse();
@@ -213,12 +221,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public AllProductsPageResponse getAllSellersProducts(String email, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, "createdDate"));
+    public SellersProductsPageResponse getAllSellersProducts(String email, int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, StringUtil.Created_Date));
         Optional<User> user = userRepository.findByEmail(email);
         Page<Product> products = productRepository.findAllByDeletedFalseAndUserEmail(user.get().getEmail(), pageable);
-        Sort sort = Sort.by(Sort.Direction.DESC, "colors");
-        List<AllProductModel> productModels = new ArrayList<>();
+        Sort sort = Sort.by(Sort.Direction.DESC, StringUtil.Color);
+        List<SellersProductModel> productModels = new ArrayList<>();
 
         PageResponse pageResponse = new PageResponse();
         pageResponse.setPageNo(products.getNumber());
@@ -228,20 +236,21 @@ public class ProductServiceImpl implements ProductService {
         pageResponse.setLast(products.isLast());
 
         for(Product product : products){
-            AllProductModel allProductModel = allProductMapper.mapProductEntityToProductModel(product);
-            getPhotoUrl(product, allProductModel);
-            getPriceAndQuantity(product, allProductModel);
+            SellersProductModel allProductModel = sellersProductMapper.mapProductEntityToProductModel(product);
+            allProductModel.setPrice(product.getInventory().iterator().next().getPrice());
+            allProductModel.setQuantity(product.getInventory().iterator().next().getQuantity());
+            allProductModel.setPhotoUrl(product.getImage().get(0).getPhotoUrl());
             allProductModel.setStoreName(product.getStore().getStoreName());
 
-            List<Inventory> inventories = inventoryRepository.findAllByProduct_ProductId(product.getProductId(), sort);
+            Set<Inventory> inventories = inventoryRepository.findAllByProduct_ProductId(product.getProductId(), sort);
             List<InventoryModel> inv = inventories.stream()
                     .map(inventoryMapper::mapInventoryEntityToInventoryModel)
-                    .toList();
+                    .collect(Collectors.toList());
 
             allProductModel.setInventoryModels(inv);
             productModels.add(allProductModel);
         }
-        return new AllProductsPageResponse(productModels, pageResponse);
+        return new SellersProductsPageResponse(productModels, pageResponse);
     }
 
     @Override
@@ -254,7 +263,7 @@ public class ProductServiceImpl implements ProductService {
             prod.setDeleted(true);
         }
 
-        favoritesRepository.deleteAllByProductId(productId);
+        favoritesRepository.deleteAllByProduct_ProductId(productId);
     }
 
     private void getPhotoUrl(Product product, AllProductModel productModel){
@@ -266,9 +275,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private void getPriceAndQuantity(Product product, AllProductModel productModel){
-        List<Inventory> inventories = product.getInventory();
+        Set<Inventory> inventories = product.getInventory();
         if(inventories != null && !inventories.isEmpty()){
-            Inventory inventory = inventories.get(0);
+            Inventory inventory = inventories.iterator().next();
             productModel.setPrice(inventory.getPrice());
             productModel.setQuantity(inventory.getQuantity());
         }

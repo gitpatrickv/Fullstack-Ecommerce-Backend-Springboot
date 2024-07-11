@@ -44,8 +44,9 @@ public class User implements UserDetails {
     private List<Cart> cart;
     @OneToMany(mappedBy = "user")
     private List<Product> product;
+    @OneToMany(mappedBy = "buyer")
+    private List<Order> order;
     @OneToOne(mappedBy = "user")
-
     private Store store;
     @OneToOne
     private Image image;
@@ -54,7 +55,7 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<OrderItem> orderItems = new ArrayList<>();
     @OneToMany(mappedBy = "user")
-    private List<Rating> ratings = new ArrayList<>();
+    private List<RatingAndReview> ratingAndReviews = new ArrayList<>();
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

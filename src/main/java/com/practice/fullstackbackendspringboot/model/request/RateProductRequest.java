@@ -10,5 +10,7 @@ import lombok.NoArgsConstructor;
 public class RateProductRequest {
 
     private String productId;
+    private String orderId;
     private Double rating;
+    private String review;
 }

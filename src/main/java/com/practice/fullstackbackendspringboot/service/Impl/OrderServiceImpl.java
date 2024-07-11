@@ -14,10 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,7 +34,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void placeOrder(String email) {
-        Optional<User> user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         List<Cart> cart = cartRepository.findAllByFilterTrueAndUserEmail(email);
 
         Map<String, List<Cart>> cartsByStore = cart.stream()
@@ -51,9 +49,10 @@ public class OrderServiceImpl implements OrderService {
 
             Order order = new Order();
             order.setStore(store.get());
-            order.setDeliveryAddress(user.get().getAddress());
-            order.setFullName(user.get().getName());
-            order.setContactNumber(user.get().getContactNumber());
+            order.setBuyer(user);
+            order.setDeliveryAddress(user.getAddress());
+            order.setFullName(user.getName());
+            order.setContactNumber(user.getContactNumber());
             order.setActive(true);
             order.setOrderStatus(StringUtil.PENDING);
             order.setOrderStatusInfo(StringUtil.ORDER_CONFIRMATION);
@@ -74,7 +73,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItem.setStoreName(carts.getStoreName());
                 orderItem.setProductName(carts.getProductName());
                 orderItem.setPhotoUrl(carts.getPhotoUrl());
-                orderItem.setUser(user.get());
+                orderItem.setUser(user);
                 orderItem.setColors(carts.getColors());
                 orderItem.setSizes(carts.getSizes());
                 orderItem.setOrder(order);
@@ -210,13 +209,14 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderItemModel> getCustomerOrdersByStatus(String email, String status1) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdDate");
+        Sort sort = Sort.by(Sort.Direction.DESC, StringUtil.Created_Date);
         List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email, sort);
 
         List<OrderItemModel> orderModels = new ArrayList<>();
 
         for(OrderItem orderItem : orderItems){
             Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
+            Product product = productRepository.findById(orderItem.getProduct().getProductId()).get();
 
             if(order.isActive() && order.getOrderStatus().equals(status1)
                     || !order.isActive() && order.getOrderStatus().equals(status1)
@@ -227,6 +227,32 @@ public class OrderServiceImpl implements OrderService {
                 orderItemModel.setOrderStatusInfo(order.getOrderStatusInfo());
                 orderItemModel.setActive(order.isActive());
                 orderItemModel.setStoreId(order.getStore().getStoreId());
+                orderItemModel.setProductId(product.getProductId());
+                orderModels.add(orderItemModel);
+            }
+        }
+        return orderModels;
+    }
+
+    @Override
+    public List<OrderItemModel> getCustomerOrdersByCompletedAndRatedStatus(String email) {
+        Sort sort = Sort.by(Sort.Direction.DESC, StringUtil.Created_Date);
+        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email, sort);
+
+        List<OrderItemModel> orderModels = new ArrayList<>();
+
+        for(OrderItem orderItem : orderItems){
+            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
+            Product product = productRepository.findById(orderItem.getProduct().getProductId()).get();
+
+            if(order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED) || order.getOrderStatus().equals(StringUtil.RATED)) {
+                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
+                orderItemModel.setOrderStatus(order.getOrderStatus());
+                orderItemModel.setOrderStatusInfo(order.getOrderStatusInfo());
+                orderItemModel.setActive(order.isActive());
+                orderItemModel.setStoreId(order.getStore().getStoreId());
+                orderItemModel.setProductId(product.getProductId());
                 orderModels.add(orderItemModel);
             }
         }
@@ -277,5 +303,23 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         return new AllOrdersResponse(orderModels);
+    }
+
+    @Override
+    public Set<OrderItemModel> getCustomerOrdersByOrderIdToRate(String email, String orderId) {
+        Set<OrderItem> orderItems = orderItemRepository.findAllByRatedFalseAndOrder_OrderIdAndUserEmail(orderId, email);
+        Set<OrderItemModel> orderItemModels = new HashSet<>();
+        Set<String> productIds = new HashSet<>();
+
+        for(OrderItem orderItem : orderItems){
+            String productId = orderItem.getProduct().getProductId();
+
+            if(!productIds.contains(productId)) {
+                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+                orderItemModels.add(orderItemModel);
+                productIds.add(productId);
+            }
+        }
+        return orderItemModels;
     }
 }

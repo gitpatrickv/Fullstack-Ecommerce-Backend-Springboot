@@ -4,6 +4,7 @@ import com.practice.fullstackbackendspringboot.model.ProductModel;
 import com.practice.fullstackbackendspringboot.model.SaveProductModel;
 import com.practice.fullstackbackendspringboot.model.request.UpdateProductRequest;
 import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
+import com.practice.fullstackbackendspringboot.model.response.SellersProductsPageResponse;
 import com.practice.fullstackbackendspringboot.service.ProductService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import jakarta.validation.Valid;
@@ -54,9 +55,9 @@ public class ProductController {
 
     @GetMapping("/store")
     @ResponseStatus(HttpStatus.OK)
-    public AllProductsPageResponse getAllSellersProducts(@RequestHeader("Authorization") String email,
-                                                       @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
-                                                       @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize){
+    public SellersProductsPageResponse getAllSellersProducts(@RequestHeader("Authorization") String email,
+                                                             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                                             @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize){
         String user = userService.getUserFromToken(email);
         return productService.getAllSellersProducts(user,pageNo,pageSize);
     }
@@ -78,8 +79,9 @@ public class ProductController {
     @ResponseStatus(HttpStatus.OK)
     public AllProductsPageResponse searchProduct(@RequestParam (value = "keyword") String search,
                                                  @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
-                                                 @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize){
-        return productService.searchProduct(search, pageNo, pageSize);
+                                                 @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize,
+                                                 @RequestParam(defaultValue = "productName", required = false) String sortBy){
+        return productService.searchProduct(search, pageNo, pageSize, sortBy);
     }
     @DeleteMapping("/delete/{productId}")
     public void delete(@PathVariable (value="productId", required = false) String productId, @RequestHeader("Authorization") String email){

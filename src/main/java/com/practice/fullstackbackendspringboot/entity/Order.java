@@ -27,6 +27,10 @@ public class Order extends AuditEntity{
     private String contactNumber;
 
     @ManyToOne
+    @JoinColumn(name = "buyer_id")
+    private User buyer;
+
+    @ManyToOne
     @JoinColumn(name = "store_id")
     private Store store;
 

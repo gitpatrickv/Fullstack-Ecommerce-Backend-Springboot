@@ -9,8 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
 
@@ -18,8 +18,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(NON_DEFAULT)
-public class AllProductModel {
-
+public class SellersProductModel {
     @Valid
 
     @NotNull(message = "{product.id.must.not.be.null}")
@@ -36,7 +35,6 @@ public class AllProductModel {
     private String categoryId;
     private String categoryName;
     private String productDescription;
-    Set<InventoryModel> inventoryModels = new HashSet<>();
+    List<InventoryModel> inventoryModels = new ArrayList<>();
     private Long productSold;
-
 }

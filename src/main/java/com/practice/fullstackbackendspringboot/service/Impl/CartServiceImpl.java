@@ -125,7 +125,13 @@ public class CartServiceImpl implements CartService {
     public List<CartModel> getAllProductsInCart(String email) {
         return cartRepository.findAllByUserEmailOrderByCreatedDateDesc(email)
                 .stream()
-                .map(cartMapper::mapCartEntityToCartModel)
+                .map(cart -> {
+                    CartModel cartModel = cartMapper.mapCartEntityToCartModel(cart);
+                    inventoryRepository.findById(cart.getInventory().getInventoryId())
+                            .ifPresent(inventory ->
+                                    cartModel.setStockRemaining(inventory.getQuantity()));
+                    return cartModel;
+                })
                 .toList();
     }
 
@@ -187,6 +193,7 @@ public class CartServiceImpl implements CartService {
         Double total = 0.0;
         long count = 0;
         long filteredItem = 0;
+        long numberOfProductFiltered = 0;
         Double totalShippingFee = 0.0;
 
         for(Cart cart : carts){
@@ -195,6 +202,9 @@ public class CartServiceImpl implements CartService {
 
             long filterNumber = cart.getQuantity();
             filteredItem += filterNumber;
+
+            long productFiltered = 1;
+            numberOfProductFiltered+=productFiltered;
         }
 
         for(Cart cart : cartCount){
@@ -217,6 +227,7 @@ public class CartServiceImpl implements CartService {
         cartTotalModel.setCartTotal(total);
         cartTotalModel.setCartItems(count);
         cartTotalModel.setQty(filteredItem);
+        cartTotalModel.setNumberOfProductFiltered(numberOfProductFiltered);
         cartTotalModel.setTotalShippingFee(totalShippingFee);
         cartTotalModel.setTotalPayment(total + totalShippingFee);
         return cartTotalModel;

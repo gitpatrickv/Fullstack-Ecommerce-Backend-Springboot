@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Builder
 @Getter
@@ -13,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "products")
+@EqualsAndHashCode(of = "productId", callSuper = false)
 public class Product extends AuditEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -24,7 +27,7 @@ public class Product extends AuditEntity{
     private Long productSold = 0L;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<Inventory> inventory = new ArrayList<>();
+    private Set<Inventory> inventory = new HashSet<>();
 
     @OneToMany(mappedBy = "product",  cascade = CascadeType.ALL)
     private List<Image> image = new ArrayList<>();
@@ -33,7 +36,10 @@ public class Product extends AuditEntity{
     private List<Cart> cart = new ArrayList<>();
 
     @OneToMany(mappedBy = "product")
-    private List<Rating> ratings = new ArrayList<>();
+    private List<RatingAndReview> ratingAndReviews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product")
+    private List<Favorites> favorites = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "user_id")
