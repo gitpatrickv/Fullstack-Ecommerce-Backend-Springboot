@@ -279,4 +279,22 @@ public class OrderServiceImpl implements OrderService {
         }
         return new AllOrdersResponse(orderModels);
     }
+
+    @Override
+    public Set<OrderItemModel> getCustomerOrdersByOrderIdToRate(String email, String orderId) {
+        Set<OrderItem> orderItems = orderItemRepository.findAllByRatedFalseAndOrder_OrderIdAndUserEmail(orderId, email);
+        Set<OrderItemModel> orderItemModels = new HashSet<>();
+        Set<String> productIds = new HashSet<>();
+
+        for(OrderItem orderItem : orderItems){
+            String productId = orderItem.getProduct().getProductId();
+
+            if(!productIds.contains(productId)) {
+                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+                orderItemModels.add(orderItemModel);
+                productIds.add(productId);
+            }
+        }
+        return orderItemModels;
+    }
 }

@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/order")
@@ -151,4 +152,11 @@ public class OrderController {
         String status1 = "";
         return orderService.getStoreOrdersByStatus(user, storeId, status1);
     }
+
+    @GetMapping("/get/{orderId}")
+    public Set<OrderItemModel> getCustomerOrdersByOrderIdToRate(@RequestHeader("Authorization") String email, @PathVariable(value="orderId") String orderId){
+        String user =  userService.getUserFromToken(email);
+        return orderService.getCustomerOrdersByOrderIdToRate(user,orderId);
+    }
+
 }
