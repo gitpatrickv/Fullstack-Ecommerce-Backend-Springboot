@@ -69,10 +69,10 @@ public class OrderServiceImpl implements OrderService {
 
                 orderItem.setQuantity(carts.getQuantity());
                 orderItem.setTotalAmount(carts.getTotalAmount());
-                orderItem.setPrice(carts.getPrice());
-                orderItem.setStoreName(carts.getStoreName());
-                orderItem.setProductName(carts.getProductName());
-                orderItem.setPhotoUrl(carts.getPhotoUrl());
+                orderItem.setPrice(inventory.get().getPrice());
+                orderItem.setStoreName(product.get().getStore().getStoreName());
+                orderItem.setProductName(product.get().getProductName());
+                orderItem.setPhotoUrl(product.get().getImage().get(0).getPhotoUrl());
                 orderItem.setUser(user);
                 orderItem.setColors(carts.getColors());
                 orderItem.setSizes(carts.getSizes());
@@ -160,14 +160,10 @@ public class OrderServiceImpl implements OrderService {
 
                 if(!product.get().isDeleted()) {
                     cart = new Cart();
-                    cart.setPhotoUrl(orderItem.getPhotoUrl());
-                    cart.setPrice(orderItem.getPrice());
-                    cart.setProductName(orderItem.getProduct().getProductName());
                     cart.setQuantity(quantity);
-                    cart.setStoreName(orderItem.getProduct().getStore().getStoreName());
                     cart.setStoreId(orderItem.getOrder().getStore().getStoreId());
                     cart.setTotalAmount(orderItem.getPrice() * quantity);
-                    cart.setProduct(orderItem.getProduct());
+                    cart.setProduct(product.get());
                     cart.setOrderItems(orderItems);
                     cart.setSizes(orderItem.getSizes());
                     cart.setColors(orderItem.getColors());

@@ -19,13 +19,9 @@ public class Cart extends AuditEntity{
     @GeneratedValue(strategy = GenerationType.UUID)
     private String cartId;
     private Long quantity;
-    private Double price;
     private Double totalAmount;
-    private String storeName;
     private String storeId;
-    private String productName;
     private boolean filter;
-    private String photoUrl;
     private String colors;
     private String sizes;
 

@@ -61,10 +61,10 @@ public class CartController {
         String user = userService.getUserFromToken(email);
         cartService.filterAllCartProducts(user);
     }
-    @PutMapping("/filter/store/{storeName}")
-    public void filterCartByStoreName(@PathVariable("storeName") String storeName, @RequestHeader("Authorization") String email){
+    @PutMapping("/filter/store/{storeId}")
+    public void filterCartByStoreName(@PathVariable("storeId") String storeId, @RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
-        cartService.filterCartByStoreName(storeName,user);
+        cartService.filterCartByStoreName(storeId,user);
     }
     @GetMapping("/checkout")
     public List<CartModel> checkout(@RequestHeader("Authorization") String email){

@@ -200,7 +200,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         Pageable pageable = PageRequest.of(pageNo,pageSize, sort);
-        Page<Product> products = productRepository.findByDeletedFalseAndProductNameContainingIgnoreCaseOrStore_StoreNameContainingIgnoreCase(search,search, pageable);
+        Page<Product> products = productRepository.findByDeletedFalseAndProductNameContainingIgnoreCaseOrDeletedFalseAndStore_StoreNameContainingIgnoreCase(search,search, pageable);
 
         List<AllProductModel> productModels = new ArrayList<>();
 

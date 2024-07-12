@@ -62,26 +62,13 @@ public class StoreServiceImpl implements StoreService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.STORE_NOT_FOUND + storeId));
 
-        boolean updatedStoreName = false;
-
-        if (request.getStoreName() != null && !request.getStoreName().equals(store.getStoreName())){
-            store.setStoreName(request.getStoreName());
-            updatedStoreName = true;
-        }
-
+        store.setStoreName(request.getStoreName() != null ? request.getStoreName() : store.getStoreName());
         store.setStoreDescription(request.getStoreDescription() != null ? request.getStoreDescription() : store.getStoreDescription());
         store.setAddress(request.getAddress() != null ? request.getAddress() :  store.getAddress());
         store.setContactNumber(request.getContactNumber() != null ? request.getContactNumber() : store.getContactNumber());
         store.setShippingFee(request.getShippingFee() != null ? request.getShippingFee() : store.getShippingFee());
         storeRepository.save(store);
 
-        if(updatedStoreName) {
-            List<Cart> carts = cartRepository.findAllByStoreId(storeId);
-            for (Cart cart : carts) {
-                cart.setStoreName(store.getStoreName());
-                cartRepository.save(cart);
-            }
-        }
     }
 }
 

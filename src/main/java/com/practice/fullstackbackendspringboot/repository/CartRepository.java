@@ -16,11 +16,10 @@ public interface CartRepository extends JpaRepository<Cart, String> {
     List<Cart> findAllByFilterAndUserEmail(boolean filter,String email);
     Optional<Cart> findByCartIdAndUserEmail(String cartId, String email);
     List<Cart> findAllByUserEmail(String email);
-    List<Cart> findAllByStoreNameIgnoreCaseAndUserEmail(String storeName, String email);
+    List<Cart> findAllByStoreIdAndUserEmail(String storeName, String email);
     Optional<Cart> deleteByCartIdAndUserEmail(String cartId, String email);
     List<Cart> deleteAllByFilterTrueAndUserEmail(String email);
     List<Cart> findAllByFilterTrueAndUserEmail(String email);
     List<Cart> findAllByFilterTrueAndUserEmailOrderByCreatedDateDesc(String email);
     List<Cart> findAllByUserEmailOrderByCreatedDateDesc(String email);
-    List<Cart> findAllByStoreId(String storeId);
 }
