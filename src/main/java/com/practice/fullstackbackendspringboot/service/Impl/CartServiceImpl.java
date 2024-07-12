@@ -65,6 +65,7 @@ public class CartServiceImpl implements CartService {
                 cart.setQuantity(cartRequest.getQuantity());
                 cart.setPrice(inventory.get().getPrice());
                 cart.setStoreName(product.get().getStore().getStoreName());
+                cart.setStoreId(product.get().getStore().getStoreId());
                 cart.setProductName(product.get().getProductName());
                 cart.setPhotoUrl(productImage.get(0).getPhotoUrl());
                 cart.setTotalAmount(inventory.get().getPrice() * cartRequest.getQuantity());
@@ -107,6 +108,7 @@ public class CartServiceImpl implements CartService {
                 cart.setQuantity(cartRequest.getQuantity());
                 cart.setPrice(inventory.get().getPrice());
                 cart.setStoreName(product.get().getStore().getStoreName());
+                cart.setStoreId(product.get().getStore().getStoreId());
                 cart.setProductName(product.get().getProductName());
                 cart.setPhotoUrl(productImage.get(0).getPhotoUrl());
                 cart.setTotalAmount(inventory.get().getPrice() * cartRequest.getQuantity());
@@ -213,12 +215,12 @@ public class CartServiceImpl implements CartService {
         }
 
         Map<String, List<Cart>> cartsByStore = carts.stream()
-                .collect(Collectors.groupingBy(Cart::getStoreName));
+                .collect(Collectors.groupingBy(Cart::getStoreId));
 
         for (Map.Entry<String, List<Cart>> cartMap : cartsByStore.entrySet()) {
-            String storeName = cartMap.getKey();
+            String storeId = cartMap.getKey();
 
-            Optional<Store> store = storeRepository.findByStoreName(storeName);
+            Optional<Store> store = storeRepository.findById(storeId);
             Double shipFee = store.get().getShippingFee();
             totalShippingFee+=shipFee;
         }

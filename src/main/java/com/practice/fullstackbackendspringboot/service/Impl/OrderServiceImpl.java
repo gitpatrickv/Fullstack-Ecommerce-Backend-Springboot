@@ -39,13 +39,13 @@ public class OrderServiceImpl implements OrderService {
         List<Cart> cart = cartRepository.findAllByFilterTrueAndUserEmail(email);
 
         Map<String, List<Cart>> cartsByStore = cart.stream()
-                .collect(Collectors.groupingBy(Cart::getStoreName));
+                .collect(Collectors.groupingBy(Cart::getStoreId));
 
         for (Map.Entry<String, List<Cart>> cartMap : cartsByStore.entrySet()) {
             List<Cart> storeCarts = cartMap.getValue();
-            String storeName = cartMap.getKey();
+            String storeId = cartMap.getKey();
 
-            Optional<Store> store = storeRepository.findByStoreName(storeName);
+            Optional<Store> store = storeRepository.findById(storeId);
 
             Order order = new Order();
             order.setStore(store.get());
@@ -162,9 +162,10 @@ public class OrderServiceImpl implements OrderService {
                     cart = new Cart();
                     cart.setPhotoUrl(orderItem.getPhotoUrl());
                     cart.setPrice(orderItem.getPrice());
-                    cart.setProductName(orderItem.getProductName());
+                    cart.setProductName(orderItem.getProduct().getProductName());
                     cart.setQuantity(quantity);
-                    cart.setStoreName(orderItem.getStoreName());
+                    cart.setStoreName(orderItem.getProduct().getStore().getStoreName());
+                    cart.setStoreId(orderItem.getOrder().getStore().getStoreId());
                     cart.setTotalAmount(orderItem.getPrice() * quantity);
                     cart.setProduct(orderItem.getProduct());
                     cart.setOrderItems(orderItems);

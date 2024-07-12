@@ -22,6 +22,7 @@ public class Cart extends AuditEntity{
     private Double price;
     private Double totalAmount;
     private String storeName;
+    private String storeId;
     private String productName;
     private boolean filter;
     private String photoUrl;

@@ -22,4 +22,5 @@ public interface CartRepository extends JpaRepository<Cart, String> {
     List<Cart> findAllByFilterTrueAndUserEmail(String email);
     List<Cart> findAllByFilterTrueAndUserEmailOrderByCreatedDateDesc(String email);
     List<Cart> findAllByUserEmailOrderByCreatedDateDesc(String email);
+    List<Cart> findAllByStoreId(String storeId);
 }
