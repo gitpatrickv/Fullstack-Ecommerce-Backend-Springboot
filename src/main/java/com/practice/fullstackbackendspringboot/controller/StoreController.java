@@ -2,6 +2,7 @@ package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.StoreModel;
 import com.practice.fullstackbackendspringboot.model.request.CreateStoreRequest;
+import com.practice.fullstackbackendspringboot.model.request.UpdateShopInfoRequest;
 import com.practice.fullstackbackendspringboot.service.StoreService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import jakarta.validation.Valid;
@@ -35,5 +36,11 @@ public class StoreController {
     public StoreModel getStoreInfo(@RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
         return storeService.getStoreInfo(user);
+    }
+    @PutMapping("/store/update/{storeId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateShopInfo(@RequestHeader("Authorization") String email, @PathVariable String storeId, @RequestBody @Valid UpdateShopInfoRequest request){
+        String user = userService.getUserFromToken(email);
+        storeService.updateShopInfo(user,storeId,request);
     }
 }
