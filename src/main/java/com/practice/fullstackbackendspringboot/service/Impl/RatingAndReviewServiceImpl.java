@@ -130,6 +130,34 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
     }
 
     @Override
+    public RatingAndReviewResponse manageAllProductReview(String email, String storeId, int pageNo, int pageSize) {
+        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, StringUtil.Created_Date));
+        Page<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByStoreId(storeId, pageable);
+        List<RatingAndReviewModel> ratingAndReviewModelList = new ArrayList<>();
+
+        PageResponse pageResponse = new PageResponse();
+        pageResponse.setPageNo(ratingAndReviews.getNumber());
+        pageResponse.setPageSize(ratingAndReviews.getSize());
+        pageResponse.setTotalElements(ratingAndReviews.getTotalElements());
+        pageResponse.setTotalPages(ratingAndReviews.getTotalPages());
+        pageResponse.setLast(ratingAndReviews.isLast());
+
+        for(RatingAndReview ratingAndReview : ratingAndReviews){
+            RatingAndReviewModel ratingAndReviewModel = ratingAndReviewMapper.mapEntityToModel(ratingAndReview);
+            ratingAndReviewModel.setName(ratingAndReview.getUser().getName());
+            ratingAndReviewModel.setPhotoUrl(ratingAndReview.getUser().getPhotoUrl());
+            ratingAndReviewModel.setCreatedDate(ratingAndReview.getCreatedDate());
+            ratingAndReviewModel.setProductName(ratingAndReview.getProduct().getProductName());
+            ratingAndReviewModel.setProductPhotoUrl(ratingAndReview.getProduct().getImage().get(0).getPhotoUrl());
+            ratingAndReviewModelList.add(ratingAndReviewModel);
+
+        }
+        return new RatingAndReviewResponse(ratingAndReviewModelList, pageResponse);
+
+    }
+
+    @Override
     public NumberOfUserRatingResponse getTotalUserRating(String productId) {
         List<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByProduct_ProductId(productId);
         double ratingTotal = 0.0;

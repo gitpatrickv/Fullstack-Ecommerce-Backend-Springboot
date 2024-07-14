@@ -30,6 +30,16 @@ public class RatingAndReviewController {
         String user = userService.getUserFromToken(email);
         ratingAndReviewService.replyToReview(user,request);
     }
+
+    @GetMapping("/seller/customer/service/review/{storeId}")
+    public RatingAndReviewResponse manageAllProductReview(@RequestHeader("Authorization") String email,
+                                                                @PathVariable String storeId,
+                                                                @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                                                @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize){
+        String user = userService.getUserFromToken(email);
+        return ratingAndReviewService.manageAllProductReview(user, storeId, pageNo, pageSize);
+    }
+
     @GetMapping("/product/review/get/all/{productId}")
     public RatingAndReviewResponse getAllProductRatingAndReview(@PathVariable String productId,
                                                          @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,

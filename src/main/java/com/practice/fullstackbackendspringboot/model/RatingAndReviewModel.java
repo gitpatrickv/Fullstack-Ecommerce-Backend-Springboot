@@ -20,5 +20,6 @@ public class RatingAndReviewModel {
     private String photoUrl;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdDate;
-
+    private String productName;
+    private String productPhotoUrl;
 }

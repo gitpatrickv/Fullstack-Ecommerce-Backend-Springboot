@@ -16,6 +16,7 @@ public interface RatingAndReviewRepository extends JpaRepository<RatingAndReview
     List<RatingAndReview> findAllByProduct_ProductId(String productId);
     Page<RatingAndReview> findAllByRatingAndProduct_ProductId(Double rating, String productId, Pageable pageable);
     Page<RatingAndReview> findAllByProduct_ProductId(String productId, Pageable pageable);
+    Page<RatingAndReview> findAllByStoreId(String storeId, Pageable pageable);
     Optional<RatingAndReview> findByReviewIdAndStoreId(Long reviewId, String storeId);
 
 }
