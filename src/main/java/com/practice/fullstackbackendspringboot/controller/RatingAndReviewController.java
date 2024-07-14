@@ -1,6 +1,7 @@
 package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.request.RateProductRequest;
+import com.practice.fullstackbackendspringboot.model.request.ReplyToReviewRequest;
 import com.practice.fullstackbackendspringboot.model.response.NumberOfUserRatingResponse;
 import com.practice.fullstackbackendspringboot.model.response.RatingAndReviewResponse;
 import com.practice.fullstackbackendspringboot.service.RatingAndReviewService;
@@ -21,6 +22,13 @@ public class RatingAndReviewController {
     public void rateAndReviewProduct(@RequestHeader("Authorization") String email, @RequestBody RateProductRequest request){
         String user = userService.getUserFromToken(email);
         ratingAndReviewService.rateAndReviewProduct(user,request);
+    }
+
+    @PostMapping("/product/review/reply")
+    @ResponseStatus(HttpStatus.OK)
+    public void replyToReview(@RequestHeader("Authorization") String email, @RequestBody ReplyToReviewRequest request){
+        String user = userService.getUserFromToken(email);
+        ratingAndReviewService.replyToReview(user,request);
     }
     @GetMapping("/product/review/get/all/{productId}")
     public RatingAndReviewResponse getAllProductRatingAndReview(@PathVariable String productId,

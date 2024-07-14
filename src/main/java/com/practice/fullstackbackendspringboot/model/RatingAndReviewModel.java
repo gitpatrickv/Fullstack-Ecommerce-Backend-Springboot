@@ -15,6 +15,7 @@ public class RatingAndReviewModel {
     private Long reviewId;
     private Double rating;
     private String review;
+    private String sellersReply;
     private String name;
     private String photoUrl;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")

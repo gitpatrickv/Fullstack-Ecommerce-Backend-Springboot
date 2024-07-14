@@ -3,6 +3,7 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.RatingAndReviewModel;
 import com.practice.fullstackbackendspringboot.model.request.RateProductRequest;
+import com.practice.fullstackbackendspringboot.model.request.ReplyToReviewRequest;
 import com.practice.fullstackbackendspringboot.model.response.NumberOfUserRatingResponse;
 import com.practice.fullstackbackendspringboot.model.response.PageResponse;
 import com.practice.fullstackbackendspringboot.model.response.RatingAndReviewResponse;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -64,6 +66,18 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
             Order order = orderRepository.findById(request.getOrderId()).get();
             order.setOrderStatus(StringUtil.RATED);
             orderRepository.save(order);
+        }
+    }
+
+    @Override
+    public void replyToReview(String email, ReplyToReviewRequest request) {
+        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Optional<RatingAndReview> ratingAndReview = ratingAndReviewRepository.findByReviewIdAndStoreId(request.getReviewId(), request.getStoreId());
+
+        if(ratingAndReview.isPresent()){
+            RatingAndReview reply = ratingAndReview.get();
+            reply.setSellersReply(request.getSellersReply());
+            ratingAndReviewRepository.save(reply);
         }
     }
 
