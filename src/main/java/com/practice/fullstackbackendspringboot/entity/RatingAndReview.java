@@ -20,6 +20,7 @@ public class RatingAndReview extends AuditEntity{
     @Column(length = 1000)
     private String sellersReply;
     private String storeId;
+    private boolean replied;
 
     @ManyToOne
     @JoinColumn(name="user_id")

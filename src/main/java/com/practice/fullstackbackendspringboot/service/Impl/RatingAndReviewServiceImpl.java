@@ -77,6 +77,7 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
         if(ratingAndReview.isPresent()){
             RatingAndReview reply = ratingAndReview.get();
             reply.setSellersReply(request.getSellersReply());
+            reply.setReplied(true);
             ratingAndReviewRepository.save(reply);
         }
     }
@@ -133,7 +134,7 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
     public RatingAndReviewResponse manageAllProductReview(String email, String storeId, int pageNo, int pageSize) {
         userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, StringUtil.Created_Date));
-        Page<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByStoreId(storeId, pageable);
+        Page<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByStoreIdOrderByRepliedAscCreatedDateDesc(storeId, pageable);
         List<RatingAndReviewModel> ratingAndReviewModelList = new ArrayList<>();
 
         PageResponse pageResponse = new PageResponse();

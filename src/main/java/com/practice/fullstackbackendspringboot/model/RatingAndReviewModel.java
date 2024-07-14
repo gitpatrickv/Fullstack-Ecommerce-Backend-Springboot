@@ -22,4 +22,6 @@ public class RatingAndReviewModel {
     private LocalDateTime createdDate;
     private String productName;
     private String productPhotoUrl;
+    private String storeId;
+    private boolean replied;
 }
