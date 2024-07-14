@@ -12,5 +12,5 @@ public interface RatingAndReviewService {
     RatingAndReviewResponse getReviewByRatingValue(String productId, int pageNo, int pageSize, Double rating);
     NumberOfUserRatingResponse getTotalUserRating(String productId);
     RatingAndReviewResponse getAllProductRatingAndReview(String productId, int pageNo, int pageSize);
-    RatingAndReviewResponse manageAllProductReview(String email, String storeId, int pageNo, int pageSize);
+    RatingAndReviewResponse manageAllProductReview(String email, String storeId, int pageNo, int pageSize, String sortBy);
 }

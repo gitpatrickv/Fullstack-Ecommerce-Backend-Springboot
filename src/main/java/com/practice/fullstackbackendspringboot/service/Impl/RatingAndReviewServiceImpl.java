@@ -131,10 +131,19 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
     }
 
     @Override
-    public RatingAndReviewResponse manageAllProductReview(String email, String storeId, int pageNo, int pageSize) {
+    public RatingAndReviewResponse manageAllProductReview(String email, String storeId, int pageNo, int pageSize, String sortBy) {
+
+        Sort sort = Sort.by(StringUtil.Created_Date).descending();
+
+        if(StringUtil.True.equals(sortBy)){
+            sort = Sort.by(StringUtil.Replied).ascending();
+        } else if(StringUtil.False.equals(sortBy)){
+            sort = Sort.by(StringUtil.Replied).descending();
+        }
+
         userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, StringUtil.Created_Date));
-        Page<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByStoreIdOrderByRepliedAscCreatedDateDesc(storeId, pageable);
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+        Page<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByStoreId(storeId, pageable);
         List<RatingAndReviewModel> ratingAndReviewModelList = new ArrayList<>();
 
         PageResponse pageResponse = new PageResponse();

@@ -39,4 +39,8 @@ public class StringUtil {
     public static final String Product_Sold = "productSold";
     public static final String Product_Name = "productName";
     public static final String Color = "colors";
+    public static final String Replied = "replied";
+    public static final String True = "true";
+    public static final String False = "false";
+    public static final String Rating = "rating";
 }
