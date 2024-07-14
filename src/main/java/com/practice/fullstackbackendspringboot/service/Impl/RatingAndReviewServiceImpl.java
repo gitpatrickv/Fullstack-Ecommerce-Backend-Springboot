@@ -41,13 +41,14 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + request.getProductId()));
         List<OrderItem> orderItems = orderItemRepository.findAllByRatedFalseAndProduct_ProductIdAndOrder_OrderIdAndUserEmail(request.getProductId(),request.getOrderId(),email);
 
-        if(request.getRating() > 5){
-            throw new IllegalArgumentException(StringUtil.RATING_EXCEEDS_MAXIMUM);
+        if(request.getRating() < 1 || request.getRating() > 5){
+            throw new IllegalArgumentException(StringUtil.RATING_EXCEEDS_LIMIT);
         }
 
             RatingAndReview rating = new RatingAndReview();
             rating.setRating(request.getRating());
             rating.setReview(request.getReview());
+            rating.setStoreId(product.getStore().getStoreId());
             rating.setProduct(product);
             rating.setUser(user);
             ratingAndReviewRepository.save(rating);

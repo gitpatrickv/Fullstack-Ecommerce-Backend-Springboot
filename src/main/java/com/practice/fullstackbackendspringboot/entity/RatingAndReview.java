@@ -17,6 +17,7 @@ public class RatingAndReview extends AuditEntity{
     private Double rating;
     @Column(length = 1000)
     private String review;
+    private String storeId;
 
     @ManyToOne
     @JoinColumn(name="user_id")
