@@ -49,8 +49,9 @@ public class ProductController {
     @ResponseStatus(HttpStatus.OK)
     public AllProductsPageResponse getAllStoreProducts(@PathVariable (value="storeId") String storeId,
                                                        @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
-                                                       @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize){
-        return productService.getAllStoreProducts(storeId,pageNo,pageSize);
+                                                       @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize,
+                                                       @RequestParam(defaultValue = "productName", required = false) String sortBy){
+        return productService.getAllStoreProducts(storeId,pageNo,pageSize, sortBy);
     }
 
     @GetMapping("/store")

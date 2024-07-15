@@ -167,8 +167,16 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public AllProductsPageResponse getAllStoreProducts(String storeId, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, StringUtil.Created_Date));
+    public AllProductsPageResponse getAllStoreProducts(String storeId, int pageNo, int pageSize, String sortBy) {
+        Sort sort = Sort.by(StringUtil.Product_Name).ascending();
+
+        if(StringUtil.Product_Sold.equals(sortBy)){
+            sort = Sort.by(StringUtil.Product_Sold).descending();
+        } else if(StringUtil.Created_Date.equals(sortBy)){
+            sort = Sort.by(StringUtil.Created_Date).descending();
+        }
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
         Page<Product> products = productRepository.findAllByDeletedFalseAndStore_StoreId(storeId, pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
