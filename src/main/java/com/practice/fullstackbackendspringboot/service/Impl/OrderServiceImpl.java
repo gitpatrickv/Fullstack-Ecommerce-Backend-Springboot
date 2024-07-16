@@ -113,7 +113,6 @@ public class OrderServiceImpl implements OrderService {
                 Order orders = order.get();
                 orders.setOrderStatus(StringUtil.ORDER_CANCELLED);
                 orders.setOrderStatusInfo(StringUtil.ORDER_IS_CANCELLED);
-                orders.setActive(false);
                 orderRepository.save(orders);
             }else{
                 throw new IllegalArgumentException(StringUtil.ORDER_NOT_FOUND);
@@ -136,6 +135,19 @@ public class OrderServiceImpl implements OrderService {
                 product1.setProductSold(product1.getProductSold() - orderItem.getQuantity());
                 productRepository.save(product1);
             }
+        }
+    }
+
+    @Override
+    public void confirmCancelOrder(String email, String orderId) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Optional<Order> order = orderRepository.findById(orderId);
+
+        if(order.isPresent()){
+            Order orders = order.get();
+            orders.setActive(false);
+            orderRepository.save(orders);
         }
     }
 

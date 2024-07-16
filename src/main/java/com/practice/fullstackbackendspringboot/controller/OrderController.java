@@ -37,6 +37,11 @@ public class OrderController {
         String user = userService.getUserFromToken(email);
         orderService.cancelOrder(user, orderId);
     }
+    @PostMapping("/confirm/cancel/{orderId}")
+    public void confirmCancelOrder(@RequestHeader("Authorization") String email, @PathVariable (value="orderId") String orderId) {
+        String user = userService.getUserFromToken(email);
+        orderService.confirmCancelOrder(user,orderId);
+    }
 
     @PutMapping("/process/{orderId}")
     @ResponseStatus(HttpStatus.OK)
