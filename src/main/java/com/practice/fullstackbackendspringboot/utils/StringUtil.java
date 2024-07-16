@@ -17,7 +17,7 @@ public class StringUtil {
     public static final String ADMIN_ALREADY_EXISTS = "ADMIN USER ALREADY EXISTS!";
     public static final String PENDING = "PENDING";
     public static final String ORDER_CANCELLED = "CANCELLED";
-    public static final String ORDER_IS_CANCELLED = "Your order has been cancelled";
+    public static final String ORDER_IS_CANCELLED = "The order has been cancelled";
     public static final String ORDER_COMPLETED = "COMPLETED";
     public static final String RATED = "RATED";
     public static final String ORDER_DELIVERED = "Parcel has been delivered";

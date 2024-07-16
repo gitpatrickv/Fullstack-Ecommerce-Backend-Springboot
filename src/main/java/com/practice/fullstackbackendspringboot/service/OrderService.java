@@ -2,6 +2,7 @@ package com.practice.fullstackbackendspringboot.service;
 
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
 import com.practice.fullstackbackendspringboot.model.response.AllOrdersResponse;
+import com.practice.fullstackbackendspringboot.model.response.TodoListTotal;
 
 import java.util.List;
 import java.util.Set;
@@ -17,4 +18,5 @@ public interface OrderService {
     List<OrderItemModel> getCustomerOrdersByCompletedAndRatedStatus(String email);
     AllOrdersResponse getStoreOrdersByStatus(String email, String storeId, String status1);
     Set<OrderItemModel> getCustomerOrdersByOrderIdToRate(String email, String orderId);
+    TodoListTotal getSellersTodoListTotal(String email, String storeId);
 }

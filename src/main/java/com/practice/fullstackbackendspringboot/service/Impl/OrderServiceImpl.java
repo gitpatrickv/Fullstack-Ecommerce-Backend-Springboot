@@ -4,6 +4,7 @@ import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
 import com.practice.fullstackbackendspringboot.model.OrderModel;
 import com.practice.fullstackbackendspringboot.model.response.AllOrdersResponse;
+import com.practice.fullstackbackendspringboot.model.response.TodoListTotal;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.OrderService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
@@ -337,5 +338,47 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         return orderItemModels;
+    }
+
+    @Override
+    public TodoListTotal getSellersTodoListTotal(String email, String storeId) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        List<Order> orders = orderRepository.findAllByActiveTrueAndStore_StoreId(storeId);
+
+        long pendingTotal = 0L;
+        long toProcessTotal = 0L;
+        long processShipmentTotal = 0L;
+        long pendingCancelledTotal = 0L;
+
+        for(Order order : orders){
+            if(order.getOrderStatus().equals(StringUtil.PENDING)){
+                long activeOrder = 1L;
+                pendingTotal+=activeOrder;
+            }
+
+            if(order.getOrderStatus().equals(StringUtil.TO_PAY)){
+                long activeOrder = 1L;
+                toProcessTotal+=activeOrder;
+            }
+
+            if(order.getOrderStatus().equals(StringUtil.TO_SHIP)){
+                long activeOrder = 1L;
+                processShipmentTotal+=activeOrder;
+            }
+
+            if(order.getOrderStatus().equals(StringUtil.ORDER_CANCELLED)){
+                long activeOrder = 1L;
+                pendingCancelledTotal+=activeOrder;
+            }
+        }
+
+        TodoListTotal total = new TodoListTotal();
+        total.setPendingOrderTotal(pendingTotal);
+        total.setToProcessShipmentTotal(toProcessTotal);
+        total.setProcessedShipmentTotal(processShipmentTotal);
+        total.setPendingCancelledOrders(pendingCancelledTotal);
+
+        return total;
     }
 }
