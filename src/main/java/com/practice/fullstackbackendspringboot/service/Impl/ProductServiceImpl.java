@@ -75,6 +75,9 @@ public class ProductServiceImpl implements ProductService {
             Product savedProduct = productRepository.save(product);
 
         imageService.uploadProductPhoto(savedProduct.getProductId(),files);
+
+        store.setProductCount(store.getProductCount() + 1L);
+        storeRepository.save(store);
     }
 
     @Override

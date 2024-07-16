@@ -185,6 +185,13 @@ public class OrderServiceImpl implements OrderService {
             orders.setOrderStatus(StringUtil.TO_PAY);
             orders.setOrderStatusInfo(StringUtil.PREPARE_ORDER);
             orderRepository.save(orders);
+
+            Optional<Store> store = storeRepository.findById(orders.getStore().getStoreId());
+            if(store.isPresent()){
+                Store store1 = store.get();
+                store1.setOrderCount(store1.getOrderCount() + 1L);
+                storeRepository.save(store1);
+            }
         }
         else if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_PAY)){
             orders.setOrderStatus(StringUtil.TO_SHIP);

@@ -27,4 +27,6 @@ public class StoreModel {
     private Double shippingFee;
     private String email;
     private String photoUrl;
+    private Long productCount;
+    private Long orderCount;
 }

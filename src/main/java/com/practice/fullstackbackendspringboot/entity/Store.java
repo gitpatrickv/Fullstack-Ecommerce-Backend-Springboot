@@ -24,6 +24,8 @@ public class Store {
     private String contactNumber;
     private Double shippingFee;
     private String photoUrl;
+    private Long productCount = 0L;
+    private Long orderCount = 0L;
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
     private List<Product> product = new ArrayList<>();
