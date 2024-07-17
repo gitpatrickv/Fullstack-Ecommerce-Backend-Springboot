@@ -56,7 +56,7 @@ public class SecurityConfig {
                                         .requestMatchers("/api/inventory/**").hasAnyAuthority(SELLER.name(), ADMIN.name())
 
                                         .requestMatchers("api/order/**").hasAnyAuthority(SELLER.name(), USER.name())
-
+                                        .requestMatchers(HttpMethod.GET, "api/order/get/todo/total/**").hasAuthority(SELLER.name())
                                         .anyRequest().authenticated()
                 );
         httpSecurity.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

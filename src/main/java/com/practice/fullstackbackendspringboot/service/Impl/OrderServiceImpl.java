@@ -373,11 +373,27 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
+        List<Product> products = productRepository.findAllByDeletedFalseAndStore_StoreId(storeId);
+        long outOfStock = 0L;
+
+        for(Product product : products){
+            List<Inventory> inventories = product.getInventory().stream().toList();
+
+            for(Inventory inventory : inventories){
+                long quantity = inventory.getQuantity();
+                long qty = 1L;
+                if(quantity == 0){
+                    outOfStock += qty;
+                }
+            }
+        }
+
         TodoListTotal total = new TodoListTotal();
         total.setPendingOrderTotal(pendingTotal);
         total.setToProcessShipmentTotal(toProcessTotal);
         total.setProcessedShipmentTotal(processShipmentTotal);
         total.setPendingCancelledOrders(pendingCancelledTotal);
+        total.setOutOfStock(outOfStock);
 
         return total;
     }

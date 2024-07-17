@@ -13,5 +13,6 @@ public class TodoListTotal {
     private Long toProcessShipmentTotal;
     private Long processedShipmentTotal;
     private Long pendingCancelledOrders;
+    private Long outOfStock;
 
 }

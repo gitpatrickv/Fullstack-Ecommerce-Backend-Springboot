@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ProductRepository extends JpaRepository<Product, String> {
 
@@ -14,5 +16,6 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     Page<Product> findAllByDeletedFalseAndUserEmail(String email, Pageable pageable);
     Page<Product> findAllByDeletedFalseAndCategory_CategoryId(String categoryId, Pageable pageable);
     Page<Product> findAllByDeletedFalse(Pageable pageable);
+    List<Product> findAllByDeletedFalseAndStore_StoreId(String storeId);
 
 }
