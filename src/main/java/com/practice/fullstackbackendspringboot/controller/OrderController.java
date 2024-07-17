@@ -3,6 +3,7 @@ package com.practice.fullstackbackendspringboot.controller;
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
 import com.practice.fullstackbackendspringboot.model.response.AllOrdersResponse;
 import com.practice.fullstackbackendspringboot.model.response.TodoListTotal;
+import com.practice.fullstackbackendspringboot.model.response.TotalSales;
 import com.practice.fullstackbackendspringboot.service.OrderService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
@@ -167,6 +168,11 @@ public class OrderController {
     public TodoListTotal getSellersTodoListTotal(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId){
         String user =  userService.getUserFromToken(email);
         return orderService.getSellersTodoListTotal(user,storeId);
+    }
+    @GetMapping("/get/sales/total/{storeId}")
+    public TotalSales getTotalSales(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId) {
+        String user =  userService.getUserFromToken(email);
+        return orderService.getTotalSales(user,storeId);
     }
 
 }

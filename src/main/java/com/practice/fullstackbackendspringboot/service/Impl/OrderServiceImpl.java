@@ -5,6 +5,7 @@ import com.practice.fullstackbackendspringboot.model.OrderItemModel;
 import com.practice.fullstackbackendspringboot.model.OrderModel;
 import com.practice.fullstackbackendspringboot.model.response.AllOrdersResponse;
 import com.practice.fullstackbackendspringboot.model.response.TodoListTotal;
+import com.practice.fullstackbackendspringboot.model.response.TotalSales;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.OrderService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
@@ -344,6 +345,7 @@ public class OrderServiceImpl implements OrderService {
     public TodoListTotal getSellersTodoListTotal(String email, String storeId) {
         userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Optional<Store> store = storeRepository.findById(storeId);
         List<Order> orders = orderRepository.findAllByActiveTrueAndStore_StoreId(storeId);
 
         long pendingTotal = 0L;
@@ -351,25 +353,27 @@ public class OrderServiceImpl implements OrderService {
         long processShipmentTotal = 0L;
         long pendingCancelledTotal = 0L;
 
-        for(Order order : orders){
-            if(order.getOrderStatus().equals(StringUtil.PENDING)){
-                long activeOrder = 1L;
-                pendingTotal+=activeOrder;
-            }
+        if(store.isPresent()) {
+            for (Order order : orders) {
+                if (order.getOrderStatus().equals(StringUtil.PENDING)) {
+                    long activeOrder = 1L;
+                    pendingTotal += activeOrder;
+                }
 
-            if(order.getOrderStatus().equals(StringUtil.TO_PAY)){
-                long activeOrder = 1L;
-                toProcessTotal+=activeOrder;
-            }
+                if (order.getOrderStatus().equals(StringUtil.TO_PAY)) {
+                    long activeOrder = 1L;
+                    toProcessTotal += activeOrder;
+                }
 
-            if(order.getOrderStatus().equals(StringUtil.TO_SHIP)){
-                long activeOrder = 1L;
-                processShipmentTotal+=activeOrder;
-            }
+                if (order.getOrderStatus().equals(StringUtil.TO_SHIP)) {
+                    long activeOrder = 1L;
+                    processShipmentTotal += activeOrder;
+                }
 
-            if(order.getOrderStatus().equals(StringUtil.ORDER_CANCELLED)){
-                long activeOrder = 1L;
-                pendingCancelledTotal+=activeOrder;
+                if (order.getOrderStatus().equals(StringUtil.ORDER_CANCELLED)) {
+                    long activeOrder = 1L;
+                    pendingCancelledTotal += activeOrder;
+                }
             }
         }
 
@@ -396,5 +400,27 @@ public class OrderServiceImpl implements OrderService {
         total.setOutOfStock(outOfStock);
 
         return total;
+    }
+
+    @Override
+    public TotalSales getTotalSales(String email, String storeId) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Optional<Store> store = storeRepository.findById(storeId);
+        List<Order> orders = orderRepository.findAllByActiveFalseAndStore_StoreId(storeId);
+        double totalSale = 0.0;
+
+        if(store.isPresent()) {
+            for (Order order : orders) {
+                if (order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED)) {
+                    double sales = order.getOrderTotalAmount() - store.get().getShippingFee();
+                    totalSale += sales;
+                }
+            }
+        }
+        TotalSales totalSales = new TotalSales();
+        totalSales.setTotalSales(totalSale);
+
+        return totalSales;
     }
 }
