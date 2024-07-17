@@ -2,9 +2,11 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 
 import com.practice.fullstackbackendspringboot.entity.Product;
 import com.practice.fullstackbackendspringboot.entity.Image;
+import com.practice.fullstackbackendspringboot.entity.Store;
 import com.practice.fullstackbackendspringboot.entity.User;
 import com.practice.fullstackbackendspringboot.repository.ImageRepository;
 import com.practice.fullstackbackendspringboot.repository.ProductRepository;
+import com.practice.fullstackbackendspringboot.repository.StoreRepository;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.service.ImageService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
@@ -32,6 +34,7 @@ public class ImageServiceImpl implements ImageService {
 
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final StoreRepository storeRepository;
 
     @Override
     public void uploadProductPhoto(String productId, MultipartFile[] files) {
@@ -51,6 +54,14 @@ public class ImageServiceImpl implements ImageService {
         User user = userRepository.findByEmail(email).get();
         user.setPhotoUrl(processUserImage(email,file));
         userRepository.save(user);
+    }
+
+    @Override
+    public void uploadStorePhoto(String email, String storeId, MultipartFile file) {
+        userRepository.findByEmail(email);
+        Store store = storeRepository.findById(storeId).get();
+        store.setPhotoUrl(processUserImage(storeId,file));
+        storeRepository.save(store);
     }
 
     @Override

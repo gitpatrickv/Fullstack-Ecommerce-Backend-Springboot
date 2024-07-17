@@ -102,6 +102,7 @@ public class ProductServiceImpl implements ProductService {
         productModel.setInventoryModels(inventoryModels);
         productModel.setProductImage(photoUrls);
         productModel.setStoreId(products.getStore().getStoreId());
+        productModel.setStorePhotoUrl(products.getStore().getPhotoUrl());
         return productModel;
     }
 
@@ -195,6 +196,7 @@ public class ProductServiceImpl implements ProductService {
             getPhotoUrl(product, allProductModel);
             getPriceAndQuantity(product, allProductModel);
             allProductModel.setStoreName(product.getStore().getStoreName());
+            allProductModel.setStorePhotoUrl(product.getStore().getPhotoUrl());
             productModels.add(allProductModel);
         }
         return new AllProductsPageResponse(productModels, pageResponse);
