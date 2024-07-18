@@ -302,6 +302,7 @@ public class OrderServiceImpl implements OrderService {
                     orderModel.setDeliveryAddress(order.getDeliveryAddress());
                     orderModel.setFullName(order.getFullName());
                     orderModel.setContactNumber(order.getContactNumber());
+                    orderModel.setCreatedDate(order.getCreatedDate());
 
                     List<OrderItemModel> orderItemModels = new ArrayList<>();
                     List<OrderItem> orderItems = order.getOrderItems();
@@ -316,6 +317,7 @@ public class OrderServiceImpl implements OrderService {
                         orderItemModels.add(orderItemModel);
                     }
                     orderModel.setOrderItemModels(orderItemModels);
+                    orderModels.sort(Comparator.comparing(OrderModel::getCreatedDate).reversed());
                     orderModels.add(orderModel);
                 }
             }
