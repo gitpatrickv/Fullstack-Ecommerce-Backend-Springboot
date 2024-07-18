@@ -4,6 +4,8 @@ import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
 import com.practice.fullstackbackendspringboot.model.OrderModel;
 import com.practice.fullstackbackendspringboot.model.response.AllOrdersResponse;
+import com.practice.fullstackbackendspringboot.model.response.TodoListTotal;
+import com.practice.fullstackbackendspringboot.model.response.TotalSales;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.OrderService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
@@ -39,13 +41,13 @@ public class OrderServiceImpl implements OrderService {
         List<Cart> cart = cartRepository.findAllByFilterTrueAndUserEmail(email);
 
         Map<String, List<Cart>> cartsByStore = cart.stream()
-                .collect(Collectors.groupingBy(Cart::getStoreName));
+                .collect(Collectors.groupingBy(Cart::getStoreId));
 
         for (Map.Entry<String, List<Cart>> cartMap : cartsByStore.entrySet()) {
             List<Cart> storeCarts = cartMap.getValue();
-            String storeName = cartMap.getKey();
+            String storeId = cartMap.getKey();
 
-            Optional<Store> store = storeRepository.findByStoreName(storeName);
+            Optional<Store> store = storeRepository.findById(storeId);
 
             Order order = new Order();
             order.setStore(store.get());
@@ -69,10 +71,10 @@ public class OrderServiceImpl implements OrderService {
 
                 orderItem.setQuantity(carts.getQuantity());
                 orderItem.setTotalAmount(carts.getTotalAmount());
-                orderItem.setPrice(carts.getPrice());
-                orderItem.setStoreName(carts.getStoreName());
-                orderItem.setProductName(carts.getProductName());
-                orderItem.setPhotoUrl(carts.getPhotoUrl());
+                orderItem.setPrice(inventory.get().getPrice());
+                orderItem.setStoreName(product.get().getStore().getStoreName());
+                orderItem.setProductName(product.get().getProductName());
+                orderItem.setPhotoUrl(product.get().getImage().get(0).getPhotoUrl());
                 orderItem.setUser(user);
                 orderItem.setColors(carts.getColors());
                 orderItem.setSizes(carts.getSizes());
@@ -113,7 +115,6 @@ public class OrderServiceImpl implements OrderService {
                 Order orders = order.get();
                 orders.setOrderStatus(StringUtil.ORDER_CANCELLED);
                 orders.setOrderStatusInfo(StringUtil.ORDER_IS_CANCELLED);
-                orders.setActive(false);
                 orderRepository.save(orders);
             }else{
                 throw new IllegalArgumentException(StringUtil.ORDER_NOT_FOUND);
@@ -140,6 +141,19 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public void confirmCancelOrder(String email, String orderId) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Optional<Order> order = orderRepository.findById(orderId);
+
+        if(order.isPresent()){
+            Order orders = order.get();
+            orders.setActive(false);
+            orderRepository.save(orders);
+        }
+    }
+
+    @Override
     public void buyAgain(String email, String orderId) {
         Optional<User> user = userRepository.findByEmail(email);
         List<OrderItem> orderItems = orderItemRepository.findAllByUserEmailAndOrder_OrderId(email,orderId);
@@ -160,13 +174,10 @@ public class OrderServiceImpl implements OrderService {
 
                 if(!product.get().isDeleted()) {
                     cart = new Cart();
-                    cart.setPhotoUrl(orderItem.getPhotoUrl());
-                    cart.setPrice(orderItem.getPrice());
-                    cart.setProductName(orderItem.getProductName());
                     cart.setQuantity(quantity);
-                    cart.setStoreName(orderItem.getStoreName());
+                    cart.setStoreId(orderItem.getOrder().getStore().getStoreId());
                     cart.setTotalAmount(orderItem.getPrice() * quantity);
-                    cart.setProduct(orderItem.getProduct());
+                    cart.setProduct(product.get());
                     cart.setOrderItems(orderItems);
                     cart.setSizes(orderItem.getSizes());
                     cart.setColors(orderItem.getColors());
@@ -188,6 +199,13 @@ public class OrderServiceImpl implements OrderService {
             orders.setOrderStatus(StringUtil.TO_PAY);
             orders.setOrderStatusInfo(StringUtil.PREPARE_ORDER);
             orderRepository.save(orders);
+
+            Optional<Store> store = storeRepository.findById(orders.getStore().getStoreId());
+            if(store.isPresent()){
+                Store store1 = store.get();
+                store1.setOrderCount(store1.getOrderCount() + 1L);
+                storeRepository.save(store1);
+            }
         }
         else if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_PAY)){
             orders.setOrderStatus(StringUtil.TO_SHIP);
@@ -284,6 +302,7 @@ public class OrderServiceImpl implements OrderService {
                     orderModel.setDeliveryAddress(order.getDeliveryAddress());
                     orderModel.setFullName(order.getFullName());
                     orderModel.setContactNumber(order.getContactNumber());
+                    orderModel.setCreatedDate(order.getCreatedDate());
 
                     List<OrderItemModel> orderItemModels = new ArrayList<>();
                     List<OrderItem> orderItems = order.getOrderItems();
@@ -298,6 +317,7 @@ public class OrderServiceImpl implements OrderService {
                         orderItemModels.add(orderItemModel);
                     }
                     orderModel.setOrderItemModels(orderItemModels);
+                    orderModels.sort(Comparator.comparing(OrderModel::getCreatedDate).reversed());
                     orderModels.add(orderModel);
                 }
             }
@@ -321,5 +341,88 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         return orderItemModels;
+    }
+
+    @Override
+    public TodoListTotal getSellersTodoListTotal(String email, String storeId) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Optional<Store> store = storeRepository.findById(storeId);
+        List<Order> orders = orderRepository.findAllByActiveTrueAndStore_StoreId(storeId);
+
+        long pendingTotal = 0L;
+        long toProcessTotal = 0L;
+        long processShipmentTotal = 0L;
+        long pendingCancelledTotal = 0L;
+
+        if(store.isPresent()) {
+            for (Order order : orders) {
+                if (order.getOrderStatus().equals(StringUtil.PENDING)) {
+                    long activeOrder = 1L;
+                    pendingTotal += activeOrder;
+                }
+
+                if (order.getOrderStatus().equals(StringUtil.TO_PAY)) {
+                    long activeOrder = 1L;
+                    toProcessTotal += activeOrder;
+                }
+
+                if (order.getOrderStatus().equals(StringUtil.TO_SHIP)) {
+                    long activeOrder = 1L;
+                    processShipmentTotal += activeOrder;
+                }
+
+                if (order.getOrderStatus().equals(StringUtil.ORDER_CANCELLED)) {
+                    long activeOrder = 1L;
+                    pendingCancelledTotal += activeOrder;
+                }
+            }
+        }
+
+        List<Product> products = productRepository.findAllByDeletedFalseAndStore_StoreId(storeId);
+        long outOfStock = 0L;
+
+        for(Product product : products){
+            List<Inventory> inventories = product.getInventory().stream().toList();
+
+            for(Inventory inventory : inventories){
+                long quantity = inventory.getQuantity();
+                long qty = 1L;
+                if(quantity == 0){
+                    outOfStock += qty;
+                }
+            }
+        }
+
+        TodoListTotal total = new TodoListTotal();
+        total.setPendingOrderTotal(pendingTotal);
+        total.setToProcessShipmentTotal(toProcessTotal);
+        total.setProcessedShipmentTotal(processShipmentTotal);
+        total.setPendingCancelledOrders(pendingCancelledTotal);
+        total.setOutOfStock(outOfStock);
+
+        return total;
+    }
+
+    @Override
+    public TotalSales getTotalSales(String email, String storeId) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Optional<Store> store = storeRepository.findById(storeId);
+        List<Order> orders = orderRepository.findAllByActiveFalseAndStore_StoreId(storeId);
+        double totalSale = 0.0;
+
+        if(store.isPresent()) {
+            for (Order order : orders) {
+                if (order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED)) {
+                    double sales = order.getOrderTotalAmount() - store.get().getShippingFee();
+                    totalSale += sales;
+                }
+            }
+        }
+        TotalSales totalSales = new TotalSales();
+        totalSales.setTotalSales(totalSale);
+
+        return totalSales;
     }
 }

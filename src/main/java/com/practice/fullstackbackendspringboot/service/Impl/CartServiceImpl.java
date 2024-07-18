@@ -39,7 +39,6 @@ public class CartServiceImpl implements CartService {
 
         Optional<User> user = userRepository.findByEmail(email);
         Optional<Product> product = productRepository.findById(cartRequest.getProductId());
-        List<Image> productImage = imageRepository.findAllPhotoUrlByProduct_ProductId(cartRequest.getProductId());
         Optional<Inventory> inventory = inventoryRepository.findByProduct_ProductId(cartRequest.getProductId());
         Optional<Cart> existingCart = cartRepository.findByProduct_ProductIdAndUserEmail(cartRequest.getProductId(),email);
         Cart cart;
@@ -63,10 +62,7 @@ public class CartServiceImpl implements CartService {
             }else{
                 cart.setProduct(product.get());
                 cart.setQuantity(cartRequest.getQuantity());
-                cart.setPrice(inventory.get().getPrice());
-                cart.setStoreName(product.get().getStore().getStoreName());
-                cart.setProductName(product.get().getProductName());
-                cart.setPhotoUrl(productImage.get(0).getPhotoUrl());
+                cart.setStoreId(product.get().getStore().getStoreId());
                 cart.setTotalAmount(inventory.get().getPrice() * cartRequest.getQuantity());
                 cart.setUser(user.get());
                 cart.setInventory(inventory.get());
@@ -81,7 +77,6 @@ public class CartServiceImpl implements CartService {
     public CartModel addProductWithVariationToCart(CartVariationRequest cartRequest, String email) {
         Optional<User> user = userRepository.findByEmail(email);
         Optional<Product> product = productRepository.findById(cartRequest.getProductId());
-        List<Image> productImage = imageRepository.findAllPhotoUrlByProduct_ProductId(cartRequest.getProductId());
         Optional<Inventory> inventory = inventoryRepository.findByColorsAndSizesAndProduct_ProductId(cartRequest.getColors(),cartRequest.getSizes(), cartRequest.getProductId());
         Optional<Cart> existingCart = cartRepository.findByColorsAndSizesAndProduct_ProductIdAndUserEmail(cartRequest.getColors(), cartRequest.getSizes(),cartRequest.getProductId(),email);
         Cart cart;
@@ -105,10 +100,7 @@ public class CartServiceImpl implements CartService {
             }else{
                 cart.setProduct(product.get());
                 cart.setQuantity(cartRequest.getQuantity());
-                cart.setPrice(inventory.get().getPrice());
-                cart.setStoreName(product.get().getStore().getStoreName());
-                cart.setProductName(product.get().getProductName());
-                cart.setPhotoUrl(productImage.get(0).getPhotoUrl());
+                cart.setStoreId(product.get().getStore().getStoreId());
                 cart.setTotalAmount(inventory.get().getPrice() * cartRequest.getQuantity());
                 cart.setColors(cartRequest.getColors());
                 cart.setSizes(cartRequest.getSizes());
@@ -128,8 +120,16 @@ public class CartServiceImpl implements CartService {
                 .map(cart -> {
                     CartModel cartModel = cartMapper.mapCartEntityToCartModel(cart);
                     inventoryRepository.findById(cart.getInventory().getInventoryId())
-                            .ifPresent(inventory ->
-                                    cartModel.setStockRemaining(inventory.getQuantity()));
+                            .ifPresent(inventory -> {
+                                cartModel.setStockRemaining(inventory.getQuantity());
+                                cartModel.setPrice(inventory.getPrice());
+                            });
+                    productRepository.findById(cart.getProduct().getProductId())
+                            .ifPresent(product -> {
+                                cartModel.setProductName(product.getProductName());
+                                cartModel.setStoreName(product.getStore().getStoreName());
+                                cartModel.setPhotoUrl(product.getImage().get(0).getPhotoUrl());
+                            });
                     return cartModel;
                 })
                 .toList();
@@ -162,9 +162,9 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public void filterCartByStoreName(String storeName, String email) {
+    public void filterCartByStoreName(String storeId, String email) {
         userRepository.findByEmail(email);
-        List<Cart> existingCart = cartRepository.findAllByStoreNameIgnoreCaseAndUserEmail(storeName, email);
+        List<Cart> existingCart = cartRepository.findAllByStoreIdAndUserEmail(storeId, email);
 
         boolean allFilteredCarts = existingCart.stream().allMatch(Cart::isFilter);
         boolean toggleFilter = !allFilteredCarts;
@@ -180,7 +180,20 @@ public class CartServiceImpl implements CartService {
         userRepository.findByEmail(email);
         return cartRepository.findAllByFilterTrueAndUserEmailOrderByCreatedDateDesc(email)
                 .stream()
-                .map(cartMapper::mapCartEntityToCartModel)
+                .map(cart -> {
+                    CartModel cartModel = cartMapper.mapCartEntityToCartModel(cart);
+                    inventoryRepository.findById(cart.getInventory().getInventoryId())
+                            .ifPresent(inventory -> {
+                                cartModel.setPrice(inventory.getPrice());
+                            });
+                    productRepository.findById(cart.getProduct().getProductId())
+                            .ifPresent(product -> {
+                                cartModel.setProductName(product.getProductName());
+                                cartModel.setStoreName(product.getStore().getStoreName());
+                                cartModel.setPhotoUrl(product.getImage().get(0).getPhotoUrl());
+                            });
+                    return cartModel;
+                })
                 .toList();
     }
 
@@ -213,12 +226,12 @@ public class CartServiceImpl implements CartService {
         }
 
         Map<String, List<Cart>> cartsByStore = carts.stream()
-                .collect(Collectors.groupingBy(Cart::getStoreName));
+                .collect(Collectors.groupingBy(Cart::getStoreId));
 
         for (Map.Entry<String, List<Cart>> cartMap : cartsByStore.entrySet()) {
-            String storeName = cartMap.getKey();
+            String storeId = cartMap.getKey();
 
-            Optional<Store> store = storeRepository.findByStoreName(storeName);
+            Optional<Store> store = storeRepository.findById(storeId);
             Double shipFee = store.get().getShippingFee();
             totalShippingFee+=shipFee;
         }

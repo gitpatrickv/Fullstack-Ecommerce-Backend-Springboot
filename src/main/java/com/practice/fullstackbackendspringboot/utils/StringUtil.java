@@ -17,7 +17,7 @@ public class StringUtil {
     public static final String ADMIN_ALREADY_EXISTS = "ADMIN USER ALREADY EXISTS!";
     public static final String PENDING = "PENDING";
     public static final String ORDER_CANCELLED = "CANCELLED";
-    public static final String ORDER_IS_CANCELLED = "Your order has been cancelled";
+    public static final String ORDER_IS_CANCELLED = "The order has been cancelled";
     public static final String ORDER_COMPLETED = "COMPLETED";
     public static final String RATED = "RATED";
     public static final String ORDER_DELIVERED = "Parcel has been delivered";
@@ -34,9 +34,13 @@ public class StringUtil {
     public static final String PRODUCT_ALREADY_EXISTS = "PRODUCT ALREADY EXISTS!";
     public static final String CATEGORY_NOT_FOUND = "CATEGORY NOT FOUND";
     public static final String STORE_NOT_FOUND = "STORE NOT FOUND: ";
-    public static final String RATING_EXCEEDS_MAXIMUM = "Invalid rating: Rating must not be greater than 5";
+    public static final String RATING_EXCEEDS_LIMIT = "Invalid rating: Rating must be between 1 and 5";
     public static final String Created_Date = "createdDate";
     public static final String Product_Sold = "productSold";
     public static final String Product_Name = "productName";
     public static final String Color = "colors";
+    public static final String Replied = "replied";
+    public static final String True = "true";
+    public static final String False = "false";
+    public static final String Rating = "rating";
 }

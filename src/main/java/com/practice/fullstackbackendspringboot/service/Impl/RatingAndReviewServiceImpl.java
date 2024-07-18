@@ -3,6 +3,7 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.RatingAndReviewModel;
 import com.practice.fullstackbackendspringboot.model.request.RateProductRequest;
+import com.practice.fullstackbackendspringboot.model.request.ReplyToReviewRequest;
 import com.practice.fullstackbackendspringboot.model.response.NumberOfUserRatingResponse;
 import com.practice.fullstackbackendspringboot.model.response.PageResponse;
 import com.practice.fullstackbackendspringboot.model.response.RatingAndReviewResponse;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -41,13 +43,14 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + request.getProductId()));
         List<OrderItem> orderItems = orderItemRepository.findAllByRatedFalseAndProduct_ProductIdAndOrder_OrderIdAndUserEmail(request.getProductId(),request.getOrderId(),email);
 
-        if(request.getRating() > 5){
-            throw new IllegalArgumentException(StringUtil.RATING_EXCEEDS_MAXIMUM);
+        if(request.getRating() < 1 || request.getRating() > 5){
+            throw new IllegalArgumentException(StringUtil.RATING_EXCEEDS_LIMIT);
         }
 
             RatingAndReview rating = new RatingAndReview();
             rating.setRating(request.getRating());
             rating.setReview(request.getReview());
+            rating.setStoreId(product.getStore().getStoreId());
             rating.setProduct(product);
             rating.setUser(user);
             ratingAndReviewRepository.save(rating);
@@ -63,6 +66,19 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
             Order order = orderRepository.findById(request.getOrderId()).get();
             order.setOrderStatus(StringUtil.RATED);
             orderRepository.save(order);
+        }
+    }
+
+    @Override
+    public void replyToReview(String email, ReplyToReviewRequest request) {
+        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Optional<RatingAndReview> ratingAndReview = ratingAndReviewRepository.findByReviewIdAndStoreId(request.getReviewId(), request.getStoreId());
+
+        if(ratingAndReview.isPresent()){
+            RatingAndReview reply = ratingAndReview.get();
+            reply.setSellersReply(request.getSellersReply());
+            reply.setReplied(true);
+            ratingAndReviewRepository.save(reply);
         }
     }
 
@@ -112,6 +128,43 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
             ratingAndReviewModelList.add(ratingAndReviewModel);
         }
         return new RatingAndReviewResponse(ratingAndReviewModelList, pageResponse);
+    }
+
+    @Override
+    public RatingAndReviewResponse manageAllProductReview(String email, String storeId, int pageNo, int pageSize, String sortBy) {
+
+        Sort sort = Sort.by(StringUtil.Created_Date).descending();
+
+        if(StringUtil.True.equals(sortBy)){
+            sort = Sort.by(StringUtil.Replied).ascending();
+        } else if(StringUtil.False.equals(sortBy)){
+            sort = Sort.by(StringUtil.Replied).descending();
+        }
+
+        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+        Page<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByStoreId(storeId, pageable);
+        List<RatingAndReviewModel> ratingAndReviewModelList = new ArrayList<>();
+
+        PageResponse pageResponse = new PageResponse();
+        pageResponse.setPageNo(ratingAndReviews.getNumber());
+        pageResponse.setPageSize(ratingAndReviews.getSize());
+        pageResponse.setTotalElements(ratingAndReviews.getTotalElements());
+        pageResponse.setTotalPages(ratingAndReviews.getTotalPages());
+        pageResponse.setLast(ratingAndReviews.isLast());
+
+        for(RatingAndReview ratingAndReview : ratingAndReviews){
+            RatingAndReviewModel ratingAndReviewModel = ratingAndReviewMapper.mapEntityToModel(ratingAndReview);
+            ratingAndReviewModel.setName(ratingAndReview.getUser().getName());
+            ratingAndReviewModel.setPhotoUrl(ratingAndReview.getUser().getPhotoUrl());
+            ratingAndReviewModel.setCreatedDate(ratingAndReview.getCreatedDate());
+            ratingAndReviewModel.setProductName(ratingAndReview.getProduct().getProductName());
+            ratingAndReviewModel.setProductPhotoUrl(ratingAndReview.getProduct().getImage().get(0).getPhotoUrl());
+            ratingAndReviewModelList.add(ratingAndReviewModel);
+
+        }
+        return new RatingAndReviewResponse(ratingAndReviewModelList, pageResponse);
+
     }
 
     @Override

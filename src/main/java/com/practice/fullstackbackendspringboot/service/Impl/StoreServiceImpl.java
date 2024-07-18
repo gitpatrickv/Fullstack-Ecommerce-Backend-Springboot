@@ -1,17 +1,23 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
+import com.practice.fullstackbackendspringboot.entity.Cart;
 import com.practice.fullstackbackendspringboot.entity.Store;
 import com.practice.fullstackbackendspringboot.entity.User;
 import com.practice.fullstackbackendspringboot.model.StoreModel;
 import com.practice.fullstackbackendspringboot.model.request.CreateStoreRequest;
+import com.practice.fullstackbackendspringboot.model.request.UpdateShopInfoRequest;
+import com.practice.fullstackbackendspringboot.repository.CartRepository;
 import com.practice.fullstackbackendspringboot.repository.StoreRepository;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.service.StoreService;
+import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.StoreMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -21,9 +27,11 @@ public class StoreServiceImpl implements StoreService {
 
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
+    private final CartRepository cartRepository;
     private final StoreMapper mapper;
-@Override
-public void createStore(CreateStoreRequest request, String email){
+
+    @Override
+    public void createStore(CreateStoreRequest request, String email){
         Optional<User> user = userRepository.findByEmail(email);
         boolean isExists = storeRepository.existsByStoreNameIgnoreCase(request.getStoreName());
 
@@ -45,6 +53,22 @@ public void createStore(CreateStoreRequest request, String email){
         StoreModel storeModel = mapper.mapEntityToModel(store);
         storeModel.setEmail(store.getUser().getEmail());
         return storeModel;
+    }
+
+    @Override
+    public void updateShopInfo(String email, String storeId, UpdateShopInfoRequest request) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.STORE_NOT_FOUND + storeId));
+
+        store.setStoreName(request.getStoreName() != null ? request.getStoreName() : store.getStoreName());
+        store.setStoreDescription(request.getStoreDescription() != null ? request.getStoreDescription() : store.getStoreDescription());
+        store.setAddress(request.getAddress() != null ? request.getAddress() :  store.getAddress());
+        store.setContactNumber(request.getContactNumber() != null ? request.getContactNumber() : store.getContactNumber());
+        store.setShippingFee(request.getShippingFee() != null ? request.getShippingFee() : store.getShippingFee());
+        storeRepository.save(store);
+
     }
 }
 

@@ -8,6 +8,7 @@ public interface ImageService {
 
     void uploadProductPhoto(String productId, MultipartFile[] files);
     void uploadUserPhoto(String email, MultipartFile file);
+    void uploadStorePhoto(String email, String storeId, MultipartFile file);
     public byte[] getPhoto(String filename) throws IOException;
 
 }
