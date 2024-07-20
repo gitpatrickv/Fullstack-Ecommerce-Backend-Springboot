@@ -3,6 +3,7 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 import com.practice.fullstackbackendspringboot.entity.Cart;
 import com.practice.fullstackbackendspringboot.entity.Store;
 import com.practice.fullstackbackendspringboot.entity.User;
+import com.practice.fullstackbackendspringboot.entity.constants.Role;
 import com.practice.fullstackbackendspringboot.model.StoreModel;
 import com.practice.fullstackbackendspringboot.model.request.CreateStoreRequest;
 import com.practice.fullstackbackendspringboot.model.request.UpdateShopInfoRequest;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -68,7 +70,24 @@ public class StoreServiceImpl implements StoreService {
         store.setContactNumber(request.getContactNumber() != null ? request.getContactNumber() : store.getContactNumber());
         store.setShippingFee(request.getShippingFee() != null ? request.getShippingFee() : store.getShippingFee());
         storeRepository.save(store);
+    }
 
+    @Override
+    public List<StoreModel> getAllStores(String email) {
+         Optional<User> user = userRepository.findByEmail(email);
+
+        if (!user.isPresent() || !user.get().getRole().equals(Role.ADMIN)) {
+            return Collections.emptyList();
+        }
+
+        return storeRepository.findAll()
+                .stream()
+                .map(store -> {
+                    StoreModel storeModel = mapper.mapEntityToModel(store);
+                    storeModel.setEmail(store.getUser().getEmail());
+                    return storeModel;
+                })
+                .toList();
     }
 }
 

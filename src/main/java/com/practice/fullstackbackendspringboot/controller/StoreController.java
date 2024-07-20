@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -42,5 +44,12 @@ public class StoreController {
     public void updateShopInfo(@RequestHeader("Authorization") String email, @PathVariable String storeId, @RequestBody @Valid UpdateShopInfoRequest request){
         String user = userService.getUserFromToken(email);
         storeService.updateShopInfo(user,storeId,request);
+    }
+
+    @GetMapping("/store/list")
+    @ResponseStatus(HttpStatus.OK)
+    public List<StoreModel> getAllStores(@RequestHeader("Authorization") String email){
+        String user = userService.getUserFromToken(email);
+        return storeService.getAllStores(user);
     }
 }

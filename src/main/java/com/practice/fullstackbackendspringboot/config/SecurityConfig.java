@@ -33,7 +33,7 @@ public class SecurityConfig {
                                         .requestMatchers("/api/admin/**").hasAuthority(ADMIN.name())
                                         .requestMatchers("/api/seller/**").hasAuthority(SELLER.name())
 
-                                        .requestMatchers("/api/store/**").hasAuthority(SELLER.name())
+                                        .requestMatchers("/api/store/**").hasAnyAuthority(SELLER.name(), ADMIN.name())
                                         .requestMatchers("/api/cart/**").hasAuthority(USER.name())
 
                                         .requestMatchers(HttpMethod.POST, "/api/product/category/add").hasAuthority(ADMIN.name())
