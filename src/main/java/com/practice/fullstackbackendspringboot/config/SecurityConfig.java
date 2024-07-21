@@ -55,7 +55,7 @@ public class SecurityConfig {
                                         .requestMatchers("/api/user/image/**").permitAll()
 
                                         .requestMatchers("/api/inventory/**").hasAnyAuthority(SELLER.name(), ADMIN.name())
-
+                                        .requestMatchers(HttpMethod.GET, "api/order/count").hasAuthority(ADMIN.name())
                                         .requestMatchers("api/order/**").hasAnyAuthority(SELLER.name(), USER.name())
 
                                         .anyRequest().authenticated()

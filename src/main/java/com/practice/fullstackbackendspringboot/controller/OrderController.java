@@ -2,6 +2,7 @@ package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
 import com.practice.fullstackbackendspringboot.model.response.AllOrdersResponse;
+import com.practice.fullstackbackendspringboot.model.response.OrderCount;
 import com.practice.fullstackbackendspringboot.model.response.TodoListTotal;
 import com.practice.fullstackbackendspringboot.model.response.TotalSales;
 import com.practice.fullstackbackendspringboot.service.OrderService;
@@ -173,6 +174,11 @@ public class OrderController {
     public TotalSales getTotalSales(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId) {
         String user =  userService.getUserFromToken(email);
         return orderService.getTotalSales(user,storeId);
+    }
+    @GetMapping("/count")
+    public OrderCount getOrderCountAndTotalSales(@RequestHeader("Authorization") String email) {
+        String user =  userService.getUserFromToken(email);
+        return orderService.getOrderCountAndTotalSales(user);
     }
 
 }

@@ -4,6 +4,7 @@ import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
 import com.practice.fullstackbackendspringboot.model.OrderModel;
 import com.practice.fullstackbackendspringboot.model.response.AllOrdersResponse;
+import com.practice.fullstackbackendspringboot.model.response.OrderCount;
 import com.practice.fullstackbackendspringboot.model.response.TodoListTotal;
 import com.practice.fullstackbackendspringboot.model.response.TotalSales;
 import com.practice.fullstackbackendspringboot.repository.*;
@@ -423,5 +424,25 @@ public class OrderServiceImpl implements OrderService {
         totalSales.setTotalSales(totalSale);
 
         return totalSales;
+    }
+
+    @Override
+    public OrderCount getOrderCountAndTotalSales(String email) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        List<Order> orders = orderRepository.findAll();
+        double countOrder = orderRepository.count();
+        double sales = 0.0;
+
+        for(Order order : orders){
+            if(order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED)){
+                double orderAmount = order.getOrderTotalAmount() - order.getStore().getShippingFee();
+                sales+=orderAmount;
+            }
+        }
+        OrderCount orderCount = new OrderCount();
+        orderCount.setOrderCount(countOrder);
+        orderCount.setTotalSales(sales);
+        return orderCount;
     }
 }
