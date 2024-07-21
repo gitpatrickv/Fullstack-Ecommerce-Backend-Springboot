@@ -4,6 +4,7 @@ import com.practice.fullstackbackendspringboot.model.ProductModel;
 import com.practice.fullstackbackendspringboot.model.SaveProductModel;
 import com.practice.fullstackbackendspringboot.model.request.UpdateProductRequest;
 import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
+import com.practice.fullstackbackendspringboot.model.response.ProductCount;
 import com.practice.fullstackbackendspringboot.model.response.SellersProductsPageResponse;
 import com.practice.fullstackbackendspringboot.service.ProductService;
 import com.practice.fullstackbackendspringboot.service.UserService;
@@ -88,6 +89,11 @@ public class ProductController {
     public void delete(@PathVariable (value="productId", required = false) String productId, @RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
         productService.delete(productId, user);
+    }
+    @GetMapping("/count")
+    public ProductCount getProductCount(@RequestHeader("Authorization") String email) {
+        String user = userService.getUserFromToken(email);
+        return productService.getProductCount(user);
     }
 
 }

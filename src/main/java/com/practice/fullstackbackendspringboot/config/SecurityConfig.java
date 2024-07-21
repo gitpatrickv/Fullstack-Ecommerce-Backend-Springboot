@@ -43,7 +43,7 @@ public class SecurityConfig {
                                         .requestMatchers("/api/product/**").permitAll()
 
                                         .requestMatchers(HttpMethod.GET, "/api/user").authenticated()
-                                        .requestMatchers(HttpMethod.GET, "/api/user/count").authenticated()
+
                                         .requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
                                         .requestMatchers(HttpMethod.POST, "/api/user/register").permitAll()
 

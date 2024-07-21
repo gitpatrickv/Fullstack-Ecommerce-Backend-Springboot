@@ -5,6 +5,7 @@ import com.practice.fullstackbackendspringboot.model.*;
 import com.practice.fullstackbackendspringboot.model.request.UpdateProductRequest;
 import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
 import com.practice.fullstackbackendspringboot.model.response.PageResponse;
+import com.practice.fullstackbackendspringboot.model.response.ProductCount;
 import com.practice.fullstackbackendspringboot.model.response.SellersProductsPageResponse;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.ImageService;
@@ -168,6 +169,16 @@ public class ProductServiceImpl implements ProductService {
             productModels.add(allProductModel);
         }
         return new AllProductsPageResponse(productModels, pageResponse);
+    }
+
+    @Override
+    public ProductCount getProductCount(String email) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        double count = productRepository.count();
+        ProductCount productCount = new ProductCount();
+        productCount.setProductCount(count);
+        return productCount;
     }
 
     @Override
