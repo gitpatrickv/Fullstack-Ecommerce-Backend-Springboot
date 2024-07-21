@@ -3,6 +3,7 @@ package com.practice.fullstackbackendspringboot.controller;
 import com.practice.fullstackbackendspringboot.model.StoreModel;
 import com.practice.fullstackbackendspringboot.model.request.CreateStoreRequest;
 import com.practice.fullstackbackendspringboot.model.request.UpdateShopInfoRequest;
+import com.practice.fullstackbackendspringboot.model.response.StoreCount;
 import com.practice.fullstackbackendspringboot.service.StoreService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import jakarta.validation.Valid;
@@ -51,5 +52,10 @@ public class StoreController {
     public List<StoreModel> getAllStores(@RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
         return storeService.getAllStores(user);
+    }
+    @GetMapping("/store/count")
+    public StoreCount getStoreCount(@RequestHeader("Authorization") String email) {
+        String user = userService.getUserFromToken(email);
+        return  storeService.getStoreCount(user);
     }
 }

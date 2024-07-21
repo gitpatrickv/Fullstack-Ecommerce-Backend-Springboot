@@ -1,12 +1,11 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
-import com.practice.fullstackbackendspringboot.entity.Cart;
 import com.practice.fullstackbackendspringboot.entity.Store;
 import com.practice.fullstackbackendspringboot.entity.User;
-import com.practice.fullstackbackendspringboot.entity.constants.Role;
 import com.practice.fullstackbackendspringboot.model.StoreModel;
 import com.practice.fullstackbackendspringboot.model.request.CreateStoreRequest;
 import com.practice.fullstackbackendspringboot.model.request.UpdateShopInfoRequest;
+import com.practice.fullstackbackendspringboot.model.response.StoreCount;
 import com.practice.fullstackbackendspringboot.repository.CartRepository;
 import com.practice.fullstackbackendspringboot.repository.StoreRepository;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
@@ -17,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -74,12 +72,8 @@ public class StoreServiceImpl implements StoreService {
 
     @Override
     public List<StoreModel> getAllStores(String email) {
-         Optional<User> user = userRepository.findByEmail(email);
-
-        if (!user.isPresent() || !user.get().getRole().equals(Role.ADMIN)) {
-            return Collections.emptyList();
-        }
-
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         return storeRepository.findAll()
                 .stream()
                 .map(store -> {
@@ -88,6 +82,16 @@ public class StoreServiceImpl implements StoreService {
                     return storeModel;
                 })
                 .toList();
+    }
+
+    @Override
+    public StoreCount getStoreCount(String email) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        double count = storeRepository.count();
+        StoreCount storeCount = new StoreCount();
+        storeCount.setStoreCount(count);
+        return storeCount;
     }
 }
 
