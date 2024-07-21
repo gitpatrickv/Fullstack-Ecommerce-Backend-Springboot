@@ -1,8 +1,9 @@
 package com.practice.fullstackbackendspringboot.controller;
 
+import com.practice.fullstackbackendspringboot.model.UserModel;
 import com.practice.fullstackbackendspringboot.model.request.LoginRequest;
 import com.practice.fullstackbackendspringboot.model.response.LoginResponse;
-import com.practice.fullstackbackendspringboot.model.UserModel;
+import com.practice.fullstackbackendspringboot.model.response.UserCount;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,5 +35,9 @@ public class  UserController {
         String user = userService.getUserFromToken(email);
         return userService.getUser(user);
     }
-
+    @GetMapping("/count")
+    public UserCount getUserCount(@RequestHeader("Authorization") String email) {
+        String user = userService.getUserFromToken(email);
+        return userService.getUserCount(user);
+    }
 }

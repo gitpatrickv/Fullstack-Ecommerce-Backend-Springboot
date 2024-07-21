@@ -4,6 +4,7 @@ import com.practice.fullstackbackendspringboot.entity.User;
 import com.practice.fullstackbackendspringboot.model.UserModel;
 import com.practice.fullstackbackendspringboot.model.request.LoginRequest;
 import com.practice.fullstackbackendspringboot.model.response.LoginResponse;
+import com.practice.fullstackbackendspringboot.model.response.UserCount;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.security.JwtAuthenticationFilter;
 import com.practice.fullstackbackendspringboot.security.JwtService;
@@ -88,5 +89,14 @@ public class UserServiceImpl implements UserService {
         return mapper.mapUserEntityToUserModel(user);
     }
 
+    @Override
+    public UserCount getUserCount(String email) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        double count = userRepository.count();
+        UserCount userCount = new UserCount();
+        userCount.setUserCount(count);
+        return userCount;
+    }
 }
 
