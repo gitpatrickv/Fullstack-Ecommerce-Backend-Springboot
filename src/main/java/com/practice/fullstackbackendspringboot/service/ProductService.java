@@ -6,6 +6,7 @@ import com.practice.fullstackbackendspringboot.model.request.UpdateProductReques
 import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
 import com.practice.fullstackbackendspringboot.model.response.ProductCount;
 import com.practice.fullstackbackendspringboot.model.response.SellersProductsPageResponse;
+import com.practice.fullstackbackendspringboot.model.response.StoreResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface ProductService {
@@ -13,7 +14,7 @@ public interface ProductService {
     void saveProduct(SaveProductModel model, String email, MultipartFile[] files);
     void updateProduct(UpdateProductRequest request, String email);
     AllProductsPageResponse getAllProducts(int pageNo, int pageSize);
-    AllProductsPageResponse getAllStoreProducts(String storeId, int pageNo, int PageSize, String sortBy);
+    StoreResponse getAllStoreProducts(String storeId, int pageNo, int PageSize, String sortBy);
     ProductModel getProductById(String productId);
     void delete(String productId, String email);
     AllProductsPageResponse searchProduct(String search, int pageNo, int pageSize, String sortBy);

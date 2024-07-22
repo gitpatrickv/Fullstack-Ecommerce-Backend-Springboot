@@ -6,6 +6,7 @@ import com.practice.fullstackbackendspringboot.model.request.UpdateProductReques
 import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
 import com.practice.fullstackbackendspringboot.model.response.ProductCount;
 import com.practice.fullstackbackendspringboot.model.response.SellersProductsPageResponse;
+import com.practice.fullstackbackendspringboot.model.response.StoreResponse;
 import com.practice.fullstackbackendspringboot.service.ProductService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import jakarta.validation.Valid;
@@ -48,10 +49,10 @@ public class ProductController {
     }
     @GetMapping("/store/{storeId}")
     @ResponseStatus(HttpStatus.OK)
-    public AllProductsPageResponse getAllStoreProducts(@PathVariable (value="storeId") String storeId,
-                                                       @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
-                                                       @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize,
-                                                       @RequestParam(defaultValue = "productName", required = false) String sortBy){
+    public StoreResponse getAllStoreProducts(@PathVariable (value="storeId") String storeId,
+                                             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                             @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize,
+                                             @RequestParam(defaultValue = "productName", required = false) String sortBy){
         return productService.getAllStoreProducts(storeId,pageNo,pageSize, sortBy);
     }
 

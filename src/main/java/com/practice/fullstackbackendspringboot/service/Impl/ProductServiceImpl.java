@@ -3,10 +3,7 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.*;
 import com.practice.fullstackbackendspringboot.model.request.UpdateProductRequest;
-import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
-import com.practice.fullstackbackendspringboot.model.response.PageResponse;
-import com.practice.fullstackbackendspringboot.model.response.ProductCount;
-import com.practice.fullstackbackendspringboot.model.response.SellersProductsPageResponse;
+import com.practice.fullstackbackendspringboot.model.response.*;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.ImageService;
 import com.practice.fullstackbackendspringboot.service.ProductService;
@@ -183,7 +180,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public AllProductsPageResponse getAllStoreProducts(String storeId, int pageNo, int pageSize, String sortBy) {
+    public StoreResponse getAllStoreProducts(String storeId, int pageNo, int pageSize, String sortBy) {
         Sort sort = Sort.by(StringUtil.Product_Name).ascending();
 
         if(StringUtil.Product_Sold.equals(sortBy)){
@@ -193,7 +190,8 @@ public class ProductServiceImpl implements ProductService {
         }
 
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-        Page<Product> products = productRepository.findAllByDeletedFalseAndStore_StoreId(storeId, pageable);
+        Page<Product> products = productRepository.findAllByDeletedFalseAndListedTrueAndStore_StoreId(storeId, pageable);
+        Store store = storeRepository.findById(storeId).get();
         List<AllProductModel> productModels = new ArrayList<>();
 
         PageResponse pageResponse = new PageResponse();
@@ -203,15 +201,18 @@ public class ProductServiceImpl implements ProductService {
         pageResponse.setTotalPages(products.getTotalPages());
         pageResponse.setLast(products.isLast());
 
+        StoreInfo storeInfo = new StoreInfo();
+        storeInfo.setStoreName(store.getStoreName());
+        storeInfo.setStorePhotoUrl(store.getPhotoUrl());
+        storeInfo.setOnline(store.isOnline());
+
         for(Product product : products){
             AllProductModel allProductModel = allProductMapper.mapProductEntityToProductModel(product);
             getPhotoUrl(product, allProductModel);
             getPriceAndQuantity(product, allProductModel);
-            allProductModel.setStoreName(product.getStore().getStoreName());
-            allProductModel.setStorePhotoUrl(product.getStore().getPhotoUrl());
             productModels.add(allProductModel);
         }
-        return new AllProductsPageResponse(productModels, pageResponse);
+        return new StoreResponse(productModels, storeInfo, pageResponse);
     }
 
     @Override
@@ -225,7 +226,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         Pageable pageable = PageRequest.of(pageNo,pageSize, sort);
-        Page<Product> products = productRepository.findByDeletedFalseAndProductNameContainingIgnoreCaseOrDeletedFalseAndStore_StoreNameContainingIgnoreCase(search,search, pageable);
+        Page<Product> products = productRepository.findByDeletedFalseAndListedTrueAndProductNameContainingIgnoreCaseOrDeletedFalseAndListedTrueAndStore_StoreNameContainingIgnoreCase(search,search, pageable);
 
         List<AllProductModel> productModels = new ArrayList<>();
 
