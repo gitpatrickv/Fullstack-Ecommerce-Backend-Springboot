@@ -26,7 +26,7 @@ public class Store {
     private String photoUrl;
     private Long productCount = 0L;
     private Long orderCount = 0L;
-    private boolean activate;
+    private boolean online;
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
     private List<Product> product = new ArrayList<>();

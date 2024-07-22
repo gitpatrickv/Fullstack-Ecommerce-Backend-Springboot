@@ -14,4 +14,5 @@ public interface StoreService {
     void updateShopInfo(String email, String storeId, UpdateShopInfoRequest request);
     List<StoreModel> getAllStores(String email);
     StoreCount getStoreCount(String email);
+    void toggleStoreAndProductListing(String storeId, String email);
 }

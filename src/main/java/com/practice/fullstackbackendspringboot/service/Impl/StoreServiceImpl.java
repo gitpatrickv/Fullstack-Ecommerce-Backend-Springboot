@@ -1,5 +1,6 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
+import com.practice.fullstackbackendspringboot.entity.Product;
 import com.practice.fullstackbackendspringboot.entity.Store;
 import com.practice.fullstackbackendspringboot.entity.User;
 import com.practice.fullstackbackendspringboot.model.StoreModel;
@@ -7,6 +8,7 @@ import com.practice.fullstackbackendspringboot.model.request.CreateStoreRequest;
 import com.practice.fullstackbackendspringboot.model.request.UpdateShopInfoRequest;
 import com.practice.fullstackbackendspringboot.model.response.StoreCount;
 import com.practice.fullstackbackendspringboot.repository.CartRepository;
+import com.practice.fullstackbackendspringboot.repository.ProductRepository;
 import com.practice.fullstackbackendspringboot.repository.StoreRepository;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.service.StoreService;
@@ -28,6 +30,7 @@ public class StoreServiceImpl implements StoreService {
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
     private final CartRepository cartRepository;
+    private final ProductRepository productRepository;
     private final StoreMapper mapper;
 
     @Override
@@ -42,6 +45,7 @@ public class StoreServiceImpl implements StoreService {
             store.setAddress(request.getAddress());
             store.setContactNumber(request.getContactNumber());
             store.setShippingFee(request.getShippingFee());
+            store.setOnline(true);
             store.setUser(user.get());
             storeRepository.save(store);
         }
@@ -92,6 +96,23 @@ public class StoreServiceImpl implements StoreService {
         StoreCount storeCount = new StoreCount();
         storeCount.setStoreCount(count);
         return storeCount;
+    }
+
+    @Override
+    public void toggleStoreAndProductListing(String storeId, String email) {
+        List<Product> products = productRepository.findAllByDeletedFalseAndStore_StoreId(storeId);
+        Optional<Store> store = storeRepository.findById(storeId);
+
+        if(store.isPresent()){
+            Store store1 = store.get();
+            store1.setOnline(!store1.isOnline());
+            storeRepository.save(store1);
+
+            for(Product product : products){
+                product.setListed(!product.isListed());
+                productRepository.save(product);
+            }
+        }
     }
 }
 

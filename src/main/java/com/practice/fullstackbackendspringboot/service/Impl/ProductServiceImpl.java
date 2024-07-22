@@ -56,6 +56,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = new Product();
         product.setProductName(model.getProductName());
         product.setProductDescription(model.getProductDescription());
+        product.setListed(true);
         product.setUser(user);
         product.setStore(store);
         product.setCategory(category);
@@ -126,7 +127,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public AllProductsPageResponse getAllProducts(int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, StringUtil.Created_Date));
-        Page<Product> products = productRepository.findAllByDeletedFalse(pageable);
+        Page<Product> products = productRepository.findAllByDeletedFalseAndListedTrue(pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
         PageResponse pageResponse = new PageResponse();
@@ -150,7 +151,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public AllProductsPageResponse getAllProductsByCategory(String categoryId, int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, StringUtil.Created_Date));
-        Page<Product> products = productRepository.findAllByDeletedFalseAndCategory_CategoryId(categoryId,pageable);
+        Page<Product> products = productRepository.findAllByDeletedFalseAndListedTrueAndCategory_CategoryId(categoryId,pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
         PageResponse pageResponse = new PageResponse();

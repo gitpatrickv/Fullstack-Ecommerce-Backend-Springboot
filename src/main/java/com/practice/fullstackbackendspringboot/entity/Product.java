@@ -25,6 +25,7 @@ public class Product extends AuditEntity{
     private String productDescription;
     private boolean deleted;
     private Long productSold = 0L;
+    private boolean listed;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private Set<Inventory> inventory = new HashSet<>();
