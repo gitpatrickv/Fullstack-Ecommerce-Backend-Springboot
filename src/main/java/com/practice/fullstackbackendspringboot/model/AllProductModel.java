@@ -38,6 +38,6 @@ public class AllProductModel {
     private String productDescription;
     Set<InventoryModel> inventoryModels = new HashSet<>();
     private Long productSold;
-//    private String storePhotoUrl;
+    private boolean listed;
 
 }

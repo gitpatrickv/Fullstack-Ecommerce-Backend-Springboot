@@ -96,5 +96,10 @@ public class ProductController {
         String user = userService.getUserFromToken(email);
         return productService.getProductCount(user);
     }
+    @PutMapping("/suspend/{productId}")
+    public void suspendProduct(@PathVariable String productId, @RequestHeader("Authorization") String email) {
+        String user = userService.getUserFromToken(email);
+        productService.suspendProduct(productId,user);
+    }
 
 }

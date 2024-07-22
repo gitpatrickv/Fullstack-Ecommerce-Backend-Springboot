@@ -170,16 +170,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductCount getProductCount(String email) {
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
-        double count = productRepository.count();
-        ProductCount productCount = new ProductCount();
-        productCount.setProductCount(count);
-        return productCount;
-    }
-
-    @Override
     public StoreResponse getAllStoreProducts(String storeId, int pageNo, int pageSize, String sortBy) {
         Sort sort = Sort.by(StringUtil.Product_Name).ascending();
 
@@ -190,7 +180,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-        Page<Product> products = productRepository.findAllByDeletedFalseAndListedTrueAndStore_StoreId(storeId, pageable);
+        Page<Product> products = productRepository.findAllByDeletedFalseAndStore_StoreId(storeId, pageable);
         Store store = storeRepository.findById(storeId).get();
         List<AllProductModel> productModels = new ArrayList<>();
 
@@ -290,6 +280,26 @@ public class ProductServiceImpl implements ProductService {
         }
 
         favoritesRepository.deleteAllByProduct_ProductId(productId);
+    }
+
+    @Override
+    public ProductCount getProductCount(String email) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        double count = productRepository.count();
+        ProductCount productCount = new ProductCount();
+        productCount.setProductCount(count);
+        return productCount;
+    }
+
+    @Override
+    public void suspendProduct(String productId, String email) {
+        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
+
+        product.setListed(!product.isListed());
+        productRepository.save(product);
     }
 
     private void getPhotoUrl(Product product, AllProductModel productModel){

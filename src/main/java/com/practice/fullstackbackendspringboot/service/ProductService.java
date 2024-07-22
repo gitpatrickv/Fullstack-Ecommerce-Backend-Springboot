@@ -21,5 +21,6 @@ public interface ProductService {
     SellersProductsPageResponse getAllSellersProducts(String email, int pageNo, int pageSize);
     AllProductsPageResponse getAllProductsByCategory(String categoryId, int pageNo, int pageSize);
     ProductCount getProductCount(String email);
+    void suspendProduct(String productId, String email);
 
 }

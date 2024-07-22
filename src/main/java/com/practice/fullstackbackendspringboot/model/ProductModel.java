@@ -40,4 +40,5 @@ public class ProductModel {
     private List<InventoryModel> inventoryModels = new ArrayList<>();
     private Long productSold;
     private String storePhotoUrl;
+    private boolean listed;
 }
