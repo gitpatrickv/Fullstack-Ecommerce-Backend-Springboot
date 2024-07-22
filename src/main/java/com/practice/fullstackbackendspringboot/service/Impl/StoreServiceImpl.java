@@ -99,7 +99,7 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
-    public void toggleStoreAndProductListing(String storeId, String email) {
+    public void suspendStoreAndProductListing(String storeId, String email) {
         List<Product> products = productRepository.findAllByDeletedFalseAndStore_StoreId(storeId);
         Optional<Store> store = storeRepository.findById(storeId);
 

@@ -58,9 +58,9 @@ public class StoreController {
         String user = userService.getUserFromToken(email);
         return  storeService.getStoreCount(user);
     }
-    @PutMapping("/store/toggle/{storeId}") //TODO: not yet implemented in the front end
-    public void toggleStoreAndProductListing(@PathVariable String storeId, @RequestHeader("Authorization") String email) {
+    @PutMapping("/store/toggle/{storeId}")
+    public void suspendStoreAndProductListing(@PathVariable String storeId, @RequestHeader("Authorization") String email) {
         String user = userService.getUserFromToken(email);
-        storeService.toggleStoreAndProductListing(storeId,user);
+        storeService.suspendStoreAndProductListing(storeId,user);
     }
 }
