@@ -302,6 +302,19 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(product);
     }
 
+    @Override
+    public SuspendedProductCount getSuspendedProductCount(String storeId, String email) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+
+        double count = productRepository.findAllByListedFalseAndStore_StoreId(storeId).stream().count();
+
+        SuspendedProductCount suspendedProductCount = new SuspendedProductCount();
+        suspendedProductCount.setDelistedCount(count);
+
+        return suspendedProductCount;
+    }
+
     private void getPhotoUrl(Product product, AllProductModel productModel){
         List<Image> images = product.getImage();
         if (images != null && !images.isEmpty()) {

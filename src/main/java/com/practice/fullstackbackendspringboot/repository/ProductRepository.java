@@ -17,5 +17,6 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     Page<Product> findAllByDeletedFalseAndListedTrueAndCategory_CategoryId(String categoryId, Pageable pageable);
     Page<Product> findAllByDeletedFalseAndListedTrue(Pageable pageable);
     List<Product> findAllByDeletedFalseAndStore_StoreId(String storeId);
+    List<Product> findAllByListedFalseAndStore_StoreId(String storeId);
 
 }

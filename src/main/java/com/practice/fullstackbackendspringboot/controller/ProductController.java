@@ -3,10 +3,7 @@ package com.practice.fullstackbackendspringboot.controller;
 import com.practice.fullstackbackendspringboot.model.ProductModel;
 import com.practice.fullstackbackendspringboot.model.SaveProductModel;
 import com.practice.fullstackbackendspringboot.model.request.UpdateProductRequest;
-import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
-import com.practice.fullstackbackendspringboot.model.response.ProductCount;
-import com.practice.fullstackbackendspringboot.model.response.SellersProductsPageResponse;
-import com.practice.fullstackbackendspringboot.model.response.StoreResponse;
+import com.practice.fullstackbackendspringboot.model.response.*;
 import com.practice.fullstackbackendspringboot.service.ProductService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import jakarta.validation.Valid;
@@ -100,6 +97,11 @@ public class ProductController {
     public void suspendProduct(@PathVariable String productId, @RequestHeader("Authorization") String email) {
         String user = userService.getUserFromToken(email);
         productService.suspendProduct(productId,user);
+    }
+    @GetMapping("/count/{storeId}")
+    public SuspendedProductCount getSuspendedProductCount(@PathVariable String storeId, @RequestHeader("Authorization") String email){
+        String user = userService.getUserFromToken(email);
+        return productService.getSuspendedProductCount(storeId, user);
     }
 
 }

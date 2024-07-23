@@ -3,10 +3,7 @@ package com.practice.fullstackbackendspringboot.service;
 import com.practice.fullstackbackendspringboot.model.ProductModel;
 import com.practice.fullstackbackendspringboot.model.SaveProductModel;
 import com.practice.fullstackbackendspringboot.model.request.UpdateProductRequest;
-import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
-import com.practice.fullstackbackendspringboot.model.response.ProductCount;
-import com.practice.fullstackbackendspringboot.model.response.SellersProductsPageResponse;
-import com.practice.fullstackbackendspringboot.model.response.StoreResponse;
+import com.practice.fullstackbackendspringboot.model.response.*;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface ProductService {
@@ -22,5 +19,6 @@ public interface ProductService {
     AllProductsPageResponse getAllProductsByCategory(String categoryId, int pageNo, int pageSize);
     ProductCount getProductCount(String email);
     void suspendProduct(String productId, String email);
+    SuspendedProductCount getSuspendedProductCount(String storeId, String email);
 
 }
