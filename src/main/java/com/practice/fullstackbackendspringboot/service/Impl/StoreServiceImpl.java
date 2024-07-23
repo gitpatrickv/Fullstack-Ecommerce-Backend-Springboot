@@ -82,7 +82,9 @@ public class StoreServiceImpl implements StoreService {
                 .stream()
                 .map(store -> {
                     StoreModel storeModel = mapper.mapEntityToModel(store);
+                    double count = productRepository.findAllBySuspendedTrueAndStore_StoreId(store.getStoreId()).stream().count();
                     storeModel.setEmail(store.getUser().getEmail());
+                    storeModel.setSuspendedCount(count);
                     return storeModel;
                 })
                 .toList();
