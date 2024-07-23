@@ -11,12 +11,13 @@ import java.util.List;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, String> {
 
-    Page<Product> findByDeletedFalseAndListedTrueAndProductNameContainingIgnoreCaseOrDeletedFalseAndListedTrueAndStore_StoreNameContainingIgnoreCase(String search, String search1, Pageable pageable);
+    Page<Product> findByDeletedFalseAndListedTrueAndSuspendedFalseAndProductNameContainingIgnoreCaseOrDeletedFalseAndListedTrueAndSuspendedFalseAndStore_StoreNameContainingIgnoreCase(String search, String search1, Pageable pageable);
     Page<Product> findAllByDeletedFalseAndStore_StoreId(String storeId, Pageable pageable);
     Page<Product> findAllByDeletedFalseAndUserEmail(String email, Pageable pageable);
-    Page<Product> findAllByDeletedFalseAndListedTrueAndCategory_CategoryId(String categoryId, Pageable pageable);
-    Page<Product> findAllByDeletedFalseAndListedTrue(Pageable pageable);
+    Page<Product> findAllByDeletedFalseAndListedTrueAndSuspendedFalseAndCategory_CategoryId(String categoryId, Pageable pageable);
+    Page<Product> findAllByDeletedFalseAndListedTrueAndSuspendedFalse(Pageable pageable);
+    List<Product> findAllByDeletedFalseAndListedTrueAndSuspendedFalseAndStore_StoreId(String storeId);
     List<Product> findAllByDeletedFalseAndStore_StoreId(String storeId);
-    List<Product> findAllByListedFalseAndStore_StoreId(String storeId);
+    List<Product> findAllBySuspendedTrueAndStore_StoreId(String storeId);
 
 }

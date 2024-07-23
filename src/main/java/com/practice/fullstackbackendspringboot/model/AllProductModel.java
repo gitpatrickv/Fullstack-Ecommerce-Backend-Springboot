@@ -39,5 +39,6 @@ public class AllProductModel {
     Set<InventoryModel> inventoryModels = new HashSet<>();
     private Long productSold;
     private boolean listed;
+    private boolean suspended;
 
 }

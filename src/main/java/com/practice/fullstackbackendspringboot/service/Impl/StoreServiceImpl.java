@@ -109,7 +109,7 @@ public class StoreServiceImpl implements StoreService {
             storeRepository.save(store1);
 
             for(Product product : products){
-                product.setListed(!product.isListed());
+                product.setSuspended(!product.isSuspended());
                 productRepository.save(product);
             }
         }

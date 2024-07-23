@@ -379,7 +379,7 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        List<Product> products = productRepository.findAllByDeletedFalseAndStore_StoreId(storeId);
+        List<Product> products = productRepository.findAllByDeletedFalseAndListedTrueAndSuspendedFalseAndStore_StoreId(storeId);
         long outOfStock = 0L;
 
         for(Product product : products){

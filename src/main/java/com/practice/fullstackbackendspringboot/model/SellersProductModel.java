@@ -34,4 +34,5 @@ public class SellersProductModel {
     List<InventoryModel> inventoryModels = new ArrayList<>();
     private Long productSold;
     private boolean listed;
+    private boolean suspended;
 }

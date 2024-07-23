@@ -124,7 +124,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public AllProductsPageResponse getAllProducts(int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, StringUtil.Created_Date));
-        Page<Product> products = productRepository.findAllByDeletedFalseAndListedTrue(pageable);
+        Page<Product> products = productRepository.findAllByDeletedFalseAndListedTrueAndSuspendedFalse(pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
         PageResponse pageResponse = new PageResponse();
@@ -148,7 +148,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public AllProductsPageResponse getAllProductsByCategory(String categoryId, int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, StringUtil.Created_Date));
-        Page<Product> products = productRepository.findAllByDeletedFalseAndListedTrueAndCategory_CategoryId(categoryId,pageable);
+        Page<Product> products = productRepository.findAllByDeletedFalseAndListedTrueAndSuspendedFalseAndCategory_CategoryId(categoryId,pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
         PageResponse pageResponse = new PageResponse();
@@ -216,7 +216,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         Pageable pageable = PageRequest.of(pageNo,pageSize, sort);
-        Page<Product> products = productRepository.findByDeletedFalseAndListedTrueAndProductNameContainingIgnoreCaseOrDeletedFalseAndListedTrueAndStore_StoreNameContainingIgnoreCase(search,search, pageable);
+        Page<Product> products = productRepository.findByDeletedFalseAndListedTrueAndSuspendedFalseAndProductNameContainingIgnoreCaseOrDeletedFalseAndListedTrueAndSuspendedFalseAndStore_StoreNameContainingIgnoreCase(search,search, pageable);
 
         List<AllProductModel> productModels = new ArrayList<>();
 
@@ -246,6 +246,8 @@ public class ProductServiceImpl implements ProductService {
             sorts = Sort.by(StringUtil.Listed).descending();
         } else if(StringUtil.Low_Product_Sold.equals(sortBy)){
             sorts = Sort.by(StringUtil.Product_Sold).ascending();
+        } else if(StringUtil.Suspended.equals(sortBy)) {
+            sorts = Sort.by(StringUtil.Suspended).descending();
         }
 
         Pageable pageable = PageRequest.of(pageNo, pageSize, sorts);
@@ -309,7 +311,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
 
-        product.setListed(!product.isListed());
+        product.setSuspended(!product.isSuspended());
         productRepository.save(product);
     }
 
@@ -318,10 +320,10 @@ public class ProductServiceImpl implements ProductService {
         userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
 
-        double count = productRepository.findAllByListedFalseAndStore_StoreId(storeId).stream().count();
+        double count = productRepository.findAllBySuspendedTrueAndStore_StoreId(storeId).stream().count();
 
         SuspendedProductCount suspendedProductCount = new SuspendedProductCount();
-        suspendedProductCount.setDelistedCount(count);
+        suspendedProductCount.setSuspendedProductCount(count);
 
         return suspendedProductCount;
     }

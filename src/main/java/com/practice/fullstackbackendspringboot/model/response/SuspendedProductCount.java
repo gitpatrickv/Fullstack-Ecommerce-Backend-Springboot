@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SuspendedProductCount {
 
-    private Double delistedCount;
+    private Double suspendedProductCount;
 }
