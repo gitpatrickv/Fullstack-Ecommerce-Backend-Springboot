@@ -182,7 +182,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-        Page<Product> products = productRepository.findAllByDeletedFalseAndStore_StoreId(storeId, pageable);
+        Page<Product> products = productRepository.findAllByDeletedFalseAndListedTrueAndStore_StoreId(storeId, pageable);
         Store store = storeRepository.findById(storeId).get();
         List<AllProductModel> productModels = new ArrayList<>();
 
@@ -244,8 +244,6 @@ public class ProductServiceImpl implements ProductService {
 
         if(StringUtil.True.equals(sortBy)){
             sorts = Sort.by(StringUtil.Listed).ascending();
-        } else if(StringUtil.False.equals(sortBy)){
-            sorts = Sort.by(StringUtil.Listed).descending();
         } else if(StringUtil.Low_Product_Sold.equals(sortBy)){
             sorts = Sort.by(StringUtil.Product_Sold).ascending();
         } else if(StringUtil.Suspended.equals(sortBy)) {
@@ -314,6 +312,16 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
 
         product.setSuspended(!product.isSuspended());
+        productRepository.save(product);
+    }
+
+    @Override
+    public void delistProduct(String productId, String email) {
+        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
+
+        product.setListed(!product.isListed());
         productRepository.save(product);
     }
 

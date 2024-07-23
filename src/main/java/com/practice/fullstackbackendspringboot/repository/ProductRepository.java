@@ -12,7 +12,7 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product, String> {
 
     Page<Product> findByDeletedFalseAndListedTrueAndSuspendedFalseAndProductNameContainingIgnoreCaseOrDeletedFalseAndListedTrueAndSuspendedFalseAndStore_StoreNameContainingIgnoreCase(String search, String search1, Pageable pageable);
-    Page<Product> findAllByDeletedFalseAndStore_StoreId(String storeId, Pageable pageable);
+    Page<Product> findAllByDeletedFalseAndListedTrueAndStore_StoreId(String storeId, Pageable pageable);
     Page<Product> findAllByDeletedFalseAndUserEmail(String email, Pageable pageable);
     Page<Product> findAllByDeletedFalseAndListedTrueAndSuspendedFalseAndCategory_CategoryId(String categoryId, Pageable pageable);
     Page<Product> findAllByDeletedFalseAndListedTrueAndSuspendedFalse(Pageable pageable);

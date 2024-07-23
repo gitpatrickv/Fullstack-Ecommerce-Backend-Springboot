@@ -104,5 +104,11 @@ public class ProductController {
         String user = userService.getUserFromToken(email);
         return productService.getSuspendedProductCount(storeId, user);
     }
+    @PutMapping("/delist/{productId}")
+    public void delistProduct(@PathVariable String productId, @RequestHeader("Authorization") String email) {
+        String user = userService.getUserFromToken(email);
+        productService.delistProduct(productId,user);
+
+    }
 
 }
