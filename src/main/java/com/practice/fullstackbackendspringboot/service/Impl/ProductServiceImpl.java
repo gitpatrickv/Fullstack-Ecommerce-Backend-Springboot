@@ -290,6 +290,10 @@ public class ProductServiceImpl implements ProductService {
         if(product.isPresent()){
             Product prod = product.get();
             prod.setDeleted(true);
+
+            Store store = storeRepository.findById(prod.getStore().getStoreId()).get();
+            store.setProductCount(store.getProductCount() - 1);
+            storeRepository.save(store);
         }
 
         favoritesRepository.deleteAllByProduct_ProductId(productId);

@@ -103,16 +103,20 @@ public class StoreServiceImpl implements StoreService {
         List<Product> products = productRepository.findAllByDeletedFalseAndStore_StoreId(storeId);
         Optional<Store> store = storeRepository.findById(storeId);
 
-        if(store.isPresent()){
+        boolean suspendProducts = products.stream().allMatch(Product::isSuspended);
+        boolean toggleSuspend = !suspendProducts;
+
+        for(Product product : products){
+            product.setSuspended(toggleSuspend);
+            productRepository.save(product);
+        }
+
+        if (store.isPresent()) {
             Store store1 = store.get();
             store1.setOnline(!store1.isOnline());
             storeRepository.save(store1);
-
-            for(Product product : products){
-                product.setSuspended(!product.isSuspended());
-                productRepository.save(product);
-            }
         }
+
     }
 }
 
