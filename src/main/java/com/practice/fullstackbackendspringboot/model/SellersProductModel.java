@@ -1,6 +1,5 @@
 package com.practice.fullstackbackendspringboot.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -12,12 +11,9 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonInclude(NON_DEFAULT)
 public class SellersProductModel {
     @Valid
 
@@ -37,4 +33,5 @@ public class SellersProductModel {
     private String productDescription;
     List<InventoryModel> inventoryModels = new ArrayList<>();
     private Long productSold;
+    private boolean listed;
 }

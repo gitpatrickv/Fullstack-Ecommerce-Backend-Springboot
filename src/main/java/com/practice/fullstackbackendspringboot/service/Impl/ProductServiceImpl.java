@@ -237,10 +237,21 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public SellersProductsPageResponse getAllSellersProducts(String email, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, StringUtil.Created_Date));
+    public SellersProductsPageResponse getAllSellersProducts(String email, int pageNo, int pageSize, String sortBy) {
+        Sort sorts = Sort.by(StringUtil.Product_Sold).descending();
+
+        if(StringUtil.True.equals(sortBy)){
+            sorts = Sort.by(StringUtil.Listed).ascending();
+        } else if(StringUtil.False.equals(sortBy)){
+            sorts = Sort.by(StringUtil.Listed).descending();
+        } else if(StringUtil.Low_Product_Sold.equals(sortBy)){
+            sorts = Sort.by(StringUtil.Product_Sold).ascending();
+        }
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sorts);
         Optional<User> user = userRepository.findByEmail(email);
         Page<Product> products = productRepository.findAllByDeletedFalseAndUserEmail(user.get().getEmail(), pageable);
+
         Sort sort = Sort.by(Sort.Direction.DESC, StringUtil.Color);
         List<SellersProductModel> productModels = new ArrayList<>();
 
