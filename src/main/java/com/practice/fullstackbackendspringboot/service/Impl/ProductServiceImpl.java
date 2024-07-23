@@ -177,6 +177,8 @@ public class ProductServiceImpl implements ProductService {
             sort = Sort.by(StringUtil.Product_Sold).descending();
         } else if(StringUtil.Created_Date.equals(sortBy)){
             sort = Sort.by(StringUtil.Created_Date).descending();
+        } else if(StringUtil.Suspended.equals(sortBy)) {
+            sort = Sort.by(StringUtil.Suspended).descending();
         }
 
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
