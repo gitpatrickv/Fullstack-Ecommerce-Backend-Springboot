@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
@@ -39,5 +41,11 @@ public class  UserController {
     public UserCount getUserCount(@RequestHeader("Authorization") String email) {
         String user = userService.getUserFromToken(email);
         return userService.getUserCount(user);
+    }
+    @GetMapping("/all")
+    public List<UserModel> getAllUsers(@RequestHeader("Authorization") String email,
+                                       @RequestParam(defaultValue = "user", required = false) String sortBy) {
+        String user = userService.getUserFromToken(email);
+        return userService.getAllUsers(user,sortBy);
     }
 }

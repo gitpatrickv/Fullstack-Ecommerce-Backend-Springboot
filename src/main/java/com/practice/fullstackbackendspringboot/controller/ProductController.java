@@ -58,7 +58,7 @@ public class ProductController {
     public SellersProductsPageResponse getAllSellersProducts(@RequestHeader("Authorization") String email,
                                                              @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
                                                              @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize,
-                                                             @RequestParam(defaultValue = "productName", required = false) String sortBy){
+                                                             @RequestParam(defaultValue = "productSold", required = false) String sortBy){
         String user = userService.getUserFromToken(email);
         return productService.getAllSellersProducts(user,pageNo,pageSize, sortBy);
     }

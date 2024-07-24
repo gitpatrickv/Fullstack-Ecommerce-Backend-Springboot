@@ -1,6 +1,7 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
 import com.practice.fullstackbackendspringboot.entity.User;
+import com.practice.fullstackbackendspringboot.entity.constants.Role;
 import com.practice.fullstackbackendspringboot.model.UserModel;
 import com.practice.fullstackbackendspringboot.model.request.LoginRequest;
 import com.practice.fullstackbackendspringboot.model.response.LoginResponse;
@@ -13,6 +14,7 @@ import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.UserMapper;
 import jakarta.persistence.EntityExistsException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +23,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -97,6 +100,24 @@ public class UserServiceImpl implements UserService {
         UserCount userCount = new UserCount();
         userCount.setUserCount(count);
         return userCount;
+    }
+
+    @Override
+    public List<UserModel> getAllUsers(String email, String sortBy) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+
+        Sort sorts = Sort.by(StringUtil.Role).ascending();
+
+        if (StringUtil.Seller.equals(sortBy)) {
+            sorts = Sort.by(StringUtil.Role).descending();
+        }
+
+        return userRepository.findAll(sorts)
+                .stream()
+                .filter(user -> !user.getRole().equals(Role.ADMIN))
+                .map(mapper::mapUserEntityToUserModel)
+                .toList();
     }
 }
 

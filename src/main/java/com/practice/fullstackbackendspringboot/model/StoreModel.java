@@ -26,5 +26,4 @@ public class StoreModel {
     private Long productCount;
     private Long orderCount;
     private boolean online;
-    private double suspendedCount;
 }

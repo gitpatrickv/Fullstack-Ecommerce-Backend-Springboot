@@ -46,4 +46,7 @@ public class StringUtil {
     public static final String Rating = "rating";
     public static final String Listed = "listed";
     public static final String Suspended = "suspended";
+    public static final String Role = "role";
+    public static final String User = "user";
+    public static final String Seller = "seller";
 }
