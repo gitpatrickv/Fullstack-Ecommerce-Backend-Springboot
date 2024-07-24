@@ -1,11 +1,10 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
 import com.practice.fullstackbackendspringboot.entity.*;
+import com.practice.fullstackbackendspringboot.entity.constants.Role;
 import com.practice.fullstackbackendspringboot.model.*;
 import com.practice.fullstackbackendspringboot.model.request.UpdateProductRequest;
-import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
-import com.practice.fullstackbackendspringboot.model.response.PageResponse;
-import com.practice.fullstackbackendspringboot.model.response.SellersProductsPageResponse;
+import com.practice.fullstackbackendspringboot.model.response.*;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.ImageService;
 import com.practice.fullstackbackendspringboot.service.ProductService;
@@ -21,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -55,6 +55,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = new Product();
         product.setProductName(model.getProductName());
         product.setProductDescription(model.getProductDescription());
+        product.setListed(true);
         product.setUser(user);
         product.setStore(store);
         product.setCategory(category);
@@ -125,7 +126,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public AllProductsPageResponse getAllProducts(int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, StringUtil.Created_Date));
-        Page<Product> products = productRepository.findAllByDeletedFalse(pageable);
+        Page<Product> products = productRepository.findAllByDeletedFalseAndListedTrueAndSuspendedFalse(pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
         PageResponse pageResponse = new PageResponse();
@@ -149,7 +150,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public AllProductsPageResponse getAllProductsByCategory(String categoryId, int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, StringUtil.Created_Date));
-        Page<Product> products = productRepository.findAllByDeletedFalseAndCategory_CategoryId(categoryId,pageable);
+        Page<Product> products = productRepository.findAllByDeletedFalseAndListedTrueAndSuspendedFalseAndCategory_CategoryId(categoryId,pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
         PageResponse pageResponse = new PageResponse();
@@ -171,17 +172,20 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public AllProductsPageResponse getAllStoreProducts(String storeId, int pageNo, int pageSize, String sortBy) {
+    public StoreResponse getAllStoreProducts(String storeId, int pageNo, int pageSize, String sortBy) {
         Sort sort = Sort.by(StringUtil.Product_Name).ascending();
 
         if(StringUtil.Product_Sold.equals(sortBy)){
             sort = Sort.by(StringUtil.Product_Sold).descending();
         } else if(StringUtil.Created_Date.equals(sortBy)){
             sort = Sort.by(StringUtil.Created_Date).descending();
+        } else if(StringUtil.Suspended.equals(sortBy)) {
+            sort = Sort.by(StringUtil.Suspended).descending();
         }
 
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-        Page<Product> products = productRepository.findAllByDeletedFalseAndStore_StoreId(storeId, pageable);
+        Page<Product> products = productRepository.findAllByDeletedFalseAndListedTrueAndStore_StoreId(storeId, pageable);
+        Store store = storeRepository.findById(storeId).get();
         List<AllProductModel> productModels = new ArrayList<>();
 
         PageResponse pageResponse = new PageResponse();
@@ -191,15 +195,18 @@ public class ProductServiceImpl implements ProductService {
         pageResponse.setTotalPages(products.getTotalPages());
         pageResponse.setLast(products.isLast());
 
+        StoreInfo storeInfo = new StoreInfo();
+        storeInfo.setStoreName(store.getStoreName());
+        storeInfo.setStorePhotoUrl(store.getPhotoUrl());
+        storeInfo.setOnline(store.isOnline());
+
         for(Product product : products){
             AllProductModel allProductModel = allProductMapper.mapProductEntityToProductModel(product);
             getPhotoUrl(product, allProductModel);
             getPriceAndQuantity(product, allProductModel);
-            allProductModel.setStoreName(product.getStore().getStoreName());
-            allProductModel.setStorePhotoUrl(product.getStore().getPhotoUrl());
             productModels.add(allProductModel);
         }
-        return new AllProductsPageResponse(productModels, pageResponse);
+        return new StoreResponse(productModels, storeInfo, pageResponse);
     }
 
     @Override
@@ -213,7 +220,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         Pageable pageable = PageRequest.of(pageNo,pageSize, sort);
-        Page<Product> products = productRepository.findByDeletedFalseAndProductNameContainingIgnoreCaseOrDeletedFalseAndStore_StoreNameContainingIgnoreCase(search,search, pageable);
+        Page<Product> products = productRepository.findByDeletedFalseAndListedTrueAndSuspendedFalseAndProductNameContainingIgnoreCaseOrDeletedFalseAndListedTrueAndSuspendedFalseAndStore_StoreNameContainingIgnoreCase(search,search, pageable);
 
         List<AllProductModel> productModels = new ArrayList<>();
 
@@ -234,10 +241,21 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public SellersProductsPageResponse getAllSellersProducts(String email, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, StringUtil.Created_Date));
+    public SellersProductsPageResponse getAllSellersProducts(String email, int pageNo, int pageSize, String sortBy) {
+        Sort sorts = Sort.by(StringUtil.Product_Sold).descending();
+
+        if(StringUtil.True.equals(sortBy)){
+            sorts = Sort.by(StringUtil.Listed).ascending();
+        } else if(StringUtil.Low_Product_Sold.equals(sortBy)){
+            sorts = Sort.by(StringUtil.Product_Sold).ascending();
+        } else if(StringUtil.Suspended.equals(sortBy)) {
+            sorts = Sort.by(StringUtil.Suspended).descending();
+        }
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sorts);
         Optional<User> user = userRepository.findByEmail(email);
         Page<Product> products = productRepository.findAllByDeletedFalseAndUserEmail(user.get().getEmail(), pageable);
+
         Sort sort = Sort.by(Sort.Direction.DESC, StringUtil.Color);
         List<SellersProductModel> productModels = new ArrayList<>();
 
@@ -274,9 +292,60 @@ public class ProductServiceImpl implements ProductService {
         if(product.isPresent()){
             Product prod = product.get();
             prod.setDeleted(true);
+
+            Store store = storeRepository.findById(prod.getStore().getStoreId()).get();
+            store.setProductCount(store.getProductCount() - 1);
+            storeRepository.save(store);
         }
 
         favoritesRepository.deleteAllByProduct_ProductId(productId);
+    }
+
+    @Override
+    public ProductCount getProductCount(String email) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        double count = productRepository.count();
+        ProductCount productCount = new ProductCount();
+        productCount.setProductCount(count);
+        return productCount;
+    }
+
+    @Override
+    public void suspendProduct(String productId, String email) {
+        User admin = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
+
+        if(!admin.getRole().equals(Role.ADMIN)) {
+            throw new AccessDeniedException(StringUtil.ACCESS_DENIED);
+        }
+
+        product.setSuspended(!product.isSuspended());
+        productRepository.save(product);
+    }
+
+    @Override
+    public void delistProduct(String productId, String email) {
+        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
+
+        product.setListed(!product.isListed());
+        productRepository.save(product);
+    }
+
+    @Override
+    public SuspendedProductCount getSuspendedProductCount(String storeId, String email) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+
+        double count = productRepository.findAllBySuspendedTrueAndStore_StoreId(storeId).stream().count();
+
+        SuspendedProductCount suspendedProductCount = new SuspendedProductCount();
+        suspendedProductCount.setSuspendedProductCount(count);
+
+        return suspendedProductCount;
     }
 
     private void getPhotoUrl(Product product, AllProductModel productModel){

@@ -1,18 +1,14 @@
 package com.practice.fullstackbackendspringboot.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_DEFAULT;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonInclude(NON_DEFAULT)
 public class StoreModel {
     @Valid
     private String storeId;
@@ -29,4 +25,5 @@ public class StoreModel {
     private String photoUrl;
     private Long productCount;
     private Long orderCount;
+    private boolean online;
 }

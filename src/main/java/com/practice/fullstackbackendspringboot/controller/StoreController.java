@@ -3,6 +3,7 @@ package com.practice.fullstackbackendspringboot.controller;
 import com.practice.fullstackbackendspringboot.model.StoreModel;
 import com.practice.fullstackbackendspringboot.model.request.CreateStoreRequest;
 import com.practice.fullstackbackendspringboot.model.request.UpdateShopInfoRequest;
+import com.practice.fullstackbackendspringboot.model.response.StoreCount;
 import com.practice.fullstackbackendspringboot.service.StoreService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import jakarta.validation.Valid;
@@ -10,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -42,5 +45,23 @@ public class StoreController {
     public void updateShopInfo(@RequestHeader("Authorization") String email, @PathVariable String storeId, @RequestBody @Valid UpdateShopInfoRequest request){
         String user = userService.getUserFromToken(email);
         storeService.updateShopInfo(user,storeId,request);
+    }
+
+    @GetMapping("/store/list")
+    @ResponseStatus(HttpStatus.OK)
+    public List<StoreModel> getAllStores(@RequestHeader("Authorization") String email,
+                                         @RequestParam(defaultValue = "true", required = false) String sortBy){
+        String user = userService.getUserFromToken(email);
+        return storeService.getAllStores(user, sortBy);
+    }
+    @GetMapping("/store/count")
+    public StoreCount getStoreCount(@RequestHeader("Authorization") String email) {
+        String user = userService.getUserFromToken(email);
+        return  storeService.getStoreCount(user);
+    }
+    @PutMapping("/store/suspend/{storeId}")
+    public void suspendStoreAndProductListing(@PathVariable String storeId, @RequestHeader("Authorization") String email) {
+        String user = userService.getUserFromToken(email);
+        storeService.suspendStoreAndProductListing(storeId,user);
     }
 }

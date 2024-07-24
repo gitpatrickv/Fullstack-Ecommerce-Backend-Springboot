@@ -37,10 +37,19 @@ public class StringUtil {
     public static final String RATING_EXCEEDS_LIMIT = "Invalid rating: Rating must be between 1 and 5";
     public static final String Created_Date = "createdDate";
     public static final String Product_Sold = "productSold";
+    public static final String Low_Product_Sold = "lowProductSold";
     public static final String Product_Name = "productName";
     public static final String Color = "colors";
     public static final String Replied = "replied";
     public static final String True = "true";
     public static final String False = "false";
     public static final String Rating = "rating";
+    public static final String Listed = "listed";
+    public static final String Suspended = "suspended";
+    public static final String Role = "role";
+    public static final String User = "user";
+    public static final String Seller = "seller";
+    public static final String Online = "online";
+    public static final String Frozen ="frozen";
+    public static final String ACCESS_DENIED = "Access denied: You do not have sufficient permissions to perform this action";
 }

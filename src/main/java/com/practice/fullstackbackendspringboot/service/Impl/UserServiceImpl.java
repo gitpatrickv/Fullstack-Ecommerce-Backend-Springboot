@@ -1,9 +1,11 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
 import com.practice.fullstackbackendspringboot.entity.User;
+import com.practice.fullstackbackendspringboot.entity.constants.Role;
 import com.practice.fullstackbackendspringboot.model.UserModel;
 import com.practice.fullstackbackendspringboot.model.request.LoginRequest;
 import com.practice.fullstackbackendspringboot.model.response.LoginResponse;
+import com.practice.fullstackbackendspringboot.model.response.UserCount;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.security.JwtAuthenticationFilter;
 import com.practice.fullstackbackendspringboot.security.JwtService;
@@ -12,6 +14,8 @@ import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.UserMapper;
 import jakarta.persistence.EntityExistsException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,6 +24,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -88,5 +93,49 @@ public class UserServiceImpl implements UserService {
         return mapper.mapUserEntityToUserModel(user);
     }
 
+    @Override
+    public UserCount getUserCount(String email) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        double count = userRepository.count();
+        UserCount userCount = new UserCount();
+        userCount.setUserCount(count);
+        return userCount;
+    }
+
+    @Override
+    public List<UserModel> getAllUsers(String email, String sortBy) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+
+        Sort sorts = Sort.by(StringUtil.Role).ascending();
+
+        if (StringUtil.Seller.equals(sortBy)) {
+            sorts = Sort.by(StringUtil.Role).descending();
+        } else if (StringUtil.False.equals(sortBy)){
+            sorts = Sort.by(StringUtil.Frozen).ascending();
+        } else if (StringUtil.True.equals(sortBy)) {
+            sorts = Sort.by(StringUtil.Frozen).descending();
+        }
+
+        return userRepository.findAll(sorts)
+                .stream()
+                .filter(user -> !user.getRole().equals(Role.ADMIN))
+                .map(mapper::mapUserEntityToUserModel)
+                .toList();
+    }
+
+    @Override
+    public void freezeAccount(String admin, String email) {
+        User administrator = userRepository.findByEmail(admin).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+
+        if(!administrator.getRole().equals(Role.ADMIN)) {
+            throw new AccessDeniedException(StringUtil.ACCESS_DENIED);
+        }
+
+        user.setFrozen(!user.isFrozen());
+        userRepository.save(user);
+    }
 }
 

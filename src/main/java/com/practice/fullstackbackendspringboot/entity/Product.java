@@ -25,6 +25,8 @@ public class Product extends AuditEntity{
     private String productDescription;
     private boolean deleted;
     private Long productSold = 0L;
+    private boolean listed;
+    private boolean suspended;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private Set<Inventory> inventory = new HashSet<>();
@@ -32,13 +34,13 @@ public class Product extends AuditEntity{
     @OneToMany(mappedBy = "product",  cascade = CascadeType.ALL)
     private List<Image> image = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product",  cascade = CascadeType.ALL)
     private List<Cart> cart = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<RatingAndReview> ratingAndReviews = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Favorites> favorites = new ArrayList<>();
 
     @ManyToOne

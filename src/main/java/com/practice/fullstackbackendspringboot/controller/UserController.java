@@ -1,13 +1,16 @@
 package com.practice.fullstackbackendspringboot.controller;
 
+import com.practice.fullstackbackendspringboot.model.UserModel;
 import com.practice.fullstackbackendspringboot.model.request.LoginRequest;
 import com.practice.fullstackbackendspringboot.model.response.LoginResponse;
-import com.practice.fullstackbackendspringboot.model.UserModel;
+import com.practice.fullstackbackendspringboot.model.response.UserCount;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
@@ -34,5 +37,21 @@ public class  UserController {
         String user = userService.getUserFromToken(email);
         return userService.getUser(user);
     }
+    @GetMapping("/count")
+    public UserCount getUserCount(@RequestHeader("Authorization") String email) {
+        String user = userService.getUserFromToken(email);
+        return userService.getUserCount(user);
+    }
+    @GetMapping("/all")
+    public List<UserModel> getAllUsers(@RequestHeader("Authorization") String email,
+                                       @RequestParam(defaultValue = "user", required = false) String sortBy) {
+        String user = userService.getUserFromToken(email);
+        return userService.getAllUsers(user,sortBy);
+    }
 
+    @PutMapping("/freeze/{email}")
+    public void freezeAccount(@RequestHeader("Authorization") String admin, @PathVariable String email){
+            String user = userService.getUserFromToken(admin);
+            userService.freezeAccount(user, email);
+    }
 }

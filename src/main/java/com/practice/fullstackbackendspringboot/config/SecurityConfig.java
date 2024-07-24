@@ -33,8 +33,8 @@ public class SecurityConfig {
                                         .requestMatchers("/api/admin/**").hasAuthority(ADMIN.name())
                                         .requestMatchers("/api/seller/**").hasAuthority(SELLER.name())
 
-                                        .requestMatchers("/api/store/**").hasAuthority(SELLER.name())
-                                        .requestMatchers("/api/cart/**").hasAuthority(USER.name())
+                                        .requestMatchers("/api/store/**").hasAnyAuthority(SELLER.name(), ADMIN.name())
+                                        .requestMatchers("/api/cart/**").authenticated()
 
                                         .requestMatchers(HttpMethod.POST, "/api/product/category/add").hasAuthority(ADMIN.name())
 
@@ -43,19 +43,21 @@ public class SecurityConfig {
                                         .requestMatchers("/api/product/**").permitAll()
 
                                         .requestMatchers(HttpMethod.GET, "/api/user").authenticated()
+
                                         .requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
                                         .requestMatchers(HttpMethod.POST, "/api/user/register").permitAll()
 
-                                        .requestMatchers(HttpMethod.POST, "api/product/rate").hasAuthority(USER.name())
+                                        .requestMatchers(HttpMethod.POST, "api/product/rate").hasAnyAuthority(USER.name(), SELLER.name())
+                                        .requestMatchers(HttpMethod.POST, "api/product/update").hasAuthority(SELLER.name())
                                         .requestMatchers( "/api/rating/**").permitAll()
 
 
-                                        .requestMatchers("/api/user/favorites/**").hasAuthority(USER.name())
+                                        .requestMatchers("/api/user/favorites/**").authenticated()
                                         .requestMatchers("/api/user/image/**").permitAll()
 
                                         .requestMatchers("/api/inventory/**").hasAnyAuthority(SELLER.name(), ADMIN.name())
 
-                                        .requestMatchers("api/order/**").hasAnyAuthority(SELLER.name(), USER.name())
+                                        .requestMatchers("api/order/**").authenticated()
 
                                         .anyRequest().authenticated()
                 );

@@ -3,8 +3,7 @@ package com.practice.fullstackbackendspringboot.controller;
 import com.practice.fullstackbackendspringboot.model.ProductModel;
 import com.practice.fullstackbackendspringboot.model.SaveProductModel;
 import com.practice.fullstackbackendspringboot.model.request.UpdateProductRequest;
-import com.practice.fullstackbackendspringboot.model.response.AllProductsPageResponse;
-import com.practice.fullstackbackendspringboot.model.response.SellersProductsPageResponse;
+import com.practice.fullstackbackendspringboot.model.response.*;
 import com.practice.fullstackbackendspringboot.service.ProductService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import jakarta.validation.Valid;
@@ -47,10 +46,10 @@ public class ProductController {
     }
     @GetMapping("/store/{storeId}")
     @ResponseStatus(HttpStatus.OK)
-    public AllProductsPageResponse getAllStoreProducts(@PathVariable (value="storeId") String storeId,
-                                                       @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
-                                                       @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize,
-                                                       @RequestParam(defaultValue = "productName", required = false) String sortBy){
+    public StoreResponse getAllStoreProducts(@PathVariable (value="storeId") String storeId,
+                                             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                             @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize,
+                                             @RequestParam(defaultValue = "productName", required = false) String sortBy){
         return productService.getAllStoreProducts(storeId,pageNo,pageSize, sortBy);
     }
 
@@ -58,9 +57,10 @@ public class ProductController {
     @ResponseStatus(HttpStatus.OK)
     public SellersProductsPageResponse getAllSellersProducts(@RequestHeader("Authorization") String email,
                                                              @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
-                                                             @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize){
+                                                             @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize,
+                                                             @RequestParam(defaultValue = "productSold", required = false) String sortBy){
         String user = userService.getUserFromToken(email);
-        return productService.getAllSellersProducts(user,pageNo,pageSize);
+        return productService.getAllSellersProducts(user,pageNo,pageSize, sortBy);
     }
     @GetMapping("/category/{categoryId}")
     @ResponseStatus(HttpStatus.OK)
@@ -88,6 +88,27 @@ public class ProductController {
     public void delete(@PathVariable (value="productId", required = false) String productId, @RequestHeader("Authorization") String email){
         String user = userService.getUserFromToken(email);
         productService.delete(productId, user);
+    }
+    @GetMapping("/count")
+    public ProductCount getProductCount(@RequestHeader("Authorization") String email) {
+        String user = userService.getUserFromToken(email);
+        return productService.getProductCount(user);
+    }
+    @PutMapping("/suspend/{productId}")
+    public void suspendProduct(@PathVariable String productId, @RequestHeader("Authorization") String email) {
+        String user = userService.getUserFromToken(email);
+        productService.suspendProduct(productId,user);
+    }
+    @GetMapping("/count/{storeId}")
+    public SuspendedProductCount getSuspendedProductCount(@PathVariable String storeId, @RequestHeader("Authorization") String email){
+        String user = userService.getUserFromToken(email);
+        return productService.getSuspendedProductCount(storeId, user);
+    }
+    @PutMapping("/delist/{productId}")
+    public void delistProduct(@PathVariable String productId, @RequestHeader("Authorization") String email) {
+        String user = userService.getUserFromToken(email);
+        productService.delistProduct(productId,user);
+
     }
 
 }

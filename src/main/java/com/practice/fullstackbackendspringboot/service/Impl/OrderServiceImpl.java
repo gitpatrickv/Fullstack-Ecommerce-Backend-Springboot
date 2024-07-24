@@ -4,6 +4,7 @@ import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
 import com.practice.fullstackbackendspringboot.model.OrderModel;
 import com.practice.fullstackbackendspringboot.model.response.AllOrdersResponse;
+import com.practice.fullstackbackendspringboot.model.response.OrderCount;
 import com.practice.fullstackbackendspringboot.model.response.TodoListTotal;
 import com.practice.fullstackbackendspringboot.model.response.TotalSales;
 import com.practice.fullstackbackendspringboot.repository.*;
@@ -194,34 +195,33 @@ public class OrderServiceImpl implements OrderService {
         userRepository.findByEmail(email);
         Optional<Order> order = orderRepository.findById(orderId);
 
-        Order orders = order.get();
-        if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.PENDING)) {
-            orders.setOrderStatus(StringUtil.TO_PAY);
-            orders.setOrderStatusInfo(StringUtil.PREPARE_ORDER);
-            orderRepository.save(orders);
+        if(order.isPresent()) {
+            Order orders = order.get();
+            if (orders.isActive() && orders.getOrderStatus().equals(StringUtil.PENDING)) {
+                orders.setOrderStatus(StringUtil.TO_PAY);
+                orders.setOrderStatusInfo(StringUtil.PREPARE_ORDER);
+                orderRepository.save(orders);
 
-            Optional<Store> store = storeRepository.findById(orders.getStore().getStoreId());
-            if(store.isPresent()){
-                Store store1 = store.get();
-                store1.setOrderCount(store1.getOrderCount() + 1L);
-                storeRepository.save(store1);
+                Optional<Store> store = storeRepository.findById(orders.getStore().getStoreId());
+                if (store.isPresent()) {
+                    Store store1 = store.get();
+                    store1.setOrderCount(store1.getOrderCount() + 1L);
+                    storeRepository.save(store1);
+                }
+            } else if (orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_PAY)) {
+                orders.setOrderStatus(StringUtil.TO_SHIP);
+                orders.setOrderStatusInfo(StringUtil.SHIPPING_ORDER);
+                orderRepository.save(orders);
+            } else if (orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_SHIP)) {
+                orders.setOrderStatus(StringUtil.TO_RECEIVE);
+                orders.setOrderStatusInfo(StringUtil.OUT_FOR_DELIVERY);
+                orderRepository.save(orders);
+            } else if (orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_RECEIVE)) {
+                orders.setOrderStatus(StringUtil.ORDER_COMPLETED);
+                orders.setOrderStatusInfo(StringUtil.ORDER_DELIVERED);
+                orders.setActive(false);
+                orderRepository.save(orders);
             }
-        }
-        else if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_PAY)){
-            orders.setOrderStatus(StringUtil.TO_SHIP);
-            orders.setOrderStatusInfo(StringUtil.SHIPPING_ORDER);
-            orderRepository.save(orders);
-        }
-        else if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_SHIP)){
-            orders.setOrderStatus(StringUtil.TO_RECEIVE);
-            orders.setOrderStatusInfo(StringUtil.OUT_FOR_DELIVERY);
-            orderRepository.save(orders);
-        }
-        else if(orders.isActive() && orders.getOrderStatus().equals(StringUtil.TO_RECEIVE)){
-            orders.setOrderStatus(StringUtil.ORDER_COMPLETED);
-            orders.setOrderStatusInfo(StringUtil.ORDER_DELIVERED);
-            orders.setActive(false);
-            orderRepository.save(orders);
         }
     }
 
@@ -379,7 +379,7 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        List<Product> products = productRepository.findAllByDeletedFalseAndStore_StoreId(storeId);
+        List<Product> products = productRepository.findAllByDeletedFalseAndListedTrueAndSuspendedFalseAndStore_StoreId(storeId);
         long outOfStock = 0L;
 
         for(Product product : products){
@@ -424,5 +424,25 @@ public class OrderServiceImpl implements OrderService {
         totalSales.setTotalSales(totalSale);
 
         return totalSales;
+    }
+
+    @Override
+    public OrderCount getOrderCountAndTotalSales(String email) {
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        List<Order> orders = orderRepository.findAll();
+        double countOrder = orderRepository.count();
+        double sales = 0.0;
+
+        for(Order order : orders){
+            if(order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED)){
+                double orderAmount = order.getOrderTotalAmount() - order.getStore().getShippingFee();
+                sales+=orderAmount;
+            }
+        }
+        OrderCount orderCount = new OrderCount();
+        orderCount.setOrderCount(countOrder);
+        orderCount.setTotalSales(sales);
+        return orderCount;
     }
 }
