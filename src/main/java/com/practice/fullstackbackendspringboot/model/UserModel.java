@@ -42,4 +42,5 @@ public class UserModel{
     @Enumerated(EnumType.STRING)
     private Role role;
     private String photoUrl;
+    private boolean frozen;
 }

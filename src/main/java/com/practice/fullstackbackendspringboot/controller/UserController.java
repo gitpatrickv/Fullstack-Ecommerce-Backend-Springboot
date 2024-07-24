@@ -48,4 +48,10 @@ public class  UserController {
         String user = userService.getUserFromToken(email);
         return userService.getAllUsers(user,sortBy);
     }
+
+    @PutMapping("/freeze/{email}")
+    public void freezeAccount(@RequestHeader("Authorization") String admin, @PathVariable String email){
+            String user = userService.getUserFromToken(admin);
+            userService.freezeAccount(user, email);
+    }
 }

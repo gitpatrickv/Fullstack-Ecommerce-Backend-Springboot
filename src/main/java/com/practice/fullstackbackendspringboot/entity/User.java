@@ -31,6 +31,8 @@ public class User implements UserDetails {
     private String address;
     private String contactNumber;
     private String photoUrl;
+    private boolean frozen;
+
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     @Enumerated(EnumType.STRING)
@@ -75,7 +77,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !frozen;
     }
 
     @Override
@@ -85,6 +87,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return !frozen;
     }
 }

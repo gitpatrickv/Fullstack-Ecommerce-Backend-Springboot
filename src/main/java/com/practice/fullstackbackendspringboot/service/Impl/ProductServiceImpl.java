@@ -1,6 +1,7 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
 import com.practice.fullstackbackendspringboot.entity.*;
+import com.practice.fullstackbackendspringboot.entity.constants.Role;
 import com.practice.fullstackbackendspringboot.model.*;
 import com.practice.fullstackbackendspringboot.model.request.UpdateProductRequest;
 import com.practice.fullstackbackendspringboot.model.response.*;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -311,9 +313,13 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void suspendProduct(String productId, String email) {
-        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        User admin = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
+
+        if(!admin.getRole().equals(Role.ADMIN)) {
+            throw new AccessDeniedException(StringUtil.ACCESS_DENIED);
+        }
 
         product.setSuspended(!product.isSuspended());
         productRepository.save(product);

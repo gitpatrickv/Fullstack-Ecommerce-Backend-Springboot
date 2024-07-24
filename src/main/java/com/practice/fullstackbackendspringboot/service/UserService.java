@@ -14,5 +14,6 @@ public interface UserService {
     UserModel getUser(String email);
     UserCount getUserCount(String email);
     List<UserModel> getAllUsers(String email, String sortBy);
+    void freezeAccount(String admin, String email);
 
 }
