@@ -49,4 +49,5 @@ public class StringUtil {
     public static final String Role = "role";
     public static final String User = "user";
     public static final String Seller = "seller";
+    public static final String Online = "online";
 }

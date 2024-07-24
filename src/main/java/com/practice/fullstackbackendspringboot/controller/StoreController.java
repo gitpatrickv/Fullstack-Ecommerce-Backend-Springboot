@@ -49,9 +49,10 @@ public class StoreController {
 
     @GetMapping("/store/list")
     @ResponseStatus(HttpStatus.OK)
-    public List<StoreModel> getAllStores(@RequestHeader("Authorization") String email){
+    public List<StoreModel> getAllStores(@RequestHeader("Authorization") String email,
+                                         @RequestParam(defaultValue = "true", required = false) String sortBy){
         String user = userService.getUserFromToken(email);
-        return storeService.getAllStores(user);
+        return storeService.getAllStores(user, sortBy);
     }
     @GetMapping("/store/count")
     public StoreCount getStoreCount(@RequestHeader("Authorization") String email) {

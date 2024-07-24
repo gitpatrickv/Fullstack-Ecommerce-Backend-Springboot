@@ -12,7 +12,7 @@ public interface StoreService {
     void createStore(CreateStoreRequest request, String email);
     StoreModel getStoreInfo(String email);
     void updateShopInfo(String email, String storeId, UpdateShopInfoRequest request);
-    List<StoreModel> getAllStores(String email);
+    List<StoreModel> getAllStores(String email, String sortBy);
     StoreCount getStoreCount(String email);
     void suspendStoreAndProductListing(String storeId, String email);
 }

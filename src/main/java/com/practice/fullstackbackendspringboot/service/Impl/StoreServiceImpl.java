@@ -16,6 +16,7 @@ import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.StoreMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -75,10 +76,17 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
-    public List<StoreModel> getAllStores(String email) {
+    public List<StoreModel> getAllStores(String email, String sortBy) {
         userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
-        return storeRepository.findAll()
+
+        Sort sorts = Sort.by(StringUtil.Online).descending();
+
+        if (StringUtil.False.equals(sortBy)) {
+            sorts = Sort.by(StringUtil.Online).ascending();
+        }
+
+        return storeRepository.findAll(sorts)
                 .stream()
                 .map(store -> {
                     StoreModel storeModel = mapper.mapEntityToModel(store);
