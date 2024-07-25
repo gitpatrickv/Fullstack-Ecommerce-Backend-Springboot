@@ -79,16 +79,19 @@ public class FavoritesServiceImpl implements FavoritesService {
         List<AllProductModel> model = new ArrayList<>();
 
         for(Favorites favorite : favorites){
-            Optional<Product> product = productRepository.findById(favorite.getProduct().getProductId());
+            Product product = productRepository.findById(favorite.getProduct().getProductId())
+                    .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
 
-            AllProductModel favoritesModel = new AllProductModel();
-            favoritesModel.setProductName(product.get().getProductName());
-            favoritesModel.setPrice(product.get().getInventory().iterator().next().getPrice());
-            favoritesModel.setPhotoUrl(product.get().getImage().get(0).getPhotoUrl());
-            favoritesModel.setProductId(product.get().getProductId());
-            favoritesModel.setProductSold(product.get().getProductSold());
+            if(product.isListed() && !product.isSuspended()) {
+                AllProductModel favoritesModel = new AllProductModel();
+                favoritesModel.setProductName(product.getProductName());
+                favoritesModel.setPrice(product.getInventory().iterator().next().getPrice());
+                favoritesModel.setPhotoUrl(product.getImage().get(0).getPhotoUrl());
+                favoritesModel.setProductId(product.getProductId());
+                favoritesModel.setProductSold(product.getProductSold());
 
-            model.add(favoritesModel);
+                model.add(favoritesModel);
+            }
         }
         return model;
     }
