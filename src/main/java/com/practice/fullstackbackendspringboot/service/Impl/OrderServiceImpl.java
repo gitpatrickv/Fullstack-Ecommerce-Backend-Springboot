@@ -36,7 +36,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemMapper orderItemMapper;
 
     @Override
-    public void placeOrder(String email) {
+    public void placeOrder(String email) {      //CUSTOMER
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         List<Cart> cart = cartRepository.findAllByFilterTrueAndUserEmail(email);
@@ -112,7 +112,47 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void cancelOrder(String email, String orderId) {
+    public void buyAgain(String email, String orderId) {        //CUSTOMER
+        Optional<User> user = userRepository.findByEmail(email);
+        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmailAndOrder_OrderId(email,orderId);
+        Long quantity = 1L;
+
+        for(OrderItem orderItem : orderItems){
+            Optional<Cart> existingCart = cartRepository.findByProduct_ProductIdAndInventory_InventoryIdAndUserEmail(
+                    orderItem.getProduct().getProductId(),
+                    orderItem.getInventory().getInventoryId(), email);
+
+            Cart cart;
+
+            if(existingCart.isPresent()){
+                cart = existingCart.get();
+                cartRepository.save(cart);
+            } else {
+                Optional<Product> optionalProduct = productRepository.findById(orderItem.getProduct().getProductId());
+                if(optionalProduct.isPresent()){
+                    Product product = optionalProduct.get();
+                    if(product.isListed() && !product.isSuspended() && !product.isDeleted()) {
+                        cart = new Cart();
+                        cart.setQuantity(quantity);
+                        cart.setStoreId(orderItem.getOrder().getStore().getStoreId());
+                        cart.setTotalAmount(orderItem.getPrice() * quantity);
+                        cart.setProduct(product);
+                        cart.setOrderItems(orderItems);
+                        cart.setSizes(orderItem.getSizes());
+                        cart.setColors(orderItem.getColors());
+                        cart.setInventory(orderItem.getInventory());
+                        cart.setUser(user.get());
+                        cartRepository.save(cart);
+                    } else {
+                        throw new IllegalArgumentException(StringUtil.PRODUCT_NOT_FOUND);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void cancelOrder(String email, String orderId) {     //CUSTOMER
         Optional<User> user = userRepository.findByEmail(email);
         Optional<Order> order = orderRepository.findById(orderId);
         List<OrderItem> orderItems = orderItemRepository.findAllByUserEmailAndOrder_OrderId(email, orderId);
@@ -148,56 +188,77 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void confirmCancelOrder(String email, String orderId) {
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
-        Optional<Order> order = orderRepository.findById(orderId);
+    public List<OrderItemModel> getCustomerOrdersByStatus(String email, String status1) {       //CUSTOMER
+        Sort sort = Sort.by(Sort.Direction.DESC, StringUtil.Created_Date);
+        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email, sort);
 
-        if(order.isPresent()){
-            Order orders = order.get();
-            orders.setActive(false);
-            orderRepository.save(orders);
-        }
-    }
-
-    @Override
-    public void buyAgain(String email, String orderId) {
-        Optional<User> user = userRepository.findByEmail(email);
-        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmailAndOrder_OrderId(email,orderId);
-        Long quantity = 1L;
+        List<OrderItemModel> orderModels = new ArrayList<>();
 
         for(OrderItem orderItem : orderItems){
-            Optional<Cart> existingCart = cartRepository.findByProduct_ProductIdAndInventory_InventoryIdAndUserEmail(
-                    orderItem.getProduct().getProductId(),
-                    orderItem.getInventory().getInventoryId(), email);
+            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
+            Product product = productRepository.findById(orderItem.getProduct().getProductId()).get();
 
-            Cart cart;
-
-            if(existingCart.isPresent()){
-                cart = existingCart.get();
-                cartRepository.save(cart);
-            } else {
-                Optional<Product> product = productRepository.findById(orderItem.getProduct().getProductId());
-
-                if(!product.get().isDeleted()) {
-                    cart = new Cart();
-                    cart.setQuantity(quantity);
-                    cart.setStoreId(orderItem.getOrder().getStore().getStoreId());
-                    cart.setTotalAmount(orderItem.getPrice() * quantity);
-                    cart.setProduct(product.get());
-                    cart.setOrderItems(orderItems);
-                    cart.setSizes(orderItem.getSizes());
-                    cart.setColors(orderItem.getColors());
-                    cart.setInventory(orderItem.getInventory());
-                    cart.setUser(user.get());
-                    cartRepository.save(cart);
-                }
+            if(order.isActive() && order.getOrderStatus().equals(status1)
+                    || !order.isActive() && order.getOrderStatus().equals(status1)
+                    || status1.isEmpty()) {
+                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
+                orderItemModel.setOrderStatus(order.getOrderStatus());
+                orderItemModel.setOrderStatusInfo(order.getOrderStatusInfo());
+                orderItemModel.setActive(order.isActive());
+                orderItemModel.setStoreId(order.getStore().getStoreId());
+                orderItemModel.setProductId(product.getProductId());
+                orderModels.add(orderItemModel);
             }
         }
+        return orderModels;
     }
 
     @Override
-    public void processOrder(String email, String orderId) {
+    public List<OrderItemModel> getCustomerOrdersByCompletedAndRatedStatus(String email) {      //CUSTOMER
+        Sort sort = Sort.by(Sort.Direction.DESC, StringUtil.Created_Date);
+        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email, sort);
+
+        List<OrderItemModel> orderModels = new ArrayList<>();
+
+        for(OrderItem orderItem : orderItems){
+            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
+            Product product = productRepository.findById(orderItem.getProduct().getProductId()).get();
+
+            if(order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED) || order.getOrderStatus().equals(StringUtil.RATED)) {
+                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
+                orderItemModel.setOrderStatus(order.getOrderStatus());
+                orderItemModel.setOrderStatusInfo(order.getOrderStatusInfo());
+                orderItemModel.setActive(order.isActive());
+                orderItemModel.setStoreId(order.getStore().getStoreId());
+                orderItemModel.setProductId(product.getProductId());
+                orderModels.add(orderItemModel);
+            }
+        }
+        return orderModels;
+    }
+
+    @Override
+    public Set<OrderItemModel> getCustomerOrdersByOrderIdToRate(String email, String orderId) {     //CUSTOMER
+        Set<OrderItem> orderItems = orderItemRepository.findAllByRatedFalseAndOrder_OrderIdAndUserEmail(orderId, email);
+        Set<OrderItemModel> orderItemModels = new HashSet<>();
+        Set<String> productIds = new HashSet<>();
+
+        for(OrderItem orderItem : orderItems){
+            String productId = orderItem.getProduct().getProductId();
+
+            if(!productIds.contains(productId)) {
+                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+                orderItemModels.add(orderItemModel);
+                productIds.add(productId);
+            }
+        }
+        return orderItemModels;
+    }
+
+    @Override
+    public void processOrder(String email, String orderId) {        //SELLER
         userRepository.findByEmail(email);
         Optional<Order> order = orderRepository.findById(orderId);
 
@@ -232,59 +293,20 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderItemModel> getCustomerOrdersByStatus(String email, String status1) {
-        Sort sort = Sort.by(Sort.Direction.DESC, StringUtil.Created_Date);
-        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email, sort);
+    public void confirmCancelOrder(String email, String orderId) {      //SELLER
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Optional<Order> order = orderRepository.findById(orderId);
 
-        List<OrderItemModel> orderModels = new ArrayList<>();
-
-        for(OrderItem orderItem : orderItems){
-            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
-            Product product = productRepository.findById(orderItem.getProduct().getProductId()).get();
-
-            if(order.isActive() && order.getOrderStatus().equals(status1)
-                    || !order.isActive() && order.getOrderStatus().equals(status1)
-                    || status1.isEmpty()) {
-                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
-                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
-                orderItemModel.setOrderStatus(order.getOrderStatus());
-                orderItemModel.setOrderStatusInfo(order.getOrderStatusInfo());
-                orderItemModel.setActive(order.isActive());
-                orderItemModel.setStoreId(order.getStore().getStoreId());
-                orderItemModel.setProductId(product.getProductId());
-                orderModels.add(orderItemModel);
-            }
+        if(order.isPresent()){
+            Order orders = order.get();
+            orders.setActive(false);
+            orderRepository.save(orders);
         }
-        return orderModels;
     }
 
     @Override
-    public List<OrderItemModel> getCustomerOrdersByCompletedAndRatedStatus(String email) {
-        Sort sort = Sort.by(Sort.Direction.DESC, StringUtil.Created_Date);
-        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email, sort);
-
-        List<OrderItemModel> orderModels = new ArrayList<>();
-
-        for(OrderItem orderItem : orderItems){
-            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
-            Product product = productRepository.findById(orderItem.getProduct().getProductId()).get();
-
-            if(order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED) || order.getOrderStatus().equals(StringUtil.RATED)) {
-                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
-                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
-                orderItemModel.setOrderStatus(order.getOrderStatus());
-                orderItemModel.setOrderStatusInfo(order.getOrderStatusInfo());
-                orderItemModel.setActive(order.isActive());
-                orderItemModel.setStoreId(order.getStore().getStoreId());
-                orderItemModel.setProductId(product.getProductId());
-                orderModels.add(orderItemModel);
-            }
-        }
-        return orderModels;
-    }
-
-    @Override
-    public AllOrdersResponse getStoreOrdersByStatus(String email, String storeId, String status1) {
+    public AllOrdersResponse getStoreOrdersByStatus(String email, String storeId, String status1) {     //SELLER
         userRepository.findByEmail(email);
         List<Order> orders = orderRepository.findAllByStore_StoreId(storeId);
         List<OrderModel> orderModels = new ArrayList<>();
@@ -332,25 +354,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Set<OrderItemModel> getCustomerOrdersByOrderIdToRate(String email, String orderId) {
-        Set<OrderItem> orderItems = orderItemRepository.findAllByRatedFalseAndOrder_OrderIdAndUserEmail(orderId, email);
-        Set<OrderItemModel> orderItemModels = new HashSet<>();
-        Set<String> productIds = new HashSet<>();
-
-        for(OrderItem orderItem : orderItems){
-            String productId = orderItem.getProduct().getProductId();
-
-            if(!productIds.contains(productId)) {
-                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
-                orderItemModels.add(orderItemModel);
-                productIds.add(productId);
-            }
-        }
-        return orderItemModels;
-    }
-
-    @Override
-    public TodoListTotal getSellersTodoListTotal(String email, String storeId) {
+    public TodoListTotal getSellersTodoListTotal(String email, String storeId) {    //SELLER
         userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Optional<Store> store = storeRepository.findById(storeId);
@@ -411,7 +415,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public TotalSales getTotalSales(String email, String storeId) {
+    public TotalSales getTotalSales(String email, String storeId) {     //SELLER
         userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Optional<Store> store = storeRepository.findById(storeId);
@@ -433,7 +437,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderCount getOrderCountAndTotalSales(String email) {
+    public OrderCount getOrderCountAndTotalSales(String email) {    //ADMIN
         userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         List<Order> orders = orderRepository.findAll();
@@ -460,7 +464,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderModel> getAllOrders(String email) {
+    public List<OrderModel> getAllOrders(String email) {    //ADMIN
         return orderRepository.findAll()
                 .stream()
                 .map(order -> {
