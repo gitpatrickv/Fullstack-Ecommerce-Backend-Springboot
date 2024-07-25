@@ -162,8 +162,8 @@ public class OrderServiceImpl implements OrderService {
 
         for(OrderItem orderItem : orderItems){
             Optional<Cart> existingCart = cartRepository.findByProduct_ProductIdAndInventory_InventoryIdAndUserEmail(
-                            orderItem.getProduct().getProductId(),
-                            orderItem.getInventory().getInventoryId(), email);
+                    orderItem.getProduct().getProductId(),
+                    orderItem.getInventory().getInventoryId(), email);
 
             Cart cart;
 
@@ -433,15 +433,21 @@ public class OrderServiceImpl implements OrderService {
         List<Order> orders = orderRepository.findAll();
         double countOrder = orderRepository.count();
         double sales = 0.0;
+        double shippingTotal = 0.0;
 
         for(Order order : orders){
             if(order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED)){
+
+                double shippingAmount = order.getStore().getShippingFee();
+                shippingTotal += shippingAmount;
+
                 double orderAmount = order.getOrderTotalAmount() - order.getStore().getShippingFee();
                 sales+=orderAmount;
             }
         }
         OrderCount orderCount = new OrderCount();
         orderCount.setOrderCount(countOrder);
+        orderCount.setTotalShippingFee(shippingTotal);
         orderCount.setTotalSales(sales);
         return orderCount;
     }

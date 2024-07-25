@@ -11,4 +11,5 @@ public class OrderCount {
 
     private Double orderCount;
     private Double totalSales;
+    private Double totalShippingFee;
 }
