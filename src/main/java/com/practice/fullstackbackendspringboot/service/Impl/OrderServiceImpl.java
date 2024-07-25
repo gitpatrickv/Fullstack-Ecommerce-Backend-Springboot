@@ -451,4 +451,17 @@ public class OrderServiceImpl implements OrderService {
         orderCount.setTotalSales(sales);
         return orderCount;
     }
+
+    @Override
+    public List<OrderModel> getAllOrders(String email) {
+        return orderRepository.findAll()
+                .stream()
+                .map(order -> {
+                    OrderModel orderModel = orderMapper.mapOrderEntityToOrderModel(order);
+                    orderModel.setShopName(order.getStore().getStoreName());
+                    return orderModel;
+                })
+                .sorted(Comparator.comparing(OrderModel::getCreatedDate).reversed())
+                .toList();
+    }
 }

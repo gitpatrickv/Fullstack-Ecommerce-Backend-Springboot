@@ -1,6 +1,7 @@
 package com.practice.fullstackbackendspringboot.service;
 
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
+import com.practice.fullstackbackendspringboot.model.OrderModel;
 import com.practice.fullstackbackendspringboot.model.response.AllOrdersResponse;
 import com.practice.fullstackbackendspringboot.model.response.OrderCount;
 import com.practice.fullstackbackendspringboot.model.response.TodoListTotal;
@@ -23,4 +24,5 @@ public interface OrderService {
     TodoListTotal getSellersTodoListTotal(String email, String storeId);
     TotalSales getTotalSales(String email, String storeId);
     OrderCount getOrderCountAndTotalSales(String email);
+    List<OrderModel> getAllOrders(String email);
 }

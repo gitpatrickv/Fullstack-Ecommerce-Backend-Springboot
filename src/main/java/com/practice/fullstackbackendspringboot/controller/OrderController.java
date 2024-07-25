@@ -1,6 +1,7 @@
 package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
+import com.practice.fullstackbackendspringboot.model.OrderModel;
 import com.practice.fullstackbackendspringboot.model.response.AllOrdersResponse;
 import com.practice.fullstackbackendspringboot.model.response.OrderCount;
 import com.practice.fullstackbackendspringboot.model.response.TodoListTotal;
@@ -179,6 +180,11 @@ public class OrderController {
     public OrderCount getOrderCountAndTotalSales(@RequestHeader("Authorization") String email) {
         String user =  userService.getUserFromToken(email);
         return orderService.getOrderCountAndTotalSales(user);
+    }
+    @GetMapping("/all")
+    public List<OrderModel> getAllOrders(@RequestHeader("Authorization") String email){
+        String user =  userService.getUserFromToken(email);
+        return orderService.getAllOrders(user);
     }
 
 }
