@@ -15,9 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -118,20 +116,25 @@ public class CartServiceImpl implements CartService {
         return cartRepository.findAllByUserEmailOrderByCreatedDateDesc(email)
                 .stream()
                 .map(cart -> {
-                    CartModel cartModel = cartMapper.mapCartEntityToCartModel(cart);
-                    inventoryRepository.findById(cart.getInventory().getInventoryId())
-                            .ifPresent(inventory -> {
-                                cartModel.setStockRemaining(inventory.getQuantity());
-                                cartModel.setPrice(inventory.getPrice());
-                            });
-                    productRepository.findById(cart.getProduct().getProductId())
-                            .ifPresent(product -> {
-                                cartModel.setProductName(product.getProductName());
-                                cartModel.setStoreName(product.getStore().getStoreName());
-                                cartModel.setPhotoUrl(product.getImage().get(0).getPhotoUrl());
-                            });
-                    return cartModel;
+                    Optional<Product> optionalProduct = productRepository.findById(cart.getProduct().getProductId());
+                    if(optionalProduct.isPresent()) {
+                        Product product = optionalProduct.get();
+                        if (product.isListed() && !product.isSuspended()) {
+                            CartModel cartModel = cartMapper.mapCartEntityToCartModel(cart);
+                            inventoryRepository.findById(cart.getInventory().getInventoryId())
+                                    .ifPresent(inventory -> {
+                                        cartModel.setStockRemaining(inventory.getQuantity());
+                                        cartModel.setPrice(inventory.getPrice());
+                                    });
+                            cartModel.setProductName(product.getProductName());
+                            cartModel.setStoreName(product.getStore().getStoreName());
+                            cartModel.setPhotoUrl(product.getImage().get(0).getPhotoUrl());
+                            return cartModel;
+                        }
+                    }
+                    return null;
                 })
+                .filter(Objects::nonNull)
                 .toList();
     }
 

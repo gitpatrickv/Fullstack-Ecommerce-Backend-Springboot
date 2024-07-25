@@ -414,7 +414,7 @@ public class OrderServiceImpl implements OrderService {
 
         if(store.isPresent()) {
             for (Order order : orders) {
-                if (order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED)) {
+                if (order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED) || order.getOrderStatus().equals(StringUtil.RATED)) {
                     double sales = order.getOrderTotalAmount() - store.get().getShippingFee();
                     totalSale += sales;
                 }
@@ -431,12 +431,13 @@ public class OrderServiceImpl implements OrderService {
         userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         List<Order> orders = orderRepository.findAll();
+
         double countOrder = orderRepository.count();
         double sales = 0.0;
         double shippingTotal = 0.0;
 
         for(Order order : orders){
-            if(order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED)){
+            if(order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED) || order.getOrderStatus().equals(StringUtil.RATED)){
 
                 double shippingAmount = order.getStore().getShippingFee();
                 shippingTotal += shippingAmount;
@@ -461,7 +462,7 @@ public class OrderServiceImpl implements OrderService {
                     orderModel.setShopName(order.getStore().getStoreName());
                     return orderModel;
                 })
-                .sorted(Comparator.comparing(OrderModel::getCreatedDate).reversed())
+                .sorted(Comparator.comparing(OrderModel::getLastModified).reversed())
                 .toList();
     }
 }
