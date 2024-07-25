@@ -119,7 +119,7 @@ public class CartServiceImpl implements CartService {
                     Optional<Product> optionalProduct = productRepository.findById(cart.getProduct().getProductId());
                     if(optionalProduct.isPresent()) {
                         Product product = optionalProduct.get();
-                        if (product.isListed() && !product.isSuspended()) {
+                        if (product.isListed() && !product.isSuspended() && !product.isDeleted()) {
                             CartModel cartModel = cartMapper.mapCartEntityToCartModel(cart);
                             inventoryRepository.findById(cart.getInventory().getInventoryId())
                                     .ifPresent(inventory -> {
@@ -173,8 +173,8 @@ public class CartServiceImpl implements CartService {
         boolean toggleFilter = !allFilteredCarts;
 
         for(Cart cart : existingCart){
-           cart.setFilter(toggleFilter);
-           cartRepository.save(cart);
+            cart.setFilter(toggleFilter);
+            cartRepository.save(cart);
         }
     }
 
@@ -184,19 +184,25 @@ public class CartServiceImpl implements CartService {
         return cartRepository.findAllByFilterTrueAndUserEmailOrderByCreatedDateDesc(email)
                 .stream()
                 .map(cart -> {
-                    CartModel cartModel = cartMapper.mapCartEntityToCartModel(cart);
-                    inventoryRepository.findById(cart.getInventory().getInventoryId())
-                            .ifPresent(inventory -> {
-                                cartModel.setPrice(inventory.getPrice());
-                            });
-                    productRepository.findById(cart.getProduct().getProductId())
-                            .ifPresent(product -> {
-                                cartModel.setProductName(product.getProductName());
-                                cartModel.setStoreName(product.getStore().getStoreName());
-                                cartModel.setPhotoUrl(product.getImage().get(0).getPhotoUrl());
-                            });
-                    return cartModel;
+                    Optional<Product> optionalProduct = productRepository.findById(cart.getProduct().getProductId());
+                    if(optionalProduct.isPresent()) {
+                        Product product = optionalProduct.get();
+                        if (product.isListed() && !product.isSuspended() && !product.isDeleted()) {
+                            CartModel cartModel = cartMapper.mapCartEntityToCartModel(cart);
+                            inventoryRepository.findById(cart.getInventory().getInventoryId())
+                                    .ifPresent(inventory -> {
+                                        cartModel.setPrice(inventory.getPrice());
+                                    });
+                            cartModel.setProductName(product.getProductName());
+                            cartModel.setStoreName(product.getStore().getStoreName());
+                            cartModel.setPhotoUrl(product.getImage().get(0).getPhotoUrl());
+
+                            return cartModel;
+                        }
+                    }
+                    return null;
                 })
+                .filter(Objects::nonNull)
                 .toList();
     }
 
@@ -213,19 +219,31 @@ public class CartServiceImpl implements CartService {
         Double totalShippingFee = 0.0;
 
         for(Cart cart : carts){
-            Double cartTotalAmount = cart.getTotalAmount();
-            total += cartTotalAmount;
+            Optional<Product> optionalProduct = productRepository.findById(cart.getProduct().getProductId());
+            if(optionalProduct.isPresent()) {
+                Product product = optionalProduct.get();
+                if (product.isListed() && !product.isSuspended() && !product.isDeleted()) {
+                    Double cartTotalAmount = cart.getTotalAmount();
+                    total += cartTotalAmount;
 
-            long filterNumber = cart.getQuantity();
-            filteredItem += filterNumber;
+                    long filterNumber = cart.getQuantity();
+                    filteredItem += filterNumber;
 
-            long productFiltered = 1;
-            numberOfProductFiltered+=productFiltered;
+                    long productFiltered = 1;
+                    numberOfProductFiltered += productFiltered;
+                }
+            }
         }
 
         for(Cart cart : cartCount){
-            long itemCount = 1L;
-            count += itemCount;
+            Optional<Product> optionalProduct = productRepository.findById(cart.getProduct().getProductId());
+            if(optionalProduct.isPresent()) {
+                Product product = optionalProduct.get();
+                if (product.isListed() && !product.isSuspended() && !product.isDeleted()) {
+                    long itemCount = 1L;
+                    count += itemCount;
+                }
+            }
         }
 
         Map<String, List<Cart>> cartsByStore = carts.stream()
