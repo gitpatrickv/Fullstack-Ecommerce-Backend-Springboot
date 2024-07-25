@@ -66,36 +66,42 @@ public class OrderServiceImpl implements OrderService {
             List<OrderItem> orderItems = new ArrayList<>();
 
             for (Cart carts : storeCarts) {
-                Optional<Product> product = productRepository.findById(carts.getProduct().getProductId());
+                Optional<Product> optionalProduct = productRepository.findById(carts.getProduct().getProductId());
                 Optional<Inventory> inventory = inventoryRepository.findById(carts.getInventory().getInventoryId());
-                OrderItem orderItem = new OrderItem();
 
-                orderItem.setQuantity(carts.getQuantity());
-                orderItem.setTotalAmount(carts.getTotalAmount());
-                orderItem.setPrice(inventory.get().getPrice());
-                orderItem.setStoreName(product.get().getStore().getStoreName());
-                orderItem.setProductName(product.get().getProductName());
-                orderItem.setPhotoUrl(product.get().getImage().get(0).getPhotoUrl());
-                orderItem.setUser(user);
-                orderItem.setColors(carts.getColors());
-                orderItem.setSizes(carts.getSizes());
-                orderItem.setOrder(order);
-                orderItem.setProduct(product.get());
-                orderItem.setInventory(inventory.get());
-                storeTotalAmount += orderItem.getTotalAmount();
-                OrderItem savedOrderItems = orderItemRepository.save(orderItem);
-                orderItems.add(savedOrderItems);
+                if(optionalProduct.isPresent()) {
+                    Product product = optionalProduct.get();
+                    if (product.isListed() && !product.isSuspended() && !product.isDeleted()) {
+                        OrderItem orderItem = new OrderItem();
 
-                if (carts.getQuantity() > inventory.get().getQuantity()) {
-                    throw new IllegalArgumentException(StringUtil.OUT_OF_STOCK);
-                } else {
-                    Inventory inv = inventory.get();
-                    inv.setQuantity(inv.getQuantity() - carts.getQuantity());
-                    inventoryRepository.save(inv);
+                        orderItem.setQuantity(carts.getQuantity());
+                        orderItem.setTotalAmount(carts.getTotalAmount());
+                        orderItem.setPrice(inventory.get().getPrice());
+                        orderItem.setStoreName(product.getStore().getStoreName());
+                        orderItem.setProductName(product.getProductName());
+                        orderItem.setPhotoUrl(product.getImage().get(0).getPhotoUrl());
+                        orderItem.setUser(user);
+                        orderItem.setColors(carts.getColors());
+                        orderItem.setSizes(carts.getSizes());
+                        orderItem.setOrder(order);
+                        orderItem.setProduct(product);
+                        orderItem.setInventory(inventory.get());
+                        storeTotalAmount += orderItem.getTotalAmount();
+                        OrderItem savedOrderItems = orderItemRepository.save(orderItem);
+                        orderItems.add(savedOrderItems);
+
+                        if (carts.getQuantity() > inventory.get().getQuantity()) {
+                            throw new IllegalArgumentException(StringUtil.OUT_OF_STOCK);
+                        } else {
+                            Inventory inv = inventory.get();
+                            inv.setQuantity(inv.getQuantity() - carts.getQuantity());
+                            inventoryRepository.save(inv);
+                        }
+
+                        product.setProductSold(product.getProductSold() + carts.getQuantity());
+                        productRepository.save(product);
+                    }
                 }
-                Product product1 = product.get();
-                product1.setProductSold(product1.getProductSold() + carts.getQuantity());
-                productRepository.save(product1);
             }
 
             order.setOrderTotalAmount(storeTotalAmount + store.get().getShippingFee());

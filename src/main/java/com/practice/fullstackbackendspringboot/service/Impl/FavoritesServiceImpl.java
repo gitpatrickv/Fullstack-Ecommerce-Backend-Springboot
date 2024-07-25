@@ -82,7 +82,7 @@ public class FavoritesServiceImpl implements FavoritesService {
             Product product = productRepository.findById(favorite.getProduct().getProductId())
                     .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
 
-            if(product.isListed() && !product.isSuspended()) {
+            if(product.isListed() && !product.isSuspended() && !product.isDeleted()) {
                 AllProductModel favoritesModel = new AllProductModel();
                 favoritesModel.setProductName(product.getProductName());
                 favoritesModel.setPrice(product.getInventory().iterator().next().getPrice());
