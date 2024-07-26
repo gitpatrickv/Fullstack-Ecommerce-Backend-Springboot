@@ -142,7 +142,7 @@ public class OrderServiceImpl implements OrderService {
                     cart.setUser(user.get());
                     cartRepository.save(cart);
                 } else {
-                    throw new IllegalArgumentException(StringUtil.PRODUCT_NOT_FOUND);
+                    throw new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND);
                 }
             }
         }
@@ -161,7 +161,7 @@ public class OrderServiceImpl implements OrderService {
                 orders.setOrderStatusInfo(StringUtil.ORDER_IS_CANCELLED);
                 orderRepository.save(orders);
             }else{
-                throw new IllegalArgumentException(StringUtil.ORDER_NOT_FOUND);
+                throw new NoSuchElementException(StringUtil.ORDER_NOT_FOUND);
             }
         }
 
@@ -172,7 +172,7 @@ public class OrderServiceImpl implements OrderService {
                 inv.setQuantity(inv.getQuantity() + orderItem.getQuantity());
                 inventoryRepository.save(inv);
             }else{
-                throw new IllegalArgumentException(StringUtil.PRODUCT_NOT_FOUND);
+                throw new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND);
             }
 
             Optional<Product> product = productRepository.findById(orderItem.getProduct().getProductId());

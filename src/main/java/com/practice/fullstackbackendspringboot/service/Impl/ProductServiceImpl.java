@@ -47,7 +47,7 @@ public class ProductServiceImpl implements ProductService {
     private final SellersProductMapper sellersProductMapper;
 
     @Override
-    public void saveProduct(SaveProductModel model, String email, MultipartFile[] files) {
+    public void saveProduct(SaveProductModel model, String email, MultipartFile[] files) {      //SELLER
         User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Store store = storeRepository.findByUserEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.STORE_NOT_FOUND + email));
         Category category = categoryRepository.findById(model.getCategoryId()).orElseThrow(() -> new NoSuchElementException(StringUtil.CATEGORY_NOT_FOUND));
@@ -83,32 +83,38 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductModel getProductById(String productId) {
-        Product products = productRepository.findById(productId).orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId));
-        List<Image> images = imageRepository.findAllPhotoUrlByProduct_ProductId(productId);
-        Set<Inventory> inventories = inventoryRepository.findAllByProduct_ProductId(productId);
+        Optional<Product> optionalProduct = productRepository.findByProductIdAndListedTrueAndDeletedFalse(productId);
 
-        List<InventoryModel> inventoryModels = new ArrayList<>();
-        List<String> photoUrls = new ArrayList<>();
+        if(optionalProduct.isPresent()) {
+            Product products = optionalProduct.get();
+            List<Image> images = imageRepository.findAllPhotoUrlByProduct_ProductId(productId);
+            Set<Inventory> inventories = inventoryRepository.findAllByProduct_ProductId(productId);
 
-        ProductModel productModel = mapper.mapProductEntityToProductModel(products);
+            List<InventoryModel> inventoryModels = new ArrayList<>();
+            List<String> photoUrls = new ArrayList<>();
 
-        for(Inventory inventory : inventories){
-            InventoryModel inventoryModel = inventoryMapper.mapInventoryEntityToInventoryModel(inventory);
-            inventoryModels.add(inventoryModel);
+            ProductModel productModel = mapper.mapProductEntityToProductModel(products);
+
+            for (Inventory inventory : inventories) {
+                InventoryModel inventoryModel = inventoryMapper.mapInventoryEntityToInventoryModel(inventory);
+                inventoryModels.add(inventoryModel);
+            }
+
+            for (Image image : images) {
+                photoUrls.add(image.getPhotoUrl());
+            }
+            productModel.setInventoryModels(inventoryModels);
+            productModel.setProductImage(photoUrls);
+            productModel.setStoreId(products.getStore().getStoreId());
+            productModel.setStorePhotoUrl(products.getStore().getPhotoUrl());
+            return productModel;
+        } else {
+            throw new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId);
         }
-
-        for(Image image : images){
-            photoUrls.add(image.getPhotoUrl());
-        }
-        productModel.setInventoryModels(inventoryModels);
-        productModel.setProductImage(photoUrls);
-        productModel.setStoreId(products.getStore().getStoreId());
-        productModel.setStorePhotoUrl(products.getStore().getPhotoUrl());
-        return productModel;
     }
 
     @Override
-    public void updateProduct(UpdateProductRequest request, String email) {
+    public void updateProduct(UpdateProductRequest request, String email) {     //SELLER
         userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
@@ -241,7 +247,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public SellersProductsPageResponse getAllSellersProducts(String email, int pageNo, int pageSize, String sortBy) {
+    public SellersProductsPageResponse getAllSellersProducts(String email, int pageNo, int pageSize, String sortBy) {       //SELLER
         Sort sorts = Sort.by(StringUtil.Product_Sold).descending();
 
         if(StringUtil.True.equals(sortBy)){
@@ -285,7 +291,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void delete(String productId, String email) {
+    public void delete(String productId, String email) {        //SELLER
         userRepository.findByEmail(email);
         Optional<Product> product = productRepository.findById(productId);
 
@@ -302,7 +308,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductCount getProductCount(String email) {
+    public ProductCount getProductCount(String email) {     //ADMIN
         userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         double count = productRepository.count();
@@ -312,7 +318,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void suspendProduct(String productId, String email) {
+    public void suspendProduct(String productId, String email) {       //ADMIN
         User admin = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
@@ -326,7 +332,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void delistProduct(String productId, String email) {
+    public void delistProduct(String productId, String email) {     //SELLER
         userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
@@ -336,7 +342,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public SuspendedProductCount getSuspendedProductCount(String storeId, String email) {
+    public SuspendedProductCount getSuspendedProductCount(String storeId, String email) {   //SELLER
         userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
 

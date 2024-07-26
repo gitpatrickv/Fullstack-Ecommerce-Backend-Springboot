@@ -50,7 +50,7 @@ public class FavoritesServiceImpl implements FavoritesService {
                 favorites.setUser(user.get());
                 favoritesRepository.save(favorites);
             } else {
-                throw new IllegalArgumentException(StringUtil.PRODUCT_NOT_FOUND + productId);
+                throw new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId);
             }
         }
     }

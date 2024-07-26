@@ -21,5 +21,6 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     List<Product> findAllByDeletedFalseAndStore_StoreId(String storeId);
     List<Product> findAllBySuspendedTrueAndStore_StoreId(String storeId);
     Optional<Product> findByProductIdAndListedTrueAndSuspendedFalseAndDeletedFalse(String productId);
+    Optional<Product> findByProductIdAndListedTrueAndDeletedFalse(String productId);
 
 }
