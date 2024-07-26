@@ -30,7 +30,7 @@ public class StringUtil {
     public static final String ORDER_CONFIRMATION = "Order Confirmation";
     public static final String SHIPPING_ORDER = "Seller is preparing to ship your order(s)";
     public static final String OUT_FOR_DELIVERY ="Parcel is out for delivery";
-    public static final String PRODUCT_NOT_FOUND = "PRODUCT NOT FOUND: ";
+    public static final String PRODUCT_NOT_FOUND = "PRODUCT NOT FOUND ";
     public static final String PRODUCT_ALREADY_EXISTS = "PRODUCT ALREADY EXISTS!";
     public static final String CATEGORY_NOT_FOUND = "CATEGORY NOT FOUND";
     public static final String STORE_NOT_FOUND = "STORE NOT FOUND: ";

@@ -66,41 +66,40 @@ public class OrderServiceImpl implements OrderService {
             List<OrderItem> orderItems = new ArrayList<>();
 
             for (Cart carts : storeCarts) {
-                Optional<Product> optionalProduct = productRepository.findById(carts.getProduct().getProductId());
+                Optional<Product> optionalProduct = productRepository.findByProductIdAndListedTrueAndSuspendedFalseAndDeletedFalse(carts.getProduct().getProductId());
                 Optional<Inventory> inventory = inventoryRepository.findById(carts.getInventory().getInventoryId());
 
                 if(optionalProduct.isPresent()) {
                     Product product = optionalProduct.get();
-                    if (product.isListed() && !product.isSuspended() && !product.isDeleted()) {
-                        OrderItem orderItem = new OrderItem();
 
-                        orderItem.setQuantity(carts.getQuantity());
-                        orderItem.setTotalAmount(carts.getTotalAmount());
-                        orderItem.setPrice(inventory.get().getPrice());
-                        orderItem.setStoreName(product.getStore().getStoreName());
-                        orderItem.setProductName(product.getProductName());
-                        orderItem.setPhotoUrl(product.getImage().get(0).getPhotoUrl());
-                        orderItem.setUser(user);
-                        orderItem.setColors(carts.getColors());
-                        orderItem.setSizes(carts.getSizes());
-                        orderItem.setOrder(order);
-                        orderItem.setProduct(product);
-                        orderItem.setInventory(inventory.get());
-                        storeTotalAmount += orderItem.getTotalAmount();
-                        OrderItem savedOrderItems = orderItemRepository.save(orderItem);
-                        orderItems.add(savedOrderItems);
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setQuantity(carts.getQuantity());
+                    orderItem.setTotalAmount(carts.getTotalAmount());
+                    orderItem.setPrice(inventory.get().getPrice());
+                    orderItem.setStoreName(product.getStore().getStoreName());
+                    orderItem.setProductName(product.getProductName());
+                    orderItem.setPhotoUrl(product.getImage().get(0).getPhotoUrl());
+                    orderItem.setUser(user);
+                    orderItem.setColors(carts.getColors());
+                    orderItem.setSizes(carts.getSizes());
+                    orderItem.setOrder(order);
+                    orderItem.setProduct(product);
+                    orderItem.setInventory(inventory.get());
+                    storeTotalAmount += orderItem.getTotalAmount();
+                    OrderItem savedOrderItems = orderItemRepository.save(orderItem);
+                    orderItems.add(savedOrderItems);
 
-                        if (carts.getQuantity() > inventory.get().getQuantity()) {
-                            throw new IllegalArgumentException(StringUtil.OUT_OF_STOCK);
-                        } else {
-                            Inventory inv = inventory.get();
-                            inv.setQuantity(inv.getQuantity() - carts.getQuantity());
-                            inventoryRepository.save(inv);
-                        }
-
-                        product.setProductSold(product.getProductSold() + carts.getQuantity());
-                        productRepository.save(product);
+                    if (carts.getQuantity() > inventory.get().getQuantity()) {
+                        throw new IllegalArgumentException(StringUtil.OUT_OF_STOCK);
+                    } else {
+                        Inventory inv = inventory.get();
+                        inv.setQuantity(inv.getQuantity() - carts.getQuantity());
+                        inventoryRepository.save(inv);
                     }
+
+                    product.setProductSold(product.getProductSold() + carts.getQuantity());
+                    productRepository.save(product);
+
                 }
             }
 
@@ -128,24 +127,22 @@ public class OrderServiceImpl implements OrderService {
                 cart = existingCart.get();
                 cartRepository.save(cart);
             } else {
-                Optional<Product> optionalProduct = productRepository.findById(orderItem.getProduct().getProductId());
+                Optional<Product> optionalProduct = productRepository.findByProductIdAndListedTrueAndSuspendedFalseAndDeletedFalse(orderItem.getProduct().getProductId());
                 if(optionalProduct.isPresent()){
                     Product product = optionalProduct.get();
-                    if(product.isListed() && !product.isSuspended() && !product.isDeleted()) {
-                        cart = new Cart();
-                        cart.setQuantity(quantity);
-                        cart.setStoreId(orderItem.getOrder().getStore().getStoreId());
-                        cart.setTotalAmount(orderItem.getPrice() * quantity);
-                        cart.setProduct(product);
-                        cart.setOrderItems(orderItems);
-                        cart.setSizes(orderItem.getSizes());
-                        cart.setColors(orderItem.getColors());
-                        cart.setInventory(orderItem.getInventory());
-                        cart.setUser(user.get());
-                        cartRepository.save(cart);
-                    } else {
-                        throw new IllegalArgumentException(StringUtil.PRODUCT_NOT_FOUND);
-                    }
+                    cart = new Cart();
+                    cart.setQuantity(quantity);
+                    cart.setStoreId(orderItem.getOrder().getStore().getStoreId());
+                    cart.setTotalAmount(orderItem.getPrice() * quantity);
+                    cart.setProduct(product);
+                    cart.setOrderItems(orderItems);
+                    cart.setSizes(orderItem.getSizes());
+                    cart.setColors(orderItem.getColors());
+                    cart.setInventory(orderItem.getInventory());
+                    cart.setUser(user.get());
+                    cartRepository.save(cart);
+                } else {
+                    throw new IllegalArgumentException(StringUtil.PRODUCT_NOT_FOUND);
                 }
             }
         }

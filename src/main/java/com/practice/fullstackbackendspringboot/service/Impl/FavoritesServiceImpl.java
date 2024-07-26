@@ -33,8 +33,8 @@ public class FavoritesServiceImpl implements FavoritesService {
     @Override
     public void addToFavorites(String email, String productId) {
         Optional<User> user = userRepository.findByEmail(email);
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId));
+        Optional<Product> optionalProduct = productRepository.findByProductIdAndListedTrueAndSuspendedFalseAndDeletedFalse(productId);
+
         Optional<Favorites> favorite = favoritesRepository.findByProduct_ProductIdAndUserEmail(productId, user.get().getEmail());
         Favorites favorites;
         if(favorite.isPresent() && favorite.get().isFavorites()){
@@ -42,11 +42,16 @@ public class FavoritesServiceImpl implements FavoritesService {
             favorites.setFavorites(false);
             favoritesRepository.delete(favorites);
         }else {
-            favorites = new Favorites();
-            favorites.setFavorites(true);
-            favorites.setProduct(product);
-            favorites.setUser(user.get());
-            favoritesRepository.save(favorites);
+            if(optionalProduct.isPresent()) {
+                Product product = optionalProduct.get();
+                favorites = new Favorites();
+                favorites.setFavorites(true);
+                favorites.setProduct(product);
+                favorites.setUser(user.get());
+                favoritesRepository.save(favorites);
+            } else {
+                throw new IllegalArgumentException(StringUtil.PRODUCT_NOT_FOUND + productId);
+            }
         }
     }
 
@@ -57,17 +62,20 @@ public class FavoritesServiceImpl implements FavoritesService {
 
         for(Cart cart : carts){
             Optional<Favorites> favorite = favoritesRepository.findByProduct_ProductIdAndUserEmail(cart.getProduct().getProductId(), user.getEmail());
-            Product product = productRepository.findById(cart.getProduct().getProductId())
-                    .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + cart.getProduct().getProductId()));
+            Optional<Product> optionalProduct = productRepository.findByProductIdAndListedTrueAndSuspendedFalseAndDeletedFalse(cart.getProduct().getProductId());
+
             if(favorite.isPresent() && favorite.get().isFavorites()){
                 cartRepository.delete(cart);
             }else {
-                Favorites favorites = new Favorites();
-                favorites.setFavorites(true);
-                favorites.setProduct(product);
-                favorites.setUser(user);
-                favoritesRepository.save(favorites);
-                cartRepository.delete(cart);
+                if(optionalProduct.isPresent()) {
+                    Product product = optionalProduct.get();
+                    Favorites favorites = new Favorites();
+                    favorites.setFavorites(true);
+                    favorites.setProduct(product);
+                    favorites.setUser(user);
+                    favoritesRepository.save(favorites);
+                    cartRepository.delete(cart);
+                }
             }
         }
 
@@ -79,10 +87,10 @@ public class FavoritesServiceImpl implements FavoritesService {
         List<AllProductModel> model = new ArrayList<>();
 
         for(Favorites favorite : favorites){
-            Product product = productRepository.findById(favorite.getProduct().getProductId())
-                    .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
+            Optional<Product> optionalProduct = productRepository.findByProductIdAndListedTrueAndSuspendedFalseAndDeletedFalse(favorite.getProduct().getProductId());
 
-            if(product.isListed() && !product.isSuspended() && !product.isDeleted()) {
+            if(optionalProduct.isPresent()) {
+                Product product = optionalProduct.get();
                 AllProductModel favoritesModel = new AllProductModel();
                 favoritesModel.setProductName(product.getProductName());
                 favoritesModel.setPrice(product.getInventory().iterator().next().getPrice());
