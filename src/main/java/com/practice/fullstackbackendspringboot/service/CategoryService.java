@@ -6,7 +6,5 @@ import java.util.List;
 
 public interface CategoryService {
 
-    CategoryModel createCategory(CategoryModel categoryModel, String email);
-    CategoryModel findCategoryById(String categoryId);
     List<CategoryModel>getAllCategory();
 }
