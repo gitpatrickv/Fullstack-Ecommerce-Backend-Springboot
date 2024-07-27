@@ -7,6 +7,8 @@ import com.practice.fullstackbackendspringboot.entity.constants.Role;
 import com.practice.fullstackbackendspringboot.model.StoreModel;
 import com.practice.fullstackbackendspringboot.model.request.CreateStoreRequest;
 import com.practice.fullstackbackendspringboot.model.request.UpdateShopInfoRequest;
+import com.practice.fullstackbackendspringboot.model.response.PageResponse;
+import com.practice.fullstackbackendspringboot.model.response.PaginateStoreResponse;
 import com.practice.fullstackbackendspringboot.model.response.StoreCount;
 import com.practice.fullstackbackendspringboot.repository.CartRepository;
 import com.practice.fullstackbackendspringboot.repository.ProductRepository;
@@ -17,10 +19,14 @@ import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.StoreMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -78,7 +84,7 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
-    public List<StoreModel> getAllStores(String email, String sortBy) {
+    public PaginateStoreResponse getAllStores(String email,int pageNo, int pageSize, String sortBy) {
         userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
 
@@ -88,14 +94,23 @@ public class StoreServiceImpl implements StoreService {
             sorts = Sort.by(StringUtil.Online).ascending();
         }
 
-        return storeRepository.findAll(sorts)
-                .stream()
-                .map(store -> {
-                    StoreModel storeModel = mapper.mapEntityToModel(store);
-                    storeModel.setEmail(store.getUser().getEmail());
-                    return storeModel;
-                })
-                .toList();
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sorts);
+        Page<Store> stores = storeRepository.findAll(pageable);
+        List<StoreModel> storeModels = new ArrayList<>();
+
+        PageResponse pageResponse = new PageResponse();
+        pageResponse.setPageNo(stores.getNumber());
+        pageResponse.setPageSize(stores.getSize());
+        pageResponse.setTotalElements(stores.getTotalElements());
+        pageResponse.setTotalPages(stores.getTotalPages());
+        pageResponse.setLast(stores.isLast());
+
+        for(Store store : stores) {
+            StoreModel storeModel = mapper.mapEntityToModel(store);
+            storeModel.setEmail(store.getUser().getEmail());
+            storeModels.add(storeModel);
+        }
+        return new PaginateStoreResponse(storeModels,pageResponse);
     }
 
     @Override

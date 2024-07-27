@@ -3,6 +3,7 @@ package com.practice.fullstackbackendspringboot.controller;
 import com.practice.fullstackbackendspringboot.model.StoreModel;
 import com.practice.fullstackbackendspringboot.model.request.CreateStoreRequest;
 import com.practice.fullstackbackendspringboot.model.request.UpdateShopInfoRequest;
+import com.practice.fullstackbackendspringboot.model.response.PaginateStoreResponse;
 import com.practice.fullstackbackendspringboot.model.response.StoreCount;
 import com.practice.fullstackbackendspringboot.service.StoreService;
 import com.practice.fullstackbackendspringboot.service.UserService;
@@ -49,10 +50,12 @@ public class StoreController {
 
     @GetMapping("/store/list")
     @ResponseStatus(HttpStatus.OK)
-    public List<StoreModel> getAllStores(@RequestHeader("Authorization") String email,
-                                         @RequestParam(defaultValue = "true", required = false) String sortBy){
+    public PaginateStoreResponse getAllStores(@RequestHeader("Authorization") String email,
+                                              @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                              @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize,
+                                              @RequestParam(defaultValue = "true", required = false) String sortBy){
         String user = userService.getUserFromToken(email);
-        return storeService.getAllStores(user, sortBy);
+        return storeService.getAllStores(user,pageNo,pageSize,sortBy);
     }
     @GetMapping("/store/count")
     public StoreCount getStoreCount(@RequestHeader("Authorization") String email) {
