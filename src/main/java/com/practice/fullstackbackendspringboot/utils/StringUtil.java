@@ -52,4 +52,5 @@ public class StringUtil {
     public static final String Online = "online";
     public static final String Frozen ="frozen";
     public static final String ACCESS_DENIED = "Access denied: You do not have sufficient permissions to perform this action";
+    public static final String LAST_MODIFIED = "lastModified";
 }

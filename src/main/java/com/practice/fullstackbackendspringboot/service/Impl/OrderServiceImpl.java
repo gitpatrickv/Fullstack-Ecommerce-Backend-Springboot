@@ -3,10 +3,7 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
 import com.practice.fullstackbackendspringboot.model.OrderModel;
-import com.practice.fullstackbackendspringboot.model.response.AllOrdersResponse;
-import com.practice.fullstackbackendspringboot.model.response.OrderCount;
-import com.practice.fullstackbackendspringboot.model.response.TodoListTotal;
-import com.practice.fullstackbackendspringboot.model.response.TotalSales;
+import com.practice.fullstackbackendspringboot.model.response.*;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.OrderService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
@@ -14,6 +11,9 @@ import com.practice.fullstackbackendspringboot.utils.mapper.OrderItemMapper;
 import com.practice.fullstackbackendspringboot.utils.mapper.OrderMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -461,15 +461,25 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderModel> getAllOrders(String email) {    //ADMIN
-        return orderRepository.findAll()
-                .stream()
-                .map(order -> {
-                    OrderModel orderModel = orderMapper.mapOrderEntityToOrderModel(order);
-                    orderModel.setShopName(order.getStore().getStoreName());
-                    return orderModel;
-                })
-                .sorted(Comparator.comparing(OrderModel::getLastModified).reversed())
-                .toList();
+    public PaginateOrderResponse getAllOrders(String email, int pageNo, int pageSize) { //ADMIN
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(StringUtil.LAST_MODIFIED).descending());
+        Page<Order> orders = orderRepository.findAll(pageable);
+        List<OrderModel> orderModels = new ArrayList<>();
+
+        PageResponse pageResponse = new PageResponse();
+        pageResponse.setPageNo(orders.getNumber());
+        pageResponse.setPageSize(orders.getSize());
+        pageResponse.setTotalElements(orders.getTotalElements());
+        pageResponse.setTotalPages(orders.getTotalPages());
+        pageResponse.setLast(orders.isLast());
+
+        for(Order order : orders) {
+            OrderModel orderModel = orderMapper.mapOrderEntityToOrderModel(order);
+            orderModel.setShopName(order.getStore().getStoreName());
+            orderModels.add(orderModel);
+        }
+
+        return new PaginateOrderResponse(orderModels,pageResponse);
     }
 }

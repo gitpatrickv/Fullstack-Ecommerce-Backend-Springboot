@@ -1,11 +1,7 @@
 package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
-import com.practice.fullstackbackendspringboot.model.OrderModel;
-import com.practice.fullstackbackendspringboot.model.response.AllOrdersResponse;
-import com.practice.fullstackbackendspringboot.model.response.OrderCount;
-import com.practice.fullstackbackendspringboot.model.response.TodoListTotal;
-import com.practice.fullstackbackendspringboot.model.response.TotalSales;
+import com.practice.fullstackbackendspringboot.model.response.*;
 import com.practice.fullstackbackendspringboot.service.OrderService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
@@ -181,10 +177,13 @@ public class OrderController {
         String user =  userService.getUserFromToken(email);
         return orderService.getOrderCountAndTotalSales(user);
     }
+
     @GetMapping("/all")
-    public List<OrderModel> getAllOrders(@RequestHeader("Authorization") String email){
+    public PaginateOrderResponse getAllOrders(@RequestHeader("Authorization") String email,
+                                              @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                              @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize){
         String user =  userService.getUserFromToken(email);
-        return orderService.getAllOrders(user);
+        return orderService.getAllOrders(user,pageNo,pageSize);
     }
 
 }

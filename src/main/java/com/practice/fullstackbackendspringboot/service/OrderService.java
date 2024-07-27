@@ -1,11 +1,7 @@
 package com.practice.fullstackbackendspringboot.service;
 
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
-import com.practice.fullstackbackendspringboot.model.OrderModel;
-import com.practice.fullstackbackendspringboot.model.response.AllOrdersResponse;
-import com.practice.fullstackbackendspringboot.model.response.OrderCount;
-import com.practice.fullstackbackendspringboot.model.response.TodoListTotal;
-import com.practice.fullstackbackendspringboot.model.response.TotalSales;
+import com.practice.fullstackbackendspringboot.model.response.*;
 
 import java.util.List;
 import java.util.Set;
@@ -24,5 +20,5 @@ public interface OrderService {
     TodoListTotal getSellersTodoListTotal(String email, String storeId);
     TotalSales getTotalSales(String email, String storeId);
     OrderCount getOrderCountAndTotalSales(String email);
-    List<OrderModel> getAllOrders(String email);
+    PaginateOrderResponse getAllOrders(String email, int pageNo, int pageSize);
 }
