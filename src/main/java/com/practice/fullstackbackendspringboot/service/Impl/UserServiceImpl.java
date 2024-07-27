@@ -4,8 +4,7 @@ import com.practice.fullstackbackendspringboot.entity.User;
 import com.practice.fullstackbackendspringboot.entity.constants.Role;
 import com.practice.fullstackbackendspringboot.model.UserModel;
 import com.practice.fullstackbackendspringboot.model.request.LoginRequest;
-import com.practice.fullstackbackendspringboot.model.response.LoginResponse;
-import com.practice.fullstackbackendspringboot.model.response.UserCount;
+import com.practice.fullstackbackendspringboot.model.response.*;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.security.JwtAuthenticationFilter;
 import com.practice.fullstackbackendspringboot.security.JwtService;
@@ -14,6 +13,9 @@ import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.UserMapper;
 import jakarta.persistence.EntityExistsException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +26,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -104,13 +107,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserModel> getAllUsers(String email, String sortBy) {
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public PaginateUserResponse getAllUsers(String email,  int pageNo, int pageSize, String sortBy) {
 
         Sort sorts = Sort.by(StringUtil.Role).ascending();
 
-        if (StringUtil.Seller.equals(sortBy)) {
+        if (StringUtil.Admin.equals(sortBy)) {
             sorts = Sort.by(StringUtil.Role).descending();
         } else if (StringUtil.False.equals(sortBy)){
             sorts = Sort.by(StringUtil.Frozen).ascending();
@@ -118,11 +119,22 @@ public class UserServiceImpl implements UserService {
             sorts = Sort.by(StringUtil.Frozen).descending();
         }
 
-        return userRepository.findAll(sorts)
-                .stream()
-                .filter(user -> !user.getRole().equals(Role.ADMIN))
-                .map(mapper::mapUserEntityToUserModel)
-                .toList();
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sorts);
+        Page<User> users = userRepository.findAll(pageable);
+        List<UserModel> userModels = new ArrayList<>();
+
+        PageResponse pageResponse = new PageResponse();
+        pageResponse.setPageNo(users.getNumber());
+        pageResponse.setPageSize(users.getSize());
+        pageResponse.setTotalElements(users.getTotalElements());
+        pageResponse.setTotalPages(users.getTotalPages());
+        pageResponse.setLast(users.isLast());
+
+        for(User user : users ) {
+            UserModel userModel = mapper.mapUserEntityToUserModel(user);
+            userModels.add(userModel);
+        }
+        return new PaginateUserResponse(userModels,pageResponse);
     }
 
     @Override

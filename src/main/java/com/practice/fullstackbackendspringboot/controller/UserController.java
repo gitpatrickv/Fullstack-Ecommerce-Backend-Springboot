@@ -3,14 +3,13 @@ package com.practice.fullstackbackendspringboot.controller;
 import com.practice.fullstackbackendspringboot.model.UserModel;
 import com.practice.fullstackbackendspringboot.model.request.LoginRequest;
 import com.practice.fullstackbackendspringboot.model.response.LoginResponse;
+import com.practice.fullstackbackendspringboot.model.response.PaginateUserResponse;
 import com.practice.fullstackbackendspringboot.model.response.UserCount;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
@@ -43,10 +42,12 @@ public class  UserController {
         return userService.getUserCount(user);
     }
     @GetMapping("/all")
-    public List<UserModel> getAllUsers(@RequestHeader("Authorization") String email,
-                                       @RequestParam(defaultValue = "user", required = false) String sortBy) {
+    public PaginateUserResponse getAllUsers(@RequestHeader("Authorization") String email,
+                                            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                            @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize,
+                                            @RequestParam(defaultValue = "user", required = false) String sortBy) {
         String user = userService.getUserFromToken(email);
-        return userService.getAllUsers(user,sortBy);
+        return userService.getAllUsers(user,pageNo,pageSize,sortBy);
     }
 
     @PutMapping("/freeze/{email}")

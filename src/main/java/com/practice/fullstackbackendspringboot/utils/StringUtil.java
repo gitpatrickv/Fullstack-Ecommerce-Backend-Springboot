@@ -49,6 +49,7 @@ public class StringUtil {
     public static final String Role = "role";
     public static final String User = "user";
     public static final String Seller = "seller";
+    public static final String Admin = "admin";
     public static final String Online = "online";
     public static final String Frozen ="frozen";
     public static final String ACCESS_DENIED = "Access denied: You do not have sufficient permissions to perform this action";
