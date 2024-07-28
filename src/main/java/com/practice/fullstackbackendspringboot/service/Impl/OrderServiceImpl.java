@@ -66,6 +66,11 @@ public class OrderServiceImpl implements OrderService {
                 order.setPaymentMethod(StringUtil.StripePayment);
                 order.setOrderStatus(StringUtil.TO_SHIP);
                 order.setOrderStatusInfo(StringUtil.SHIPPING_ORDER);
+
+                Store store1 = store.get();
+                store1.setOrderCount(store1.getOrderCount() + 1L);
+                storeRepository.save(store1);
+
             } else if(paymentMethod.equals(StringUtil.Cash)){
                 order.setPaymentMethod(StringUtil.CASH_ON_DELIVERY);
                 order.setOrderStatus(StringUtil.PENDING);

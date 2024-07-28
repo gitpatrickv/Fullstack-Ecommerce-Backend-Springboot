@@ -57,5 +57,9 @@ public class StringUtil {
     public static final String StripePayment = "Stripe Payment";
     public static final String Stripe = "stripe";
     public static final String Cash = "cash_on_delivery";
+    public static final String Shopee= "Shopee";
+    public static final String Php = "php";
+    public static final String SuccessUrl = "http://localhost:5173/user/purchase/order/to-ship";
+    public static final String CancelUrl = "http://localhost:5173/checkout";
 
 }
