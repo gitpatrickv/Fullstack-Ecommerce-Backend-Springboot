@@ -2,13 +2,14 @@ package com.practice.fullstackbackendspringboot.service;
 
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
 import com.practice.fullstackbackendspringboot.model.response.*;
+import com.stripe.exception.StripeException;
 
 import java.util.List;
 import java.util.Set;
 
 public interface OrderService {
 
-    void placeOrder(String email);
+    PaymentResponse placeOrder(String email) throws StripeException;
     void cancelOrder(String email, String orderId);
     void confirmCancelOrder(String email, String orderId);
     void buyAgain(String email, String orderId);

@@ -5,8 +5,10 @@ import com.practice.fullstackbackendspringboot.model.response.*;
 import com.practice.fullstackbackendspringboot.service.OrderService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
+import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,9 +23,10 @@ public class OrderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
-    public void placeOrder(@RequestHeader("Authorization") String email){
+    public ResponseEntity<?> placeOrder(@RequestHeader("Authorization") String email) throws StripeException {
         String user = userService.getUserFromToken(email);
-        orderService.placeOrder(user);
+        PaymentResponse response =  orderService.placeOrder(user);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
     @PostMapping("/buy/{orderId}")
     public void buyAgain(@RequestHeader("Authorization") String email, @PathVariable (value="orderId") String orderId){

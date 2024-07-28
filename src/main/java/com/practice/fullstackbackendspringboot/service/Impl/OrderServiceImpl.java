@@ -6,9 +6,11 @@ import com.practice.fullstackbackendspringboot.model.OrderModel;
 import com.practice.fullstackbackendspringboot.model.response.*;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.OrderService;
+import com.practice.fullstackbackendspringboot.service.PaymentService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.OrderItemMapper;
 import com.practice.fullstackbackendspringboot.utils.mapper.OrderMapper;
+import com.stripe.exception.StripeException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -34,15 +36,18 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
+    private final PaymentService paymentService;
 
     @Override
-    public void placeOrder(String email) {      //CUSTOMER
+    public PaymentResponse placeOrder(String email) throws StripeException {      //CUSTOMER
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         List<Cart> cart = cartRepository.findAllByFilterTrueAndUserEmail(email);
 
         Map<String, List<Cart>> cartsByStore = cart.stream()
                 .collect(Collectors.groupingBy(Cart::getStoreId));
+
+        double totalAmount = 0.0;
 
         for (Map.Entry<String, List<Cart>> cartMap : cartsByStore.entrySet()) {
             List<Cart> storeCarts = cartMap.getValue();
@@ -104,10 +109,13 @@ public class OrderServiceImpl implements OrderService {
             }
 
             order.setOrderTotalAmount(storeTotalAmount + store.get().getShippingFee());
+            totalAmount += order.getOrderTotalAmount();
             order.setOrderItems(orderItems);
             orderRepository.save(order);
         }
         cartRepository.deleteAllByFilterTrueAndUserEmail(email);
+
+        return paymentService.paymentLink(totalAmount);
     }
 
     @Override
