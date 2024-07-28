@@ -39,7 +39,7 @@ public class OrderServiceImpl implements OrderService {
     private final PaymentService paymentService;
 
     @Override
-    public PaymentResponse placeOrder(String email) throws StripeException {      //CUSTOMER
+    public PaymentResponse placeOrder(String email, String paymentMethod) throws StripeException {      //CUSTOMER
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         List<Cart> cart = cartRepository.findAllByFilterTrueAndUserEmail(email);
@@ -62,9 +62,15 @@ public class OrderServiceImpl implements OrderService {
             order.setFullName(user.getName());
             order.setContactNumber(user.getContactNumber());
             order.setActive(true);
-            order.setOrderStatus(StringUtil.PENDING);
-            order.setOrderStatusInfo(StringUtil.ORDER_CONFIRMATION);
-            order.setPaymentMethod(StringUtil.CASH_ON_DELIVERY);
+            if(paymentMethod.equals(StringUtil.Stripe)){
+                order.setPaymentMethod(StringUtil.StripePayment);
+                order.setOrderStatus(StringUtil.TO_SHIP);
+                order.setOrderStatusInfo(StringUtil.SHIPPING_ORDER);
+            } else if(paymentMethod.equals(StringUtil.Cash)){
+                order.setPaymentMethod(StringUtil.CASH_ON_DELIVERY);
+                order.setOrderStatus(StringUtil.PENDING);
+                order.setOrderStatusInfo(StringUtil.ORDER_CONFIRMATION);
+            }
             order = orderRepository.save(order);
             Double storeTotalAmount = 0.0;
 
@@ -115,7 +121,7 @@ public class OrderServiceImpl implements OrderService {
         }
         cartRepository.deleteAllByFilterTrueAndUserEmail(email);
 
-        return paymentService.paymentLink(totalAmount);
+        return paymentService.paymentLink(totalAmount, paymentMethod);
     }
 
     @Override

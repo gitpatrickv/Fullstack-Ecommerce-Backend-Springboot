@@ -12,7 +12,7 @@ public class StringUtil {
     public static final String OUT_OF_STOCK = "PRODUCT IS OUT OF STOCK!";
     public static final String WRONG_PASSWORD = "WRONG PASSWORD!";
     public static final String PASSWORD_NOT_MATCH = "PASSWORD DOES NOT MATCH!";
-    public static final String CASH_ON_DELIVERY = "CASH ON DELIVERY";
+    public static final String CASH_ON_DELIVERY = "Cash on Delivery";
     public static final String ADMIN_CREATED = "ADMIN USER CREATED SUCCESSFULLY!";
     public static final String ADMIN_ALREADY_EXISTS = "ADMIN USER ALREADY EXISTS!";
     public static final String PENDING = "PENDING";
@@ -54,4 +54,8 @@ public class StringUtil {
     public static final String Frozen ="frozen";
     public static final String ACCESS_DENIED = "Access denied: You do not have sufficient permissions to perform this action";
     public static final String LAST_MODIFIED = "lastModified";
+    public static final String StripePayment = "Stripe Payment";
+    public static final String Stripe = "stripe";
+    public static final String Cash = "cash_on_delivery";
+
 }

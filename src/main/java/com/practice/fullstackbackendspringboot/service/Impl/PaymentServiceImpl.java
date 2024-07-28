@@ -2,6 +2,7 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 
 import com.practice.fullstackbackendspringboot.model.response.PaymentResponse;
 import com.practice.fullstackbackendspringboot.service.PaymentService;
+import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
@@ -21,7 +22,12 @@ public class PaymentServiceImpl implements PaymentService {
     @Value("${stripe.api.key}")
     private String stripeSecretKey;
     @Override
-    public PaymentResponse paymentLink(double totalAmount) throws StripeException {
+    public PaymentResponse paymentLink(double totalAmount,String paymentMethod) throws StripeException {
+
+        if(paymentMethod.equals(StringUtil.Cash)){
+            return null;
+        }
+
         Stripe.apiKey=stripeSecretKey;
         SessionCreateParams params = SessionCreateParams.builder()
                 .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)

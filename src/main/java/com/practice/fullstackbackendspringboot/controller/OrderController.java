@@ -21,11 +21,11 @@ public class OrderController {
     private final OrderService orderService;
     private final UserService userService;
 
-    @PostMapping
+    @PostMapping("/{paymentMethod}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> placeOrder(@RequestHeader("Authorization") String email) throws StripeException {
+    public ResponseEntity<?> placeOrder(@RequestHeader("Authorization") String email, @PathVariable String paymentMethod) throws StripeException {
         String user = userService.getUserFromToken(email);
-        PaymentResponse response =  orderService.placeOrder(user);
+        PaymentResponse response =  orderService.placeOrder(user,paymentMethod);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     @PostMapping("/buy/{orderId}")
