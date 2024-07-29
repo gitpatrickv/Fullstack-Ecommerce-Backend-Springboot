@@ -22,7 +22,6 @@ public class OrderController {
     private final UserService userService;
 
     @PostMapping("/{paymentMethod}")
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> placeOrder(@RequestHeader("Authorization") String email, @PathVariable String paymentMethod) throws StripeException {
         String user = userService.getUserFromToken(email);
         PaymentResponse response =  orderService.placeOrder(user,paymentMethod);

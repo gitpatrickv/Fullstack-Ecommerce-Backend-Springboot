@@ -13,3 +13,7 @@ application:
     jwt:
       secret-key: 6jZy59I3gNLH1Pj45sJT9/E0SSQUA1yNcAV1yZaXiwE
       expiration: 86400000 # 1 day
+
+stripe:
+  api:
+    key: sk_test_51PchJnKrNg4CjtgGgbUYj56kZ2rKeWpFUnmUEPTLtJofgGDavpJO9t0RrLeNSUeNPWa5VmNWrdJOsbobNr4dyw1c00HSTVxG2m

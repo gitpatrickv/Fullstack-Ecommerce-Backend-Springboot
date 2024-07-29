@@ -1,13 +1,12 @@
 package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.CategoryModel;
+import com.practice.fullstackbackendspringboot.model.request.CategoryRequest;
 import com.practice.fullstackbackendspringboot.service.CategoryService;
+import com.practice.fullstackbackendspringboot.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -17,11 +16,19 @@ import java.util.List;
 public class CategoryController {
 
     private final CategoryService categoryService;
+    private final UserService userService;
 
     @GetMapping("/category")
     @ResponseStatus(HttpStatus.OK)
     public List<CategoryModel> getAllCategory() {
         return categoryService.getAllCategory();
     }
+
+    @PostMapping("/category/create") //TODO: not yet implemented in the front end
+    public void createCategory(@RequestHeader("Authorization") String email, @RequestBody CategoryRequest request) {
+        String user = userService.getUserFromToken(email);
+        categoryService.createCategory(user,request);
+    }
+
 
 }
