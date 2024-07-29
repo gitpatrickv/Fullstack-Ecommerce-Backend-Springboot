@@ -30,5 +30,11 @@ public class CategoryController {
         categoryService.createCategory(user,request);
     }
 
+    @PutMapping("/category/update")
+    public void updateCategory(@RequestHeader("Authorization") String email, @RequestBody CategoryRequest request){
+        String user = userService.getUserFromToken(email);
+        categoryService.updateCategory(user,request);
+    }
+
 
 }

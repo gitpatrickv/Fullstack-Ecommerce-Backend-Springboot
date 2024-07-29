@@ -9,4 +9,5 @@ public interface CategoryService {
 
     List<CategoryModel>getAllCategory();
     void createCategory(String email, CategoryRequest request);
+    void updateCategory(String email, CategoryRequest request);
 }

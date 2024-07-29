@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,5 +38,17 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = new Category();
         category.setCategoryName(request.getCategoryName());
         categoryRepository.save(category);
+    }
+
+    @Override
+    public void updateCategory(String email, CategoryRequest request) {
+        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Optional<Category> optionalCategory = categoryRepository.findById(request.getCategoryId());
+
+        if (optionalCategory.isPresent()){
+            Category category = optionalCategory.get();
+            category.setCategoryName(request.getCategoryName() != null ? request.getCategoryName() : optionalCategory.get().getCategoryName());
+            categoryRepository.save(category);
+        }
     }
 }
