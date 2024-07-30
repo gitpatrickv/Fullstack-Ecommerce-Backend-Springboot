@@ -11,6 +11,5 @@ public interface StoreRepository extends JpaRepository<Store, String> {
 
     Optional<Store> findByUserEmail(String email);
     Boolean existsByStoreNameIgnoreCase(String storeName);
-
-    Optional<Store> findByStoreName(String storeName);
+    Optional<Store> findByStoreNameIgnoreCase(String storeName);
 }
