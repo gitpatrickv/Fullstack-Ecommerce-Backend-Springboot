@@ -6,10 +6,12 @@ import com.practice.fullstackbackendspringboot.model.request.CategoryRequest;
 import com.practice.fullstackbackendspringboot.repository.CategoryRepository;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.service.CategoryService;
+import com.practice.fullstackbackendspringboot.service.ImageService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.CategoryMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -22,6 +24,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
     private final UserRepository userRepository;
+    private final ImageService imageService;
 
     @Override
     public List<CategoryModel> getAllCategory() {
@@ -32,12 +35,14 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void createCategory(String email, CategoryRequest request) {
+    public void createCategory(String email, CategoryRequest request, MultipartFile file) {
         userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
 
         Category category = new Category();
         category.setCategoryName(request.getCategoryName());
-        categoryRepository.save(category);
+        Category savedCategory = categoryRepository.save(category);
+
+        imageService.uploadCategoryPhoto(email, savedCategory.getCategoryId(), file);
     }
 
     @Override

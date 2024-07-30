@@ -7,6 +7,7 @@ import com.practice.fullstackbackendspringboot.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -25,9 +26,11 @@ public class CategoryController {
     }
 
     @PostMapping("/category/create") //TODO: not yet implemented in the front end
-    public void createCategory(@RequestHeader("Authorization") String email, @RequestBody CategoryRequest request) {
+    public void createCategory(@RequestHeader("Authorization") String email,
+                               @RequestPart("category") CategoryRequest request,
+                               @RequestPart("file") MultipartFile file) {
         String user = userService.getUserFromToken(email);
-        categoryService.createCategory(user,request);
+        categoryService.createCategory(user,request,file);
     }
 
     @PutMapping("/category/update")
