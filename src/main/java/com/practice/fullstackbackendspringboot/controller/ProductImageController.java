@@ -37,6 +37,15 @@ public class ProductImageController {
         imageService.uploadStorePhoto(user, storeId, file);
     }
 
+    @PostMapping("/product/category/image/upload/{categoryId}")
+    public void uploadCategoryPhoto(@RequestHeader("Authorization") String email,
+                                 @PathVariable String categoryId,
+                                 @RequestParam(value = "file") MultipartFile file) {
+
+        String user = userService.getUserFromToken(email);
+        imageService.uploadCategoryPhoto(user, categoryId, file);
+    }
+
     @GetMapping(path = "/product/image/{filename}", produces = {IMAGE_PNG_VALUE, IMAGE_JPEG_VALUE})
     public byte[] getProductPhoto(@PathVariable("filename") String filename) throws IOException {
         return imageService.getPhoto(filename);
