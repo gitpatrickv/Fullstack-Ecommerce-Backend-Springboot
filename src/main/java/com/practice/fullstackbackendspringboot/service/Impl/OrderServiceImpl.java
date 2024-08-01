@@ -217,19 +217,12 @@ public class OrderServiceImpl implements OrderService {
             if(order.isActive() && order.getOrderStatus().equals(status1)
                     || !order.isActive() && order.getOrderStatus().equals(status1)
                     || status1.isEmpty()) {
-                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
-                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
-                orderItemModel.setOrderStatus(order.getOrderStatus());
-                orderItemModel.setOrderStatusInfo(order.getOrderStatusInfo());
-                orderItemModel.setActive(order.isActive());
-                orderItemModel.setStoreId(order.getStore().getStoreId());
-                orderItemModel.setProductId(product.getProductId());
-                orderItemModel.setStoreRated(orderItem.getOrder().isStoreRated());
-                orderModels.add(orderItemModel);
+                orderModels.add(this.mapOrderItems(order,orderItem,product));
             }
         }
         return orderModels;
     }
+
 
     @Override
     public List<OrderItemModel> getCustomerOrdersByCompletedAndRatedStatus(String email) {      //CUSTOMER
@@ -243,15 +236,7 @@ public class OrderServiceImpl implements OrderService {
             Product product = productRepository.findById(orderItem.getProduct().getProductId()).get();
 
             if(order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED) || order.getOrderStatus().equals(StringUtil.RATED)) {
-                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
-                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
-                orderItemModel.setOrderStatus(order.getOrderStatus());
-                orderItemModel.setOrderStatusInfo(order.getOrderStatusInfo());
-                orderItemModel.setActive(order.isActive());
-                orderItemModel.setStoreId(order.getStore().getStoreId());
-                orderItemModel.setProductId(product.getProductId());
-                orderItemModel.setStoreRated(orderItem.getOrder().isStoreRated());
-                orderModels.add(orderItemModel);
+                orderModels.add(this.mapOrderItems(order,orderItem,product));
             }
         }
         return orderModels;
@@ -502,5 +487,17 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return new PaginateOrderResponse(orderModels,pageResponse);
+    }
+
+    private OrderItemModel mapOrderItems(Order order, OrderItem orderItem, Product product){
+        OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+        orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
+        orderItemModel.setOrderStatus(order.getOrderStatus());
+        orderItemModel.setOrderStatusInfo(order.getOrderStatusInfo());
+        orderItemModel.setActive(order.isActive());
+        orderItemModel.setStoreId(order.getStore().getStoreId());
+        orderItemModel.setProductId(product.getProductId());
+        orderItemModel.setStoreRated(orderItem.getOrder().isStoreRated());
+        return orderItemModel;
     }
 }
