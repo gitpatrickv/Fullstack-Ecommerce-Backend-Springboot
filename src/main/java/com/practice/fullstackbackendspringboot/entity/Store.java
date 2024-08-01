@@ -37,4 +37,7 @@ public class Store {
     @OneToOne
     private User user;
 
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    private List<StoreRating> storeRatings = new ArrayList<>();
+
 }

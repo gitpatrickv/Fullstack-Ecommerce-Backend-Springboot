@@ -9,6 +9,7 @@ import com.practice.fullstackbackendspringboot.model.response.PageResponse;
 import com.practice.fullstackbackendspringboot.model.response.RatingAndReviewResponse;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.RatingAndReviewService;
+import com.practice.fullstackbackendspringboot.service.StoreRatingService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.RatingAndReviewMapper;
 import jakarta.transaction.Transactional;
@@ -35,6 +36,7 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
     private final RatingAndReviewMapper ratingAndReviewMapper;
     private final OrderItemRepository orderItemRepository;
     private final OrderRepository orderRepository;
+    private final StoreRatingService storeRatingService;
 
     @Override
     public void rateAndReviewProduct(String email, RateProductRequest request) {
@@ -59,14 +61,7 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
                 orderItem.setRated(!orderItem.isRated());
                 orderItemRepository.save(orderItem);
             }
-
-        Boolean isExists = orderItemRepository.existsAllByRatedFalseAndOrder_OrderIdAndUserEmail(request.getOrderId(), email);
-
-        if(!isExists){
-            Order order = orderRepository.findById(request.getOrderId()).get();
-            order.setOrderStatus(StringUtil.RATED);
-            orderRepository.save(order);
-        }
+            storeRatingService.checkStatus(request.getOrderId(), email);
     }
 
     @Override

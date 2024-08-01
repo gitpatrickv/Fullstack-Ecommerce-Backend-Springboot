@@ -25,6 +25,7 @@ public class Order extends AuditEntity{
     private String deliveryAddress;
     private String fullName;
     private String contactNumber;
+    private boolean storeRated;
 
     @ManyToOne
     @JoinColumn(name = "buyer_id")

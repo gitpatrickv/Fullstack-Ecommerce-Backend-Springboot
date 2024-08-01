@@ -224,6 +224,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItemModel.setActive(order.isActive());
                 orderItemModel.setStoreId(order.getStore().getStoreId());
                 orderItemModel.setProductId(product.getProductId());
+                orderItemModel.setStoreRated(orderItem.getOrder().isStoreRated());
                 orderModels.add(orderItemModel);
             }
         }
@@ -249,6 +250,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItemModel.setActive(order.isActive());
                 orderItemModel.setStoreId(order.getStore().getStoreId());
                 orderItemModel.setProductId(product.getProductId());
+                orderItemModel.setStoreRated(orderItem.getOrder().isStoreRated());
                 orderModels.add(orderItemModel);
             }
         }

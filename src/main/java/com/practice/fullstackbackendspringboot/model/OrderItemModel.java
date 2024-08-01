@@ -28,4 +28,5 @@ public class OrderItemModel {
     private String sizes;
     private String productId;
     private boolean rated;
+    private boolean storeRated;
 }
