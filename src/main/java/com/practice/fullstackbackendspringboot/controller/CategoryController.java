@@ -25,7 +25,7 @@ public class CategoryController {
         return categoryService.getAllCategory();
     }
 
-    @PostMapping("/category/create") //TODO: not yet implemented in the front end
+    @PostMapping("/category/create")
     public void createCategory(@RequestHeader("Authorization") String email,
                                @RequestPart("category") CategoryRequest request,
                                @RequestPart("file") MultipartFile file) {
