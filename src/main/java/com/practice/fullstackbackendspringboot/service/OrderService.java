@@ -17,6 +17,7 @@ public interface OrderService {
     List<OrderItemModel> getCustomerOrdersByStatus(String email, String status1);
     List<OrderItemModel> getCustomerOrdersByCompletedAndRatedStatus(String email);
     AllOrdersResponse getStoreOrdersByStatus(String email, String storeId, String status1);
+    AllOrdersResponse getStoreOrdersByCompletedAndRatedStatus(String email, String storeId);
     Set<OrderItemModel> getCustomerOrdersByOrderIdToRate(String email, String orderId);
     TodoListTotal getSellersTodoListTotal(String email, String storeId);
     TotalSales getTotalSales(String email, String storeId);

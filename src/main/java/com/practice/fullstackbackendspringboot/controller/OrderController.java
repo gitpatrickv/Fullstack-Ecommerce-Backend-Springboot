@@ -147,8 +147,7 @@ public class OrderController {
     @ResponseStatus(HttpStatus.OK)
     public AllOrdersResponse getStoreOrdersByCompletedOrders(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
         String user =  userService.getUserFromToken(email);
-        String status1 = StringUtil.ORDER_COMPLETED;
-        return orderService.getStoreOrdersByStatus(user, storeId, status1);
+        return orderService.getStoreOrdersByCompletedAndRatedStatus(user, storeId);
     }
 
     @GetMapping("/seller/get/all/{storeId}")

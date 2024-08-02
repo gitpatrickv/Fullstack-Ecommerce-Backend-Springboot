@@ -323,31 +323,31 @@ public class OrderServiceImpl implements OrderService {
                 if (order.isActive() && order.getOrderStatus().equals(status1)
                         || !order.isActive() && order.getOrderStatus().equals(status1)
                         || status1.isEmpty()) {
-                    OrderModel orderModel = new OrderModel();
-                    orderModel.setOrderId(order.getOrderId());
-                    orderModel.setOrderTotalAmount(order.getOrderTotalAmount());
-                    orderModel.setPaymentMethod(order.getPaymentMethod());
-                    orderModel.setActive(order.isActive());
-                    orderModel.setOrderStatus(order.getOrderStatus());
-                    orderModel.setOrderStatusInfo(order.getOrderStatusInfo());
-                    orderModel.setDeliveryAddress(order.getDeliveryAddress());
-                    orderModel.setFullName(order.getFullName());
-                    orderModel.setContactNumber(order.getContactNumber());
-                    orderModel.setCreatedDate(order.getCreatedDate());
 
-                    List<OrderItemModel> orderItemModels = new ArrayList<>();
-                    List<OrderItem> orderItems = order.getOrderItems();
+                    OrderModel orderModel = this.mapOrders(order);
+                    orderModels.sort(Comparator.comparing(OrderModel::getCreatedDate).reversed());
+                    orderModels.add(orderModel);
+                }
+            }
+        }
+        return new AllOrdersResponse(orderModels);
+    }
 
-                    for (OrderItem orderItem : orderItems) {
-                        OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
-                        orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
-                        orderItemModel.setOrderStatus(order.getOrderStatus());
-                        orderItemModel.setActive(order.isActive());
-                        orderItemModel.setStoreId(order.getStore().getStoreId());
-                        orderItemModel.setFullName(order.getFullName());
-                        orderItemModels.add(orderItemModel);
-                    }
-                    orderModel.setOrderItemModels(orderItemModels);
+    @Override
+    public AllOrdersResponse getStoreOrdersByCompletedAndRatedStatus(String email, String storeId) {    //SELLER
+        userRepository.findByEmail(email);
+        List<Order> orders = orderRepository.findAllByStore_StoreId(storeId);
+        List<OrderModel> orderModels = new ArrayList<>();
+
+        Map<String, List<Order>> listOfOrders = orders.stream().collect(Collectors.groupingBy(Order::getOrderId));
+
+        for(Map.Entry<String, List<Order>> orderMap : listOfOrders.entrySet()) {
+            List<Order> orderList = orderMap.getValue();
+
+            for(Order order: orderList) {
+                if (order.getOrderStatus().equals(StringUtil.RATED)
+                        || order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED)) {
+                    OrderModel orderModel = this.mapOrders(order);
                     orderModels.sort(Comparator.comparing(OrderModel::getCreatedDate).reversed());
                     orderModels.add(orderModel);
                 }
@@ -499,5 +499,34 @@ public class OrderServiceImpl implements OrderService {
         orderItemModel.setProductId(product.getProductId());
         orderItemModel.setStoreRated(orderItem.getOrder().isStoreRated());
         return orderItemModel;
+    }
+
+    private OrderModel mapOrders(Order order){
+        OrderModel orderModel = new OrderModel();
+        orderModel.setOrderId(order.getOrderId());
+        orderModel.setOrderTotalAmount(order.getOrderTotalAmount());
+        orderModel.setPaymentMethod(order.getPaymentMethod());
+        orderModel.setActive(order.isActive());
+        orderModel.setOrderStatus(order.getOrderStatus());
+        orderModel.setOrderStatusInfo(order.getOrderStatusInfo());
+        orderModel.setDeliveryAddress(order.getDeliveryAddress());
+        orderModel.setFullName(order.getFullName());
+        orderModel.setContactNumber(order.getContactNumber());
+        orderModel.setCreatedDate(order.getCreatedDate());
+
+        List<OrderItemModel> orderItemModels = new ArrayList<>();
+        List<OrderItem> orderItems = order.getOrderItems();
+
+        for (OrderItem orderItem : orderItems) {
+            OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+            orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
+            orderItemModel.setOrderStatus(order.getOrderStatus());
+            orderItemModel.setActive(order.isActive());
+            orderItemModel.setStoreId(order.getStore().getStoreId());
+            orderItemModel.setFullName(order.getFullName());
+            orderItemModels.add(orderItemModel);
+        }
+        orderModel.setOrderItemModels(orderItemModels);
+        return orderModel;
     }
 }
