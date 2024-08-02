@@ -135,12 +135,7 @@ public class ProductServiceImpl implements ProductService {
         Page<Product> products = productRepository.findAllByDeletedFalseAndListedTrueAndSuspendedFalse(pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
-        PageResponse pageResponse = new PageResponse();
-        pageResponse.setPageNo(products.getNumber());
-        pageResponse.setPageSize(products.getSize());
-        pageResponse.setTotalElements(products.getTotalElements());
-        pageResponse.setTotalPages(products.getTotalPages());
-        pageResponse.setLast(products.isLast());
+        PageResponse pageResponse = getPagination(products);
 
         for (Product product : products) {
             AllProductModel allProductModel = allProductMapper.mapProductEntityToProductModel(product);
@@ -159,12 +154,7 @@ public class ProductServiceImpl implements ProductService {
         Page<Product> products = productRepository.findAllByDeletedFalseAndListedTrueAndSuspendedFalseAndCategory_CategoryId(categoryId,pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
-        PageResponse pageResponse = new PageResponse();
-        pageResponse.setPageNo(products.getNumber());
-        pageResponse.setPageSize(products.getSize());
-        pageResponse.setTotalElements(products.getTotalElements());
-        pageResponse.setTotalPages(products.getTotalPages());
-        pageResponse.setLast(products.isLast());
+        PageResponse pageResponse = getPagination(products);
 
         for (Product product : products) {
             AllProductModel allProductModel = allProductMapper.mapProductEntityToProductModel(product);
@@ -194,12 +184,7 @@ public class ProductServiceImpl implements ProductService {
         Store store = storeRepository.findById(storeId).get();
         List<AllProductModel> productModels = new ArrayList<>();
 
-        PageResponse pageResponse = new PageResponse();
-        pageResponse.setPageNo(products.getNumber());
-        pageResponse.setPageSize(products.getSize());
-        pageResponse.setTotalElements(products.getTotalElements());
-        pageResponse.setTotalPages(products.getTotalPages());
-        pageResponse.setLast(products.isLast());
+        PageResponse pageResponse = getPagination(products);
 
         StoreInfo storeInfo = new StoreInfo();
         storeInfo.setStoreName(store.getStoreName());
@@ -230,12 +215,7 @@ public class ProductServiceImpl implements ProductService {
 
         List<AllProductModel> productModels = new ArrayList<>();
 
-        PageResponse pageResponse = new PageResponse();
-        pageResponse.setPageNo(products.getNumber());
-        pageResponse.setPageSize(products.getSize());
-        pageResponse.setTotalElements(products.getTotalElements());
-        pageResponse.setTotalPages(products.getTotalPages());
-        pageResponse.setLast(products.isLast());
+        PageResponse pageResponse = getPagination(products);
 
         for(Product product : products) {
             AllProductModel allProductModel = allProductMapper.mapProductEntityToProductModel(product);
@@ -265,12 +245,7 @@ public class ProductServiceImpl implements ProductService {
         Sort sort = Sort.by(Sort.Direction.DESC, StringUtil.Color);
         List<SellersProductModel> productModels = new ArrayList<>();
 
-        PageResponse pageResponse = new PageResponse();
-        pageResponse.setPageNo(products.getNumber());
-        pageResponse.setPageSize(products.getSize());
-        pageResponse.setTotalElements(products.getTotalElements());
-        pageResponse.setTotalPages(products.getTotalPages());
-        pageResponse.setLast(products.isLast());
+        PageResponse pageResponse = getPagination(products);
 
         for(Product product : products){
             SellersProductModel allProductModel = sellersProductMapper.mapProductEntityToProductModel(product);
@@ -369,6 +344,16 @@ public class ProductServiceImpl implements ProductService {
             productModel.setPrice(inventory.getPrice());
             productModel.setQuantity(inventory.getQuantity());
         }
+    }
+
+    private PageResponse getPagination(Page<Product> products){
+        PageResponse pageResponse = new PageResponse();
+        pageResponse.setPageNo(products.getNumber());
+        pageResponse.setPageSize(products.getSize());
+        pageResponse.setTotalElements(products.getTotalElements());
+        pageResponse.setTotalPages(products.getTotalPages());
+        pageResponse.setLast(products.isLast());
+        return pageResponse;
     }
 
 }
