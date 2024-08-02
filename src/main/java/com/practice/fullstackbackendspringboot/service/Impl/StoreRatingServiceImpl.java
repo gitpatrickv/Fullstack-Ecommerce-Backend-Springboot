@@ -4,12 +4,14 @@ import com.practice.fullstackbackendspringboot.entity.Order;
 import com.practice.fullstackbackendspringboot.entity.Store;
 import com.practice.fullstackbackendspringboot.entity.StoreRating;
 import com.practice.fullstackbackendspringboot.model.request.RateStoreRequest;
+import com.practice.fullstackbackendspringboot.model.response.TotalStoreRating;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.StoreRatingService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -45,6 +47,31 @@ public class StoreRatingServiceImpl implements StoreRatingService {
             orderRepository.save(order);
         }
         this.checkStatus(request.getOrderId(), email);
+    }
+
+    @Override
+    public TotalStoreRating getStoreRatingCount(String storeId) {
+        List<StoreRating> storeRatings = storeRatingRepository.findAllByStore_StoreId(storeId);
+        Store store = storeRepository.findById(storeId).get();
+        double totalRatingCount = 0.0;
+        double rating = 0.0;
+
+        for(StoreRating storeRating : storeRatings){
+            double ratingCount = 1.0;
+            totalRatingCount+=ratingCount;
+
+            double ratingTotal = storeRating.getRating();
+            rating += ratingTotal;
+        }
+
+        double avg = rating / totalRatingCount;
+        Double roundedAvg = Math.round(avg * 10.0) / 10.0;
+
+        TotalStoreRating totalStoreRating = new TotalStoreRating();
+        totalStoreRating.setStoreTotalRating(totalRatingCount);
+        totalStoreRating.setStoreRatingAvg(roundedAvg);
+        totalStoreRating.setProductCount(store.getProductCount());
+        return totalStoreRating;
     }
 
     public void checkStatus(String orderId, String email){

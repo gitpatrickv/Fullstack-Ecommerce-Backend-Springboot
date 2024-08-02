@@ -41,6 +41,7 @@ public class SecurityConfig {
                                         .requestMatchers(HttpMethod.POST, "/api/product/save").hasAuthority(SELLER.name())
                                         .requestMatchers(HttpMethod.DELETE,"/api/product/delete/**").hasAnyAuthority(SELLER.name(), ADMIN.name())
                                         .requestMatchers("/api/product/**").permitAll()
+                                        .requestMatchers(HttpMethod.GET, "/api/rate/store/count/**").permitAll()
 
                                         .requestMatchers(HttpMethod.GET, "/api/user").authenticated()
 
