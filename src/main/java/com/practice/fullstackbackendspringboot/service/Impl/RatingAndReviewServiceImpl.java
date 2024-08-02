@@ -87,10 +87,7 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
 
         for(RatingAndReview ratingAndReview : ratingAndReviews){
             if(ratingAndReview.getRating().equals(rating)) {
-                RatingAndReviewModel ratingAndReviewModel = ratingAndReviewMapper.mapEntityToModel(ratingAndReview);
-                ratingAndReviewModel.setName(ratingAndReview.getUser().getName());
-                ratingAndReviewModel.setPhotoUrl(ratingAndReview.getUser().getPhotoUrl());
-                ratingAndReviewModel.setCreatedDate(ratingAndReview.getCreatedDate());
+                RatingAndReviewModel ratingAndReviewModel = mapRatingAndReview(ratingAndReview);
                 ratingAndReviewModelList.add(ratingAndReviewModel);
             }
         }
@@ -106,10 +103,7 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
         PageResponse pageResponse = getPagination(ratingAndReviews);
 
         for(RatingAndReview ratingAndReview : ratingAndReviews){
-            RatingAndReviewModel ratingAndReviewModel = ratingAndReviewMapper.mapEntityToModel(ratingAndReview);
-            ratingAndReviewModel.setName(ratingAndReview.getUser().getName());
-            ratingAndReviewModel.setPhotoUrl(ratingAndReview.getUser().getPhotoUrl());
-            ratingAndReviewModel.setCreatedDate(ratingAndReview.getCreatedDate());
+            RatingAndReviewModel ratingAndReviewModel = mapRatingAndReview(ratingAndReview);
             ratingAndReviewModelList.add(ratingAndReviewModel);
         }
         return new RatingAndReviewResponse(ratingAndReviewModelList, pageResponse);
@@ -134,14 +128,10 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
         PageResponse pageResponse = getPagination(ratingAndReviews);
 
         for(RatingAndReview ratingAndReview : ratingAndReviews){
-            RatingAndReviewModel ratingAndReviewModel = ratingAndReviewMapper.mapEntityToModel(ratingAndReview);
-            ratingAndReviewModel.setName(ratingAndReview.getUser().getName());
-            ratingAndReviewModel.setPhotoUrl(ratingAndReview.getUser().getPhotoUrl());
-            ratingAndReviewModel.setCreatedDate(ratingAndReview.getCreatedDate());
+            RatingAndReviewModel ratingAndReviewModel = mapRatingAndReview(ratingAndReview);
             ratingAndReviewModel.setProductName(ratingAndReview.getProduct().getProductName());
             ratingAndReviewModel.setProductPhotoUrl(ratingAndReview.getProduct().getImage().get(0).getPhotoUrl());
             ratingAndReviewModelList.add(ratingAndReviewModel);
-
         }
         return new RatingAndReviewResponse(ratingAndReviewModelList, pageResponse);
 
@@ -214,5 +204,13 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
         pageResponse.setTotalPages(ratingAndReviews.getTotalPages());
         pageResponse.setLast(ratingAndReviews.isLast());
         return pageResponse;
+    }
+
+    private RatingAndReviewModel mapRatingAndReview(RatingAndReview ratingAndReview){
+        RatingAndReviewModel ratingAndReviewModel = ratingAndReviewMapper.mapEntityToModel(ratingAndReview);
+        ratingAndReviewModel.setName(ratingAndReview.getUser().getName());
+        ratingAndReviewModel.setPhotoUrl(ratingAndReview.getUser().getPhotoUrl());
+        ratingAndReviewModel.setCreatedDate(ratingAndReview.getCreatedDate());
+        return ratingAndReviewModel;
     }
 }
