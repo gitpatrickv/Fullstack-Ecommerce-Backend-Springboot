@@ -83,12 +83,7 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
         Page<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByRatingAndProduct_ProductId(rating, productId, pageable);
         List<RatingAndReviewModel> ratingAndReviewModelList = new ArrayList<>();
 
-        PageResponse pageResponse = new PageResponse();
-        pageResponse.setPageNo(ratingAndReviews.getNumber());
-        pageResponse.setPageSize(ratingAndReviews.getSize());
-        pageResponse.setTotalElements(ratingAndReviews.getTotalElements());
-        pageResponse.setTotalPages(ratingAndReviews.getTotalPages());
-        pageResponse.setLast(ratingAndReviews.isLast());
+        PageResponse pageResponse = getPagination(ratingAndReviews);
 
         for(RatingAndReview ratingAndReview : ratingAndReviews){
             if(ratingAndReview.getRating().equals(rating)) {
@@ -108,12 +103,7 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
         Page<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByProduct_ProductId(productId, pageable);
         List<RatingAndReviewModel> ratingAndReviewModelList = new ArrayList<>();
 
-        PageResponse pageResponse = new PageResponse();
-        pageResponse.setPageNo(ratingAndReviews.getNumber());
-        pageResponse.setPageSize(ratingAndReviews.getSize());
-        pageResponse.setTotalElements(ratingAndReviews.getTotalElements());
-        pageResponse.setTotalPages(ratingAndReviews.getTotalPages());
-        pageResponse.setLast(ratingAndReviews.isLast());
+        PageResponse pageResponse = getPagination(ratingAndReviews);
 
         for(RatingAndReview ratingAndReview : ratingAndReviews){
             RatingAndReviewModel ratingAndReviewModel = ratingAndReviewMapper.mapEntityToModel(ratingAndReview);
@@ -141,12 +131,7 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
         Page<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByStoreId(storeId, pageable);
         List<RatingAndReviewModel> ratingAndReviewModelList = new ArrayList<>();
 
-        PageResponse pageResponse = new PageResponse();
-        pageResponse.setPageNo(ratingAndReviews.getNumber());
-        pageResponse.setPageSize(ratingAndReviews.getSize());
-        pageResponse.setTotalElements(ratingAndReviews.getTotalElements());
-        pageResponse.setTotalPages(ratingAndReviews.getTotalPages());
-        pageResponse.setLast(ratingAndReviews.isLast());
+        PageResponse pageResponse = getPagination(ratingAndReviews);
 
         for(RatingAndReview ratingAndReview : ratingAndReviews){
             RatingAndReviewModel ratingAndReviewModel = ratingAndReviewMapper.mapEntityToModel(ratingAndReview);
@@ -219,5 +204,15 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
         numberOfUserRatingResponse.setTotal1StarUserRating(total1StarRating);
 
         return numberOfUserRatingResponse;
+    }
+
+    private PageResponse getPagination(Page<RatingAndReview> ratingAndReviews){
+        PageResponse pageResponse = new PageResponse();
+        pageResponse.setPageNo(ratingAndReviews.getNumber());
+        pageResponse.setPageSize(ratingAndReviews.getSize());
+        pageResponse.setTotalElements(ratingAndReviews.getTotalElements());
+        pageResponse.setTotalPages(ratingAndReviews.getTotalPages());
+        pageResponse.setLast(ratingAndReviews.isLast());
+        return pageResponse;
     }
 }
