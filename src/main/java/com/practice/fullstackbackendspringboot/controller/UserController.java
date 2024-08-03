@@ -32,27 +32,28 @@ public class  UserController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public UserModel getUser(@RequestHeader("Authorization") String email) {
-        String user = userService.getUserFromToken(email);
+    public UserModel getUser() {
+        String user = userService.getAuthenticatedUser();
         return userService.getUser(user);
     }
     @GetMapping("/count")
-    public UserCount getUserCount(@RequestHeader("Authorization") String email) {
-        String user = userService.getUserFromToken(email);
-        return userService.getUserCount(user);
+    public UserCount getUserCount() {
+        return userService.getUserCount();
     }
     @GetMapping("/all")
-    public PaginateUserResponse getAllUsers(@RequestHeader("Authorization") String email,
-                                            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+    public PaginateUserResponse getAllUsers(@RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
                                             @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize,
                                             @RequestParam(defaultValue = "user", required = false) String sortBy) {
-        String user = userService.getUserFromToken(email);
-        return userService.getAllUsers(user,pageNo,pageSize,sortBy);
+        return userService.getAllUsers(pageNo,pageSize,sortBy);
     }
 
     @PutMapping("/freeze/{email}")
-    public void freezeAccount(@RequestHeader("Authorization") String admin, @PathVariable String email){
-            String user = userService.getUserFromToken(admin);
-            userService.freezeAccount(user, email);
+    public void freezeAccount(@PathVariable String email){
+            String admin = userService.getAuthenticatedUser();
+            userService.freezeAccount(admin, email);
+    }
+    @GetMapping("/token")       //TODO: delete
+    public String getUserFromToken(String token){
+        return userService.getAuthenticatedUser();
     }
 }

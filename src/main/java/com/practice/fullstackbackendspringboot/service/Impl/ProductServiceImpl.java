@@ -114,8 +114,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void updateProduct(UpdateProductRequest request, String email) {     //SELLER
-        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public void updateProduct(UpdateProductRequest request) {     //SELLER
+
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
 
@@ -238,9 +238,10 @@ public class ProductServiceImpl implements ProductService {
             sorts = Sort.by(StringUtil.Suspended).descending();
         }
 
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Pageable pageable = PageRequest.of(pageNo, pageSize, sorts);
-        Optional<User> user = userRepository.findByEmail(email);
-        Page<Product> products = productRepository.findAllByDeletedFalseAndUserEmail(user.get().getEmail(), pageable);
+
+        Page<Product> products = productRepository.findAllByDeletedFalseAndUserEmail(user.getEmail(), pageable);
 
         Sort sort = Sort.by(Sort.Direction.DESC, StringUtil.Color);
         List<SellersProductModel> productModels = new ArrayList<>();
@@ -266,10 +267,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void delete(String productId, String email) {        //SELLER
-        userRepository.findByEmail(email);
+    public void delete(String productId) {        //SELLER
         Optional<Product> product = productRepository.findById(productId);
-
         if(product.isPresent()){
             Product prod = product.get();
             prod.setDeleted(true);
@@ -283,9 +282,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductCount getProductCount(String email) {     //ADMIN
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public ProductCount getProductCount() {     //ADMIN
         double count = productRepository.count();
         ProductCount productCount = new ProductCount();
         productCount.setProductCount(count);
@@ -307,8 +304,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void delistProduct(String productId, String email) {     //SELLER
-        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public void delistProduct(String productId) {     //SELLER
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
 
@@ -317,15 +313,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public SuspendedProductCount getSuspendedProductCount(String storeId, String email) {   //SELLER
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
-
+    public SuspendedProductCount getSuspendedProductCount(String storeId) {   //SELLER
         double count = productRepository.findAllBySuspendedTrueAndStore_StoreId(storeId).stream().count();
-
         SuspendedProductCount suspendedProductCount = new SuspendedProductCount();
         suspendedProductCount.setSuspendedProductCount(count);
-
         return suspendedProductCount;
     }
 

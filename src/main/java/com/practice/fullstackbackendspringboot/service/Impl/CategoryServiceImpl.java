@@ -7,14 +7,12 @@ import com.practice.fullstackbackendspringboot.repository.CategoryRepository;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.service.CategoryService;
 import com.practice.fullstackbackendspringboot.service.ImageService;
-import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.CategoryMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -35,19 +33,16 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void createCategory(String email, CategoryRequest request, MultipartFile file) {
-        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
-
+    public void createCategory(CategoryRequest request, MultipartFile file) {
         Category category = new Category();
         category.setCategoryName(request.getCategoryName());
         Category savedCategory = categoryRepository.save(category);
 
-        imageService.uploadCategoryPhoto(email, savedCategory.getCategoryId(), file);
+        imageService.uploadCategoryPhoto(savedCategory.getCategoryId(), file);
     }
 
     @Override
-    public void updateCategory(String email, CategoryRequest request) {
-        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public void updateCategory(CategoryRequest request) {
         Optional<Category> optionalCategory = categoryRepository.findById(request.getCategoryId());
 
         if (optionalCategory.isPresent()){

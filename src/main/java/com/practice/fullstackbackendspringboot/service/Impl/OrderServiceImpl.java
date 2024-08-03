@@ -168,12 +168,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void cancelOrder(String email, String orderId) {     //CUSTOMER
-        Optional<User> user = userRepository.findByEmail(email);
+    public void cancelOrder(String orderId) {     //CUSTOMER
         Optional<Order> order = orderRepository.findById(orderId);
-        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmailAndOrder_OrderId(email, orderId);
+        List<OrderItem> orderItems = orderItemRepository.findAllByOrder_OrderId(orderId);
 
-        if(user.isPresent()){
             if(order.isPresent()){
                 Order orders = order.get();
                 orders.setOrderStatus(StringUtil.ORDER_CANCELLED);
@@ -182,7 +180,6 @@ public class OrderServiceImpl implements OrderService {
             }else{
                 throw new NoSuchElementException(StringUtil.ORDER_NOT_FOUND);
             }
-        }
 
         for(OrderItem orderItem: orderItems){
             Optional<Inventory> inventory = inventoryRepository.findById(orderItem.getInventory().getInventoryId());
@@ -243,8 +240,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Set<OrderItemModel> getCustomerOrdersByOrderIdToRate(String email, String orderId) {     //CUSTOMER
-        Set<OrderItem> orderItems = orderItemRepository.findAllByRatedFalseAndOrder_OrderIdAndUserEmail(orderId, email);
+    public Set<OrderItemModel> getCustomerOrdersByOrderIdToRate(String orderId) {     //CUSTOMER
+        Set<OrderItem> orderItems = orderItemRepository.findAllByRatedFalseAndOrder_OrderId(orderId);
         Set<OrderItemModel> orderItemModels = new HashSet<>();
         Set<String> productIds = new HashSet<>();
 
@@ -261,8 +258,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void processOrder(String email, String orderId) {        //SELLER
-        userRepository.findByEmail(email);
+    public void processOrder(String orderId) {        //SELLER
         Optional<Order> order = orderRepository.findById(orderId);
 
         if(order.isPresent()) {
@@ -296,11 +292,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void confirmCancelOrder(String email, String orderId) {      //SELLER
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public void confirmCancelOrder(String orderId) {      //SELLER
         Optional<Order> order = orderRepository.findById(orderId);
-
         if(order.isPresent()){
             Order orders = order.get();
             orders.setActive(false);
@@ -309,8 +302,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public AllOrdersResponse getStoreOrdersByStatus(String email, String storeId, String status1) {     //SELLER
-        userRepository.findByEmail(email);
+    public AllOrdersResponse getStoreOrdersByStatus(String storeId, String status1) {     //SELLER
+
         List<Order> orders = orderRepository.findAllByStore_StoreId(storeId);
         List<OrderModel> orderModels = new ArrayList<>();
 
@@ -334,8 +327,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public AllOrdersResponse getStoreOrdersByCompletedAndRatedStatus(String email, String storeId) {    //SELLER
-        userRepository.findByEmail(email);
+    public AllOrdersResponse getStoreOrdersByCompletedAndRatedStatus(String storeId) {    //SELLER
+
         List<Order> orders = orderRepository.findAllByStore_StoreId(storeId);
         List<OrderModel> orderModels = new ArrayList<>();
 
@@ -357,9 +350,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public TodoListTotal getSellersTodoListTotal(String email, String storeId) {    //SELLER
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public TodoListTotal getSellersTodoListTotal(String storeId) {    //SELLER
         Optional<Store> store = storeRepository.findById(storeId);
         List<Order> orders = orderRepository.findAllByActiveTrueAndStore_StoreId(storeId);
 
@@ -418,9 +409,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public TotalSales getTotalSales(String email, String storeId) {     //SELLER
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public TotalSales getTotalSales(String storeId) {     //SELLER
+
         Optional<Store> store = storeRepository.findById(storeId);
         List<Order> orders = orderRepository.findAllByActiveFalseAndStore_StoreId(storeId);
         double totalSale = 0.0;
@@ -432,7 +422,10 @@ public class OrderServiceImpl implements OrderService {
                     totalSale += sales;
                 }
             }
+        }else {
+            throw new NoSuchElementException(StringUtil.STORE_NOT_FOUND);
         }
+
         TotalSales totalSales = new TotalSales();
         totalSales.setTotalSales(totalSale);
 
@@ -440,9 +433,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderCount getOrderCountAndTotalSales(String email) {    //ADMIN
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public OrderCount getOrderCountAndTotalSales() {    //ADMIN
+
         List<Order> orders = orderRepository.findAll();
 
         double countOrder = orderRepository.count();
@@ -467,7 +459,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public PaginateOrderResponse getAllOrders(String email, int pageNo, int pageSize) { //ADMIN
+    public PaginateOrderResponse getAllOrders(int pageNo, int pageSize) { //ADMIN
 
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(StringUtil.LAST_MODIFIED).descending());
         Page<Order> orders = orderRepository.findAll(pageable);

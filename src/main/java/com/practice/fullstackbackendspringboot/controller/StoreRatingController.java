@@ -15,8 +15,8 @@ public class StoreRatingController {
     private final StoreRatingService storeRatingService;
     private final UserService userService;
     @PostMapping("/rate/store")
-    public void rateStore(@RequestHeader("Authorization") String email, @RequestBody RateStoreRequest request) {
-        String user = userService.getUserFromToken(email);
+    public void rateStore(@RequestBody RateStoreRequest request) {
+        String user = userService.getAuthenticatedUser();
         storeRatingService.rateStore(user,request);
     }
     @GetMapping("/rate/store/count/{storeId}")

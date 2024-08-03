@@ -17,6 +17,7 @@ import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.service.StoreService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.StoreMapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -44,10 +45,10 @@ public class StoreServiceImpl implements StoreService {
 
     @Override
     public void createStore(CreateStoreRequest request, String email){
-        Optional<User> user = userRepository.findByEmail(email);
-        boolean isExists = storeRepository.existsByStoreNameIgnoreCase(request.getStoreName());
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        boolean storeExists = storeRepository.existsByStoreNameIgnoreCase(request.getStoreName());
 
-        if(user.isPresent() && !isExists){
+        if(!storeExists) {
             Store store = new Store();
             store.setStoreName(request.getStoreName());
             store.setStoreDescription(request.getStoreDescription());
@@ -55,23 +56,22 @@ public class StoreServiceImpl implements StoreService {
             store.setContactNumber(request.getContactNumber());
             store.setShippingFee(request.getShippingFee());
             store.setOnline(true);
-            store.setUser(user.get());
+            store.setUser(user);
             storeRepository.save(store);
         }
     }
 
     @Override
     public StoreModel getStoreInfo(String email) {
-        Store store = storeRepository.findByUserEmail(email).get();
-        StoreModel storeModel = mapper.mapEntityToModel(store);
-        storeModel.setEmail(store.getUser().getEmail());
-        return storeModel;
+        Store store = storeRepository.findByUserEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.STORE_NOT_FOUND + email));
+            StoreModel storeModel = mapper.mapEntityToModel(store);
+            storeModel.setEmail(store.getUser().getEmail());
+            return storeModel;
     }
 
     @Override
-    public void updateShopInfo(String email, String storeId, UpdateShopInfoRequest request) {
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public void updateShopInfo(String storeId, UpdateShopInfoRequest request) {
+
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.STORE_NOT_FOUND + storeId));
 
@@ -84,9 +84,7 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
-    public PaginateStoreResponse getAllStores(String email,int pageNo, int pageSize, String sortBy) {
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public PaginateStoreResponse getAllStores(int pageNo, int pageSize, String sortBy) {
 
         Sort sorts = Sort.by(StringUtil.Online).descending();
 
@@ -114,9 +112,7 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
-    public StoreCount getStoreCount(String email) {
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public StoreCount getStoreCount() {
         double count = storeRepository.count();
         StoreCount storeCount = new StoreCount();
         storeCount.setStoreCount(count);

@@ -21,14 +21,14 @@ public class AccountController {
 
     @PutMapping("/account/profile")
     @ResponseStatus(HttpStatus.OK)
-    public UpdateUserRequest updateAccountInfo(@RequestHeader("Authorization") String email, @RequestBody UpdateUserRequest updateUserRequest){
-        String user = userService.getUserFromToken(email);
+    public UpdateUserRequest updateAccountInfo(@RequestBody UpdateUserRequest updateUserRequest){
+        String user = userService.getAuthenticatedUser();
         return accountService.updateAccountInfo(user,updateUserRequest);
     }
     @PutMapping("/account/password")
     @ResponseStatus(HttpStatus.OK)
-    public void changePassword(@RequestHeader("Authorization") String email, @RequestBody @Valid ChangePasswordRequest request, Principal user){
-    String currentUser = userService.getUserFromToken(email);
+    public void changePassword(@RequestBody @Valid ChangePasswordRequest request, Principal user){
+        String currentUser = userService.getAuthenticatedUser();
     accountService.changePassword(currentUser,request,user);
     }
 

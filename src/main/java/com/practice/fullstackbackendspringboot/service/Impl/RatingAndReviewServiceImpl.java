@@ -1,6 +1,7 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
 import com.practice.fullstackbackendspringboot.entity.*;
+import com.practice.fullstackbackendspringboot.entity.constants.Role;
 import com.practice.fullstackbackendspringboot.model.RatingAndReviewModel;
 import com.practice.fullstackbackendspringboot.model.request.RateProductRequest;
 import com.practice.fullstackbackendspringboot.model.request.ReplyToReviewRequest;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -66,8 +68,12 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
 
     @Override
     public void replyToReview(String email, ReplyToReviewRequest request) {
-        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Optional<RatingAndReview> ratingAndReview = ratingAndReviewRepository.findByReviewIdAndStoreId(request.getReviewId(), request.getStoreId());
+
+        if(!user.getRole().equals(Role.SELLER)) {
+            throw new AccessDeniedException(StringUtil.ACCESS_DENIED);
+        }
 
         if(ratingAndReview.isPresent()){
             RatingAndReview reply = ratingAndReview.get();
@@ -110,7 +116,7 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
     }
 
     @Override
-    public RatingAndReviewResponse manageAllProductReview(String email, String storeId, int pageNo, int pageSize, String sortBy) {
+    public RatingAndReviewResponse manageAllProductReview(String storeId, int pageNo, int pageSize, String sortBy) {
 
         Sort sort = Sort.by(StringUtil.Created_Date).descending();
 
@@ -120,7 +126,6 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
             sort = Sort.by(StringUtil.Replied).descending();
         }
 
-        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
         Page<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByStoreId(storeId, pageable);
         List<RatingAndReviewModel> ratingAndReviewModelList = new ArrayList<>();

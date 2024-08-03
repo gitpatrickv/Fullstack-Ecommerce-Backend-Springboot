@@ -9,6 +9,6 @@ import java.util.List;
 public interface CategoryService {
 
     List<CategoryModel>getAllCategory();
-    void createCategory(String email, CategoryRequest request, MultipartFile file);
-    void updateCategory(String email, CategoryRequest request);
+    void createCategory(CategoryRequest request, MultipartFile file);
+    void updateCategory(CategoryRequest request);
 }

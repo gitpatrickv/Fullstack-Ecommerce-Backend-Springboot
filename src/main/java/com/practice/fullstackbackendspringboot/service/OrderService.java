@@ -10,17 +10,17 @@ import java.util.Set;
 public interface OrderService {
 
     PaymentResponse placeOrder(String email, String paymentMethod) throws StripeException;
-    void cancelOrder(String email, String orderId);
-    void confirmCancelOrder(String email, String orderId);
+    void cancelOrder(String orderId);
+    void confirmCancelOrder(String orderId);
     void buyAgain(String email, String orderId);
-    void processOrder(String email, String orderId);
+    void processOrder(String orderId);
     List<OrderItemModel> getCustomerOrdersByStatus(String email, String status1);
     List<OrderItemModel> getCustomerOrdersByCompletedAndRatedStatus(String email);
-    AllOrdersResponse getStoreOrdersByStatus(String email, String storeId, String status1);
-    AllOrdersResponse getStoreOrdersByCompletedAndRatedStatus(String email, String storeId);
-    Set<OrderItemModel> getCustomerOrdersByOrderIdToRate(String email, String orderId);
-    TodoListTotal getSellersTodoListTotal(String email, String storeId);
-    TotalSales getTotalSales(String email, String storeId);
-    OrderCount getOrderCountAndTotalSales(String email);
-    PaginateOrderResponse getAllOrders(String email, int pageNo, int pageSize);
+    AllOrdersResponse getStoreOrdersByStatus(String storeId, String status1);
+    AllOrdersResponse getStoreOrdersByCompletedAndRatedStatus(String storeId);
+    Set<OrderItemModel> getCustomerOrdersByOrderIdToRate(String orderId);
+    TodoListTotal getSellersTodoListTotal(String storeId);
+    TotalSales getTotalSales(String storeId);
+    OrderCount getOrderCountAndTotalSales();
+    PaginateOrderResponse getAllOrders(int pageNo, int pageSize);
 }

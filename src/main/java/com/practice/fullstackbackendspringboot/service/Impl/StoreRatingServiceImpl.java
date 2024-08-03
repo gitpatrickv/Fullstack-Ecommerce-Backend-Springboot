@@ -3,6 +3,7 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 import com.practice.fullstackbackendspringboot.entity.Order;
 import com.practice.fullstackbackendspringboot.entity.Store;
 import com.practice.fullstackbackendspringboot.entity.StoreRating;
+import com.practice.fullstackbackendspringboot.entity.User;
 import com.practice.fullstackbackendspringboot.model.request.RateStoreRequest;
 import com.practice.fullstackbackendspringboot.model.response.TotalStoreRating;
 import com.practice.fullstackbackendspringboot.repository.*;
@@ -27,7 +28,7 @@ public class StoreRatingServiceImpl implements StoreRatingService {
 
     @Override
     public void rateStore(String email, RateStoreRequest request) {
-        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Optional<Order> optionalOrder = orderRepository.findByOrderIdAndStoreRatedFalse(request.getOrderId());
 
         if(request.getRating() < 1 || request.getRating() > 5){
@@ -46,7 +47,7 @@ public class StoreRatingServiceImpl implements StoreRatingService {
             order.setStoreRated(true);
             orderRepository.save(order);
         }
-        this.checkStatus(request.getOrderId(), email);
+        this.checkStatus(request.getOrderId(), user.getEmail());
     }
 
     @Override

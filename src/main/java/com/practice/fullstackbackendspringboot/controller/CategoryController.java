@@ -26,17 +26,14 @@ public class CategoryController {
     }
 
     @PostMapping("/category/create")
-    public void createCategory(@RequestHeader("Authorization") String email,
-                               @RequestPart("category") CategoryRequest request,
+    public void createCategory(@RequestPart("category") CategoryRequest request,
                                @RequestPart("file") MultipartFile file) {
-        String user = userService.getUserFromToken(email);
-        categoryService.createCategory(user,request,file);
+        categoryService.createCategory(request,file);
     }
 
     @PutMapping("/category/update")
-    public void updateCategory(@RequestHeader("Authorization") String email, @RequestBody CategoryRequest request){
-        String user = userService.getUserFromToken(email);
-        categoryService.updateCategory(user,request);
+    public void updateCategory(@RequestBody CategoryRequest request){
+        categoryService.updateCategory(request);
     }
 
 

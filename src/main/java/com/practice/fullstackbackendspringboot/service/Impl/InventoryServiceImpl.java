@@ -4,7 +4,6 @@ import com.practice.fullstackbackendspringboot.entity.Inventory;
 import com.practice.fullstackbackendspringboot.model.request.AddStockRequest;
 import com.practice.fullstackbackendspringboot.model.request.UpdatePriceRequest;
 import com.practice.fullstackbackendspringboot.repository.InventoryRepository;
-import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.service.InventoryService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +17,9 @@ import java.util.Optional;
 public class InventoryServiceImpl implements InventoryService {
 
     private final InventoryRepository inventoryRepository;
-    private final UserRepository userRepository;
-
     @Override
-    public void addInventoryStock(String email, AddStockRequest request) {
-        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public void addInventoryStock(AddStockRequest request) {
+
         Optional<Inventory> inventory = inventoryRepository.findById(request.getInventoryId());
 
         if(inventory.isPresent()){
@@ -35,8 +32,8 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
-    public void updatePrice(String email, UpdatePriceRequest request) {
-        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public void updatePrice(UpdatePriceRequest request) {
+
         Optional<Inventory> inventory = inventoryRepository.findById(request.getInventoryId());
 
         if(inventory.isPresent()){

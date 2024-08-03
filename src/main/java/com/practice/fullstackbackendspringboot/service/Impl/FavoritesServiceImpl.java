@@ -32,10 +32,10 @@ public class FavoritesServiceImpl implements FavoritesService {
     private final FavoritesMapper favoritesMapper;
     @Override
     public void addToFavorites(String email, String productId) {
-        Optional<User> user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Optional<Product> optionalProduct = productRepository.findByProductIdAndListedTrueAndSuspendedFalseAndDeletedFalse(productId);
 
-        Optional<Favorites> favorite = favoritesRepository.findByProduct_ProductIdAndUserEmail(productId, user.get().getEmail());
+        Optional<Favorites> favorite = favoritesRepository.findByProduct_ProductIdAndUserEmail(productId, user.getEmail());
         Favorites favorites;
         if(favorite.isPresent() && favorite.get().isFavorites()){
             favorites = favorite.get();
@@ -47,7 +47,7 @@ public class FavoritesServiceImpl implements FavoritesService {
                 favorites = new Favorites();
                 favorites.setFavorites(true);
                 favorites.setProduct(product);
-                favorites.setUser(user.get());
+                favorites.setUser(user);
                 favoritesRepository.save(favorites);
             } else {
                 throw new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId);
@@ -57,7 +57,7 @@ public class FavoritesServiceImpl implements FavoritesService {
 
     @Override
     public void addToFavoritesByFilter(String email) {
-        User user = userRepository.findByEmail(email).get();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         List<Cart> carts = cartRepository.findAllByFilterAndUserEmail(true,email);
 
         for(Cart cart : carts){
@@ -106,7 +106,7 @@ public class FavoritesServiceImpl implements FavoritesService {
 
     @Override
     public FavoritesModel getFavoriteStatus(String email, String productId) {
-        userRepository.findByEmail(email).get();
+
         Optional<Favorites> favorites = favoritesRepository.findByProduct_ProductIdAndUserEmail(productId,email);
 
         return favorites.map(favoritesMapper::mapEntityToModel).orElse(null);

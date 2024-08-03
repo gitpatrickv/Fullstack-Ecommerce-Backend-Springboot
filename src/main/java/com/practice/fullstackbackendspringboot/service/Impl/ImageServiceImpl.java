@@ -52,8 +52,7 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public void uploadStorePhoto(String email, String storeId, MultipartFile file) {
-        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public void uploadStorePhoto(String storeId, MultipartFile file) {
         Optional<Store> optionalStore = storeRepository.findById(storeId);
 
         if(optionalStore.isPresent()) {
@@ -64,8 +63,7 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public void uploadCategoryPhoto(String email, String categoryId, MultipartFile file) {
-        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public void uploadCategoryPhoto(String categoryId, MultipartFile file) {
         Optional<Category> optionalCategory = categoryRepository.findById(categoryId);
 
         if(optionalCategory.isPresent()){

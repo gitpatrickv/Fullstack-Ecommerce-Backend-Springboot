@@ -32,33 +32,26 @@ public class SecurityConfig {
                                 authorize
                                         .requestMatchers("/api/admin/**").hasAuthority(ADMIN.name())
                                         .requestMatchers("/api/seller/**").hasAuthority(SELLER.name())
+                                        .requestMatchers(HttpMethod.POST, "/api/product/category/add").hasAuthority(ADMIN.name())
+                                        .requestMatchers(HttpMethod.POST, "api/product/update").hasAuthority(SELLER.name())
+                                        .requestMatchers(HttpMethod.POST, "/api/product/save").hasAuthority(SELLER.name())
 
                                         .requestMatchers("/api/store/**").hasAnyAuthority(SELLER.name(), ADMIN.name())
-                                        .requestMatchers("/api/cart/**").authenticated()
-
-                                        .requestMatchers(HttpMethod.POST, "/api/product/category/add").hasAuthority(ADMIN.name())
-
-                                        .requestMatchers(HttpMethod.POST, "/api/product/save").hasAuthority(SELLER.name())
-                                        .requestMatchers(HttpMethod.DELETE,"/api/product/delete/**").hasAnyAuthority(SELLER.name(), ADMIN.name())
-                                        .requestMatchers("/api/product/**").permitAll()
-                                        .requestMatchers(HttpMethod.GET, "/api/rate/store/count/**").permitAll()
-
-                                        .requestMatchers(HttpMethod.GET, "/api/user").authenticated()
-
-                                        .requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
-                                        .requestMatchers(HttpMethod.POST, "/api/user/register").permitAll()
-
                                         .requestMatchers(HttpMethod.POST, "api/product/rate").hasAnyAuthority(USER.name(), SELLER.name())
-                                        .requestMatchers(HttpMethod.POST, "api/product/update").hasAuthority(SELLER.name())
-                                        .requestMatchers( "/api/rating/**").permitAll()
-
-
-                                        .requestMatchers("/api/user/favorites/**").authenticated()
-                                        .requestMatchers("/api/user/image/**").permitAll()
-
+                                        .requestMatchers(HttpMethod.DELETE,"/api/product/delete/**").hasAnyAuthority(SELLER.name(), ADMIN.name())
                                         .requestMatchers("/api/inventory/**").hasAnyAuthority(SELLER.name(), ADMIN.name())
 
+                                        .requestMatchers(HttpMethod.GET, "/api/user").authenticated()
+                                        .requestMatchers("/api/user/favorites/**").authenticated()
+                                        .requestMatchers("/api/cart/**").authenticated()
                                         .requestMatchers("api/order/**").authenticated()
+
+                                        .requestMatchers( "/api/rating/**").permitAll()
+                                        .requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
+                                        .requestMatchers(HttpMethod.POST, "/api/user/register").permitAll()
+                                        .requestMatchers("/api/user/image/**").permitAll()
+                                        .requestMatchers(HttpMethod.GET, "/api/rate/store/count/**").permitAll()
+                                        .requestMatchers("/api/product/**").permitAll()
 
                                         .anyRequest().authenticated()
                 );

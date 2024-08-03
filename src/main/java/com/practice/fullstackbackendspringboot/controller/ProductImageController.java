@@ -24,26 +24,20 @@ public class ProductImageController {
         imageService.uploadProductPhoto(productId, files);
     }
     @PostMapping("/user/image/upload")
-    public void uploadUserPhoto(@RequestHeader("Authorization") String email,  @RequestParam(value = "file") MultipartFile file) {
-        String user = userService.getUserFromToken(email);
+    public void uploadUserPhoto(@RequestParam(value = "file") MultipartFile file) {
+        String user = userService.getAuthenticatedUser();
         imageService.uploadUserPhoto(user,file);
     }
     @PostMapping("/store/image/upload/{storeId}")
-    public void uploadStorePhoto(@RequestHeader("Authorization") String email,
-                                 @PathVariable String storeId,
+    public void uploadStorePhoto(@PathVariable String storeId,
                                  @RequestParam(value = "file") MultipartFile file) {
-
-        String user = userService.getUserFromToken(email);
-        imageService.uploadStorePhoto(user, storeId, file);
+        imageService.uploadStorePhoto(storeId, file);
     }
 
     @PostMapping("/product/category/image/upload/{categoryId}")
-    public void uploadCategoryPhoto(@RequestHeader("Authorization") String email,
-                                 @PathVariable String categoryId,
+    public void uploadCategoryPhoto(@PathVariable String categoryId,
                                  @RequestParam(value = "file") MultipartFile file) {
-
-        String user = userService.getUserFromToken(email);
-        imageService.uploadCategoryPhoto(user, categoryId, file);
+        imageService.uploadCategoryPhoto(categoryId, file);
     }
 
     @GetMapping(path = "/product/image/{filename}", produces = {IMAGE_PNG_VALUE, IMAGE_JPEG_VALUE})

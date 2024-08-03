@@ -61,5 +61,6 @@ public class StringUtil {
     public static final String Php = "php";
     public static final String SuccessUrl = "http://localhost:5173/user/purchase/order/to-ship";
     public static final String CancelUrl = "http://localhost:5173/checkout";
+    public static final String StoreNameExists = "Store name already exists: ";
 
 }

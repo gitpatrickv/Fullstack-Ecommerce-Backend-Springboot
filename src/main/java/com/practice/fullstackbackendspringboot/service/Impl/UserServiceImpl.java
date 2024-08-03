@@ -4,9 +4,11 @@ import com.practice.fullstackbackendspringboot.entity.User;
 import com.practice.fullstackbackendspringboot.entity.constants.Role;
 import com.practice.fullstackbackendspringboot.model.UserModel;
 import com.practice.fullstackbackendspringboot.model.request.LoginRequest;
-import com.practice.fullstackbackendspringboot.model.response.*;
+import com.practice.fullstackbackendspringboot.model.response.LoginResponse;
+import com.practice.fullstackbackendspringboot.model.response.PageResponse;
+import com.practice.fullstackbackendspringboot.model.response.PaginateUserResponse;
+import com.practice.fullstackbackendspringboot.model.response.UserCount;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
-import com.practice.fullstackbackendspringboot.security.JwtAuthenticationFilter;
 import com.practice.fullstackbackendspringboot.security.JwtService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
@@ -23,7 +25,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -38,7 +40,6 @@ public class UserServiceImpl implements UserService {
     private final UserMapper mapper;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
-    private final PasswordEncoder passwordEncoder;
 
     @Override
     public LoginResponse register(UserModel userModel) {
@@ -82,24 +83,16 @@ public class UserServiceImpl implements UserService {
         }
 
     }
-    @Override
-    public String getUserFromToken(String email){
-        email = JwtAuthenticationFilter.CURRENT_USER;
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND));
-        return email;
-    }
 
     @Override
     public UserModel getUser(String email) {
-        User user = userRepository.findByEmail(email).get();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         return mapper.mapUserEntityToUserModel(user);
     }
 
     @Override
-    public UserCount getUserCount(String email) {
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public UserCount getUserCount() {           //ADMIN
         double count = userRepository.count();
         UserCount userCount = new UserCount();
         userCount.setUserCount(count);
@@ -107,7 +100,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public PaginateUserResponse getAllUsers(String email,  int pageNo, int pageSize, String sortBy) {
+    public PaginateUserResponse getAllUsers(int pageNo, int pageSize, String sortBy) {      //ADMIN
 
         Sort sorts = Sort.by(StringUtil.Role).ascending();
 
@@ -138,8 +131,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void freezeAccount(String admin, String email) {
-        User administrator = userRepository.findByEmail(admin).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public void freezeAccount(String admin, String email) {     //ADMIN
+        User administrator = userRepository.findByEmail(admin).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + admin));
         User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
 
         if(!administrator.getRole().equals(Role.ADMIN)) {
@@ -148,6 +141,11 @@ public class UserServiceImpl implements UserService {
 
         user.setFrozen(!user.isFrozen());
         userRepository.save(user);
+    }
+
+    @Override
+    public String getAuthenticatedUser(){
+        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 }
 

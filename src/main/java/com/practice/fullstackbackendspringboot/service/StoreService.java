@@ -8,10 +8,10 @@ import com.practice.fullstackbackendspringboot.model.response.StoreCount;
 
 public interface StoreService {
 
-    void createStore(CreateStoreRequest request, String email);
+    void createStore(CreateStoreRequest request, String user);
     StoreModel getStoreInfo(String email);
-    void updateShopInfo(String email, String storeId, UpdateShopInfoRequest request);
-    PaginateStoreResponse getAllStores(String email,int pageNo, int pageSize, String sortBy);
-    StoreCount getStoreCount(String email);
+    void updateShopInfo(String storeId, UpdateShopInfoRequest request);
+    PaginateStoreResponse getAllStores(int pageNo, int pageSize, String sortBy);
+    StoreCount getStoreCount();
     void suspendStoreAndProductListing(String storeId, String email);
 }

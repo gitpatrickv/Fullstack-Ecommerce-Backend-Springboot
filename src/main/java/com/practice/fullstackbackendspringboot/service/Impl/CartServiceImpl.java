@@ -35,19 +35,19 @@ public class CartServiceImpl implements CartService {
     @Override
     public CartModel addProductToCart(CartRequest cartRequest, String email) {
 
-        Optional<User> user = userRepository.findByEmail(email);
-        Optional<Product> product = productRepository.findById(cartRequest.getProductId());
-        Optional<Inventory> inventory = inventoryRepository.findByProduct_ProductId(cartRequest.getProductId());
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Product product = productRepository.findById(cartRequest.getProductId()).orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
+        Inventory inventory = inventoryRepository.findByProduct_ProductId(cartRequest.getProductId()).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Optional<Cart> existingCart = cartRepository.findByProduct_ProductIdAndUserEmail(cartRequest.getProductId(),email);
         Cart cart;
         if(existingCart.isPresent()){
             cart = existingCart.get();
 
-            if(cart.getQuantity() < inventory.get().getQuantity() &&
-                    cartRequest.getQuantity() < inventory.get().getQuantity()){
+            if(cart.getQuantity() < inventory.getQuantity() &&
+                    cartRequest.getQuantity() < inventory.getQuantity()){
 
                 cart.setQuantity(cart.getQuantity() + cartRequest.getQuantity());
-                cart.setTotalAmount(cart.getQuantity() * inventory.get().getPrice());
+                cart.setTotalAmount(cart.getQuantity() * inventory.getPrice());
                 cartRepository.save(cart);
             }else{
                 throw new IllegalArgumentException(StringUtil.OUT_OF_STOCK);
@@ -55,15 +55,15 @@ public class CartServiceImpl implements CartService {
         }else{
             cart = new Cart();
 
-            if(cartRequest.getQuantity() > inventory.get().getQuantity()){
+            if(cartRequest.getQuantity() > inventory.getQuantity()){
                 throw new IllegalArgumentException(StringUtil.OUT_OF_STOCK);
             }else{
-                cart.setProduct(product.get());
+                cart.setProduct(product);
                 cart.setQuantity(cartRequest.getQuantity());
-                cart.setStoreId(product.get().getStore().getStoreId());
-                cart.setTotalAmount(inventory.get().getPrice() * cartRequest.getQuantity());
-                cart.setUser(user.get());
-                cart.setInventory(inventory.get());
+                cart.setStoreId(product.getStore().getStoreId());
+                cart.setTotalAmount(inventory.getPrice() * cartRequest.getQuantity());
+                cart.setUser(user);
+                cart.setInventory(inventory);
                 cartRepository.save(cart);
             }
         }
@@ -73,8 +73,8 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartModel addProductWithVariationToCart(CartVariationRequest cartRequest, String email) {
-        Optional<User> user = userRepository.findByEmail(email);
-        Optional<Product> product = productRepository.findById(cartRequest.getProductId());
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Product product = productRepository.findById(cartRequest.getProductId()).orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
         Optional<Inventory> inventory = inventoryRepository.findByColorsAndSizesAndProduct_ProductId(cartRequest.getColors(),cartRequest.getSizes(), cartRequest.getProductId());
         Optional<Cart> existingCart = cartRepository.findByColorsAndSizesAndProduct_ProductIdAndUserEmail(cartRequest.getColors(), cartRequest.getSizes(),cartRequest.getProductId(),email);
         Cart cart;
@@ -96,13 +96,13 @@ public class CartServiceImpl implements CartService {
             if(cartRequest.getQuantity() > inventory.get().getQuantity()){
                 throw new IllegalArgumentException(StringUtil.OUT_OF_STOCK);
             }else{
-                cart.setProduct(product.get());
+                cart.setProduct(product);
                 cart.setQuantity(cartRequest.getQuantity());
-                cart.setStoreId(product.get().getStore().getStoreId());
+                cart.setStoreId(product.getStore().getStoreId());
                 cart.setTotalAmount(inventory.get().getPrice() * cartRequest.getQuantity());
                 cart.setColors(cartRequest.getColors());
                 cart.setSizes(cartRequest.getSizes());
-                cart.setUser(user.get());
+                cart.setUser(user);
                 cart.setInventory(inventory.get());
                 cartRepository.save(cart);
             }
@@ -139,9 +139,9 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public void filterCartProducts(String cartId, String email) {
-        userRepository.findByEmail(email);
-        Optional<Cart> existingCart = cartRepository.findByCartIdAndUserEmail(cartId,email);
+    public void filterCartProducts(String cartId) {
+
+        Optional<Cart> existingCart = cartRepository.findById(cartId);
 
         if(existingCart.isPresent()) {
             Cart cart = existingCart.get();
@@ -152,7 +152,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void filterAllCartProducts(String email) {
-        userRepository.findByEmail(email);
+
         List<Cart> existingCart = cartRepository.findAllByUserEmail(email);
 
         boolean allFilteredCarts = existingCart.stream().allMatch(Cart::isFilter);
@@ -166,7 +166,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void filterCartByStoreName(String storeId, String email) {
-        userRepository.findByEmail(email);
+
         List<Cart> existingCart = cartRepository.findAllByStoreIdAndUserEmail(storeId, email);
 
         boolean allFilteredCarts = existingCart.stream().allMatch(Cart::isFilter);
@@ -180,7 +180,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public List<CartModel> checkout(String email) {
-        userRepository.findByEmail(email);
+
         return cartRepository.findAllByFilterTrueAndUserEmailOrderByCreatedDateDesc(email)
                 .stream()
                 .map(cart -> {
@@ -207,7 +207,6 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartTotalModel getCartTotal(String email, boolean filter) {
-        User user = userRepository.findByEmail(email).get();
         List<Cart> carts = cartRepository.findAllByFilterAndUserEmail(true,email);
         List<Cart> cartCount = cartRepository.findAllByUserEmail(email);
 
@@ -263,7 +262,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void increaseQuantity(QuantityRequest quantityRequest, String email) {
-        userRepository.findByEmail(email);
+
         Optional<Cart> existingCart = cartRepository.findByCartIdAndUserEmail(quantityRequest.getCartId(), email);
         Optional<Inventory> inventory = inventoryRepository.findById(quantityRequest.getInventoryId());
 
@@ -279,7 +278,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void decreaseQuantity(QuantityRequest quantityRequest, String email) {
-        userRepository.findByEmail(email);
+
         Optional<Cart> existingCart = cartRepository.findByCartIdAndUserEmail(quantityRequest.getCartId(), email);
         Optional<Inventory> inventory = inventoryRepository.findById(quantityRequest.getInventoryId());
 
@@ -296,14 +295,12 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public void delete(String cartId, String email) {
-        userRepository.findByEmail(email);
+    public void delete(String cartId) {
         cartRepository.deleteById(cartId);
     }
 
     @Override
     public void deleteAllCarts(String email) {
-        userRepository.findByEmail(email);
         cartRepository.deleteAllByFilterTrueAndUserEmail(email);
     }
 }
