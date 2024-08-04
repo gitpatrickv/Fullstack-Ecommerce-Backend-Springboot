@@ -32,42 +32,50 @@ public class FavoritesServiceImpl implements FavoritesService {
     private final FavoritesMapper favoritesMapper;
     @Override
     public void addToFavorites(String email, String productId) {
-        Optional<User> user = userRepository.findByEmail(email);
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId));
-        Optional<Favorites> favorite = favoritesRepository.findByProduct_ProductIdAndUserEmail(productId, user.get().getEmail());
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        Optional<Product> optionalProduct = productRepository.findByProductIdAndListedTrueAndSuspendedFalseAndDeletedFalse(productId);
+
+        Optional<Favorites> favorite = favoritesRepository.findByProduct_ProductIdAndUserEmail(productId, user.getEmail());
         Favorites favorites;
         if(favorite.isPresent() && favorite.get().isFavorites()){
             favorites = favorite.get();
             favorites.setFavorites(false);
             favoritesRepository.delete(favorites);
         }else {
-            favorites = new Favorites();
-            favorites.setFavorites(true);
-            favorites.setProduct(product);
-            favorites.setUser(user.get());
-            favoritesRepository.save(favorites);
+            if(optionalProduct.isPresent()) {
+                Product product = optionalProduct.get();
+                favorites = new Favorites();
+                favorites.setFavorites(true);
+                favorites.setProduct(product);
+                favorites.setUser(user);
+                favoritesRepository.save(favorites);
+            } else {
+                throw new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId);
+            }
         }
     }
 
     @Override
     public void addToFavoritesByFilter(String email) {
-        User user = userRepository.findByEmail(email).get();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         List<Cart> carts = cartRepository.findAllByFilterAndUserEmail(true,email);
 
         for(Cart cart : carts){
             Optional<Favorites> favorite = favoritesRepository.findByProduct_ProductIdAndUserEmail(cart.getProduct().getProductId(), user.getEmail());
-            Product product = productRepository.findById(cart.getProduct().getProductId())
-                    .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + cart.getProduct().getProductId()));
+            Optional<Product> optionalProduct = productRepository.findByProductIdAndListedTrueAndSuspendedFalseAndDeletedFalse(cart.getProduct().getProductId());
+
             if(favorite.isPresent() && favorite.get().isFavorites()){
                 cartRepository.delete(cart);
             }else {
-                Favorites favorites = new Favorites();
-                favorites.setFavorites(true);
-                favorites.setProduct(product);
-                favorites.setUser(user);
-                favoritesRepository.save(favorites);
-                cartRepository.delete(cart);
+                if(optionalProduct.isPresent()) {
+                    Product product = optionalProduct.get();
+                    Favorites favorites = new Favorites();
+                    favorites.setFavorites(true);
+                    favorites.setProduct(product);
+                    favorites.setUser(user);
+                    favoritesRepository.save(favorites);
+                    cartRepository.delete(cart);
+                }
             }
         }
 
@@ -79,23 +87,26 @@ public class FavoritesServiceImpl implements FavoritesService {
         List<AllProductModel> model = new ArrayList<>();
 
         for(Favorites favorite : favorites){
-            Optional<Product> product = productRepository.findById(favorite.getProduct().getProductId());
+            Optional<Product> optionalProduct = productRepository.findByProductIdAndListedTrueAndSuspendedFalseAndDeletedFalse(favorite.getProduct().getProductId());
 
-            AllProductModel favoritesModel = new AllProductModel();
-            favoritesModel.setProductName(product.get().getProductName());
-            favoritesModel.setPrice(product.get().getInventory().iterator().next().getPrice());
-            favoritesModel.setPhotoUrl(product.get().getImage().get(0).getPhotoUrl());
-            favoritesModel.setProductId(product.get().getProductId());
-            favoritesModel.setProductSold(product.get().getProductSold());
+            if(optionalProduct.isPresent()) {
+                Product product = optionalProduct.get();
+                AllProductModel favoritesModel = new AllProductModel();
+                favoritesModel.setProductName(product.getProductName());
+                favoritesModel.setPrice(product.getInventory().iterator().next().getPrice());
+                favoritesModel.setPhotoUrl(product.getImage().get(0).getPhotoUrl());
+                favoritesModel.setProductId(product.getProductId());
+                favoritesModel.setProductSold(product.getProductSold());
 
-            model.add(favoritesModel);
+                model.add(favoritesModel);
+            }
         }
         return model;
     }
 
     @Override
     public FavoritesModel getFavoriteStatus(String email, String productId) {
-        userRepository.findByEmail(email).get();
+
         Optional<Favorites> favorites = favoritesRepository.findByProduct_ProductIdAndUserEmail(productId,email);
 
         return favorites.map(favoritesMapper::mapEntityToModel).orElse(null);

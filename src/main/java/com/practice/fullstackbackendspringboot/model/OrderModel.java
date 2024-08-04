@@ -27,5 +27,8 @@ public class OrderModel {
     private List<OrderItemModel> orderItemModels;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdDate;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    private LocalDateTime lastModified;
+    private String shopName;
 
 }

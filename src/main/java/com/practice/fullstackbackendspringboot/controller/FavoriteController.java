@@ -20,28 +20,28 @@ public class FavoriteController {
 
     @PutMapping("/add/{productId}")
     @ResponseStatus(HttpStatus.OK)
-    public void addToFavorites(@RequestHeader("Authorization") String email, @PathVariable (value="productId") String productId){
-        String user = userService.getUserFromToken(email);
+    public void addToFavorites(@PathVariable (value="productId") String productId){
+        String user = userService.getAuthenticatedUser();
         favoritesService.addToFavorites(user,productId);
     }
 
     @PutMapping("/cart/add")
     @ResponseStatus(HttpStatus.OK)
-    public void addToFavoritesByFilter(@RequestHeader("Authorization") String email){
-        String user = userService.getUserFromToken(email);
+    public void addToFavoritesByFilter(){
+        String user = userService.getAuthenticatedUser();
         favoritesService.addToFavoritesByFilter(user);
     }
     @GetMapping("/get")
     @ResponseStatus(HttpStatus.OK)
-    public List<AllProductModel> getAllFavorites(@RequestHeader("Authorization") String email) {
-        String user = userService.getUserFromToken(email);
+    public List<AllProductModel> getAllFavorites() {
+        String user = userService.getAuthenticatedUser();
         return favoritesService.getAllFavorites(user);
     }
 
     @GetMapping("/get/status/{productId}")
     @ResponseStatus(HttpStatus.OK)
-    public FavoritesModel getFavoriteStatus(@RequestHeader("Authorization") String email, @PathVariable (value="productId") String productId){
-        String user = userService.getUserFromToken(email);
+    public FavoritesModel getFavoriteStatus(@PathVariable (value="productId") String productId){
+        String user = userService.getAuthenticatedUser();
         return favoritesService.getFavoriteStatus(user,productId);
     }
 }

@@ -24,18 +24,15 @@ public class ProductController {
     @PostMapping(value = {"/save"},  consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @ResponseStatus(HttpStatus.OK)
     public void saveProduct(@RequestPart("product") SaveProductModel model,
-                                        @RequestPart("file") MultipartFile[] files,
-                                        @RequestHeader("Authorization") String email){
-        String user = userService.getUserFromToken(email);
+                                        @RequestPart("file") MultipartFile[] files){
+        String user = userService.getAuthenticatedUser();
         productService.saveProduct(model,user,files);
     }
 
     @PutMapping("/update")
     @ResponseStatus(HttpStatus.OK)
-    public void updateProduct(@RequestBody @Valid UpdateProductRequest request,
-                                     @RequestHeader("Authorization") String email){
-        String user = userService.getUserFromToken(email);
-        productService.updateProduct(request,user);
+    public void updateProduct(@RequestBody @Valid UpdateProductRequest request){
+        productService.updateProduct(request);
     }
 
     @GetMapping
@@ -55,11 +52,10 @@ public class ProductController {
 
     @GetMapping("/store")
     @ResponseStatus(HttpStatus.OK)
-    public SellersProductsPageResponse getAllSellersProducts(@RequestHeader("Authorization") String email,
-                                                             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+    public SellersProductsPageResponse getAllSellersProducts(@RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
                                                              @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize,
                                                              @RequestParam(defaultValue = "productSold", required = false) String sortBy){
-        String user = userService.getUserFromToken(email);
+        String user = userService.getAuthenticatedUser();
         return productService.getAllSellersProducts(user,pageNo,pageSize, sortBy);
     }
     @GetMapping("/category/{categoryId}")
@@ -85,29 +81,25 @@ public class ProductController {
         return productService.searchProduct(search, pageNo, pageSize, sortBy);
     }
     @DeleteMapping("/delete/{productId}")
-    public void delete(@PathVariable (value="productId", required = false) String productId, @RequestHeader("Authorization") String email){
-        String user = userService.getUserFromToken(email);
-        productService.delete(productId, user);
+    public void delete(@PathVariable (value="productId", required = false) String productId){
+        productService.delete(productId);
     }
     @GetMapping("/count")
-    public ProductCount getProductCount(@RequestHeader("Authorization") String email) {
-        String user = userService.getUserFromToken(email);
-        return productService.getProductCount(user);
+    public ProductCount getProductCount() {
+        return productService.getProductCount();
     }
     @PutMapping("/suspend/{productId}")
-    public void suspendProduct(@PathVariable String productId, @RequestHeader("Authorization") String email) {
-        String user = userService.getUserFromToken(email);
+    public void suspendProduct(@PathVariable String productId) {
+        String user = userService.getAuthenticatedUser();
         productService.suspendProduct(productId,user);
     }
     @GetMapping("/count/{storeId}")
-    public SuspendedProductCount getSuspendedProductCount(@PathVariable String storeId, @RequestHeader("Authorization") String email){
-        String user = userService.getUserFromToken(email);
-        return productService.getSuspendedProductCount(storeId, user);
+    public SuspendedProductCount getSuspendedProductCount(@PathVariable String storeId){
+        return productService.getSuspendedProductCount(storeId);
     }
     @PutMapping("/delist/{productId}")
-    public void delistProduct(@PathVariable String productId, @RequestHeader("Authorization") String email) {
-        String user = userService.getUserFromToken(email);
-        productService.delistProduct(productId,user);
+    public void delistProduct(@PathVariable String productId) {
+        productService.delistProduct(productId);
 
     }
 

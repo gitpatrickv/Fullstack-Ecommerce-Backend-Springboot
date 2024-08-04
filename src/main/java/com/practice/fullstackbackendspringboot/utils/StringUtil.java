@@ -12,7 +12,7 @@ public class StringUtil {
     public static final String OUT_OF_STOCK = "PRODUCT IS OUT OF STOCK!";
     public static final String WRONG_PASSWORD = "WRONG PASSWORD!";
     public static final String PASSWORD_NOT_MATCH = "PASSWORD DOES NOT MATCH!";
-    public static final String CASH_ON_DELIVERY = "CASH ON DELIVERY";
+    public static final String CASH_ON_DELIVERY = "Cash on Delivery";
     public static final String ADMIN_CREATED = "ADMIN USER CREATED SUCCESSFULLY!";
     public static final String ADMIN_ALREADY_EXISTS = "ADMIN USER ALREADY EXISTS!";
     public static final String PENDING = "PENDING";
@@ -30,7 +30,7 @@ public class StringUtil {
     public static final String ORDER_CONFIRMATION = "Order Confirmation";
     public static final String SHIPPING_ORDER = "Seller is preparing to ship your order(s)";
     public static final String OUT_FOR_DELIVERY ="Parcel is out for delivery";
-    public static final String PRODUCT_NOT_FOUND = "PRODUCT NOT FOUND: ";
+    public static final String PRODUCT_NOT_FOUND = "PRODUCT NOT FOUND ";
     public static final String PRODUCT_ALREADY_EXISTS = "PRODUCT ALREADY EXISTS!";
     public static final String CATEGORY_NOT_FOUND = "CATEGORY NOT FOUND";
     public static final String STORE_NOT_FOUND = "STORE NOT FOUND: ";
@@ -49,7 +49,18 @@ public class StringUtil {
     public static final String Role = "role";
     public static final String User = "user";
     public static final String Seller = "seller";
+    public static final String Admin = "admin";
     public static final String Online = "online";
     public static final String Frozen ="frozen";
     public static final String ACCESS_DENIED = "Access denied: You do not have sufficient permissions to perform this action";
+    public static final String LAST_MODIFIED = "lastModified";
+    public static final String StripePayment = "Stripe Payment";
+    public static final String Stripe = "stripe";
+    public static final String Cash = "cash_on_delivery";
+    public static final String Shopee= "Shopee";
+    public static final String Php = "php";
+    public static final String SuccessUrl = "http://localhost:5173/user/purchase/order/to-ship";
+    public static final String CancelUrl = "http://localhost:5173/checkout";
+    public static final String StoreNameExists = "Store name already exists: ";
+
 }

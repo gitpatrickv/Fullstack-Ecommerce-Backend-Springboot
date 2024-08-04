@@ -9,17 +9,17 @@ import org.springframework.web.multipart.MultipartFile;
 public interface ProductService {
 
     void saveProduct(SaveProductModel model, String email, MultipartFile[] files);
-    void updateProduct(UpdateProductRequest request, String email);
+    void updateProduct(UpdateProductRequest request);
     AllProductsPageResponse getAllProducts(int pageNo, int pageSize);
     StoreResponse getAllStoreProducts(String storeId, int pageNo, int PageSize, String sortBy);
     ProductModel getProductById(String productId);
-    void delete(String productId, String email);
+    void delete(String productId);
     AllProductsPageResponse searchProduct(String search, int pageNo, int pageSize, String sortBy);
     SellersProductsPageResponse getAllSellersProducts(String email, int pageNo, int pageSize, String sortBy);
     AllProductsPageResponse getAllProductsByCategory(String categoryId, int pageNo, int pageSize);
-    ProductCount getProductCount(String email);
+    ProductCount getProductCount();
     void suspendProduct(String productId, String email);
-    void delistProduct(String productId, String email);
-    SuspendedProductCount getSuspendedProductCount(String storeId, String email);
+    void delistProduct(String productId);
+    SuspendedProductCount getSuspendedProductCount(String storeId);
 
 }

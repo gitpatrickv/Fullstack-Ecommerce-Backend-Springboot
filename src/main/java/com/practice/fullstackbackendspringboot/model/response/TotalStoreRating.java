@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderCount {
+public class TotalStoreRating {
 
-    private Double orderCount;
-    private Double totalSales;
-    private Double totalShippingFee;
+    private Double storeTotalRating;
+    private Double storeRatingAvg;
+    private Long productCount;
 }

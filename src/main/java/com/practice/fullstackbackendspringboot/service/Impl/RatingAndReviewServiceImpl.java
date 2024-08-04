@@ -1,6 +1,7 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
 import com.practice.fullstackbackendspringboot.entity.*;
+import com.practice.fullstackbackendspringboot.entity.constants.Role;
 import com.practice.fullstackbackendspringboot.model.RatingAndReviewModel;
 import com.practice.fullstackbackendspringboot.model.request.RateProductRequest;
 import com.practice.fullstackbackendspringboot.model.request.ReplyToReviewRequest;
@@ -9,6 +10,7 @@ import com.practice.fullstackbackendspringboot.model.response.PageResponse;
 import com.practice.fullstackbackendspringboot.model.response.RatingAndReviewResponse;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.RatingAndReviewService;
+import com.practice.fullstackbackendspringboot.service.StoreRatingService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.RatingAndReviewMapper;
 import jakarta.transaction.Transactional;
@@ -17,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -35,6 +38,7 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
     private final RatingAndReviewMapper ratingAndReviewMapper;
     private final OrderItemRepository orderItemRepository;
     private final OrderRepository orderRepository;
+    private final StoreRatingService storeRatingService;
 
     @Override
     public void rateAndReviewProduct(String email, RateProductRequest request) {
@@ -59,20 +63,17 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
                 orderItem.setRated(!orderItem.isRated());
                 orderItemRepository.save(orderItem);
             }
-
-        Boolean isExists = orderItemRepository.existsAllByRatedFalseAndOrder_OrderIdAndUserEmail(request.getOrderId(), email);
-
-        if(!isExists){
-            Order order = orderRepository.findById(request.getOrderId()).get();
-            order.setOrderStatus(StringUtil.RATED);
-            orderRepository.save(order);
-        }
+            storeRatingService.checkStatus(request.getOrderId(), email);
     }
 
     @Override
     public void replyToReview(String email, ReplyToReviewRequest request) {
-        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Optional<RatingAndReview> ratingAndReview = ratingAndReviewRepository.findByReviewIdAndStoreId(request.getReviewId(), request.getStoreId());
+
+        if(!user.getRole().equals(Role.SELLER)) {
+            throw new AccessDeniedException(StringUtil.ACCESS_DENIED);
+        }
 
         if(ratingAndReview.isPresent()){
             RatingAndReview reply = ratingAndReview.get();
@@ -88,19 +89,11 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
         Page<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByRatingAndProduct_ProductId(rating, productId, pageable);
         List<RatingAndReviewModel> ratingAndReviewModelList = new ArrayList<>();
 
-        PageResponse pageResponse = new PageResponse();
-        pageResponse.setPageNo(ratingAndReviews.getNumber());
-        pageResponse.setPageSize(ratingAndReviews.getSize());
-        pageResponse.setTotalElements(ratingAndReviews.getTotalElements());
-        pageResponse.setTotalPages(ratingAndReviews.getTotalPages());
-        pageResponse.setLast(ratingAndReviews.isLast());
+        PageResponse pageResponse = getPagination(ratingAndReviews);
 
         for(RatingAndReview ratingAndReview : ratingAndReviews){
             if(ratingAndReview.getRating().equals(rating)) {
-                RatingAndReviewModel ratingAndReviewModel = ratingAndReviewMapper.mapEntityToModel(ratingAndReview);
-                ratingAndReviewModel.setName(ratingAndReview.getUser().getName());
-                ratingAndReviewModel.setPhotoUrl(ratingAndReview.getUser().getPhotoUrl());
-                ratingAndReviewModel.setCreatedDate(ratingAndReview.getCreatedDate());
+                RatingAndReviewModel ratingAndReviewModel = mapRatingAndReview(ratingAndReview);
                 ratingAndReviewModelList.add(ratingAndReviewModel);
             }
         }
@@ -113,25 +106,17 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
         Page<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByProduct_ProductId(productId, pageable);
         List<RatingAndReviewModel> ratingAndReviewModelList = new ArrayList<>();
 
-        PageResponse pageResponse = new PageResponse();
-        pageResponse.setPageNo(ratingAndReviews.getNumber());
-        pageResponse.setPageSize(ratingAndReviews.getSize());
-        pageResponse.setTotalElements(ratingAndReviews.getTotalElements());
-        pageResponse.setTotalPages(ratingAndReviews.getTotalPages());
-        pageResponse.setLast(ratingAndReviews.isLast());
+        PageResponse pageResponse = getPagination(ratingAndReviews);
 
         for(RatingAndReview ratingAndReview : ratingAndReviews){
-            RatingAndReviewModel ratingAndReviewModel = ratingAndReviewMapper.mapEntityToModel(ratingAndReview);
-            ratingAndReviewModel.setName(ratingAndReview.getUser().getName());
-            ratingAndReviewModel.setPhotoUrl(ratingAndReview.getUser().getPhotoUrl());
-            ratingAndReviewModel.setCreatedDate(ratingAndReview.getCreatedDate());
+            RatingAndReviewModel ratingAndReviewModel = mapRatingAndReview(ratingAndReview);
             ratingAndReviewModelList.add(ratingAndReviewModel);
         }
         return new RatingAndReviewResponse(ratingAndReviewModelList, pageResponse);
     }
 
     @Override
-    public RatingAndReviewResponse manageAllProductReview(String email, String storeId, int pageNo, int pageSize, String sortBy) {
+    public RatingAndReviewResponse manageAllProductReview(String storeId, int pageNo, int pageSize, String sortBy) {
 
         Sort sort = Sort.by(StringUtil.Created_Date).descending();
 
@@ -141,27 +126,17 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
             sort = Sort.by(StringUtil.Replied).descending();
         }
 
-        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
         Page<RatingAndReview> ratingAndReviews = ratingAndReviewRepository.findAllByStoreId(storeId, pageable);
         List<RatingAndReviewModel> ratingAndReviewModelList = new ArrayList<>();
 
-        PageResponse pageResponse = new PageResponse();
-        pageResponse.setPageNo(ratingAndReviews.getNumber());
-        pageResponse.setPageSize(ratingAndReviews.getSize());
-        pageResponse.setTotalElements(ratingAndReviews.getTotalElements());
-        pageResponse.setTotalPages(ratingAndReviews.getTotalPages());
-        pageResponse.setLast(ratingAndReviews.isLast());
+        PageResponse pageResponse = getPagination(ratingAndReviews);
 
         for(RatingAndReview ratingAndReview : ratingAndReviews){
-            RatingAndReviewModel ratingAndReviewModel = ratingAndReviewMapper.mapEntityToModel(ratingAndReview);
-            ratingAndReviewModel.setName(ratingAndReview.getUser().getName());
-            ratingAndReviewModel.setPhotoUrl(ratingAndReview.getUser().getPhotoUrl());
-            ratingAndReviewModel.setCreatedDate(ratingAndReview.getCreatedDate());
+            RatingAndReviewModel ratingAndReviewModel = mapRatingAndReview(ratingAndReview);
             ratingAndReviewModel.setProductName(ratingAndReview.getProduct().getProductName());
             ratingAndReviewModel.setProductPhotoUrl(ratingAndReview.getProduct().getImage().get(0).getPhotoUrl());
             ratingAndReviewModelList.add(ratingAndReviewModel);
-
         }
         return new RatingAndReviewResponse(ratingAndReviewModelList, pageResponse);
 
@@ -224,5 +199,23 @@ public class RatingAndReviewServiceImpl implements RatingAndReviewService {
         numberOfUserRatingResponse.setTotal1StarUserRating(total1StarRating);
 
         return numberOfUserRatingResponse;
+    }
+
+    private PageResponse getPagination(Page<RatingAndReview> ratingAndReviews){
+        PageResponse pageResponse = new PageResponse();
+        pageResponse.setPageNo(ratingAndReviews.getNumber());
+        pageResponse.setPageSize(ratingAndReviews.getSize());
+        pageResponse.setTotalElements(ratingAndReviews.getTotalElements());
+        pageResponse.setTotalPages(ratingAndReviews.getTotalPages());
+        pageResponse.setLast(ratingAndReviews.isLast());
+        return pageResponse;
+    }
+
+    private RatingAndReviewModel mapRatingAndReview(RatingAndReview ratingAndReview){
+        RatingAndReviewModel ratingAndReviewModel = ratingAndReviewMapper.mapEntityToModel(ratingAndReview);
+        ratingAndReviewModel.setName(ratingAndReview.getUser().getName());
+        ratingAndReviewModel.setPhotoUrl(ratingAndReview.getUser().getPhotoUrl());
+        ratingAndReviewModel.setCreatedDate(ratingAndReview.getCreatedDate());
+        return ratingAndReviewModel;
     }
 }

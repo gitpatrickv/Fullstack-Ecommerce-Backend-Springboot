@@ -3,17 +3,19 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
 import com.practice.fullstackbackendspringboot.model.OrderModel;
-import com.practice.fullstackbackendspringboot.model.response.AllOrdersResponse;
-import com.practice.fullstackbackendspringboot.model.response.OrderCount;
-import com.practice.fullstackbackendspringboot.model.response.TodoListTotal;
-import com.practice.fullstackbackendspringboot.model.response.TotalSales;
+import com.practice.fullstackbackendspringboot.model.response.*;
 import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.OrderService;
+import com.practice.fullstackbackendspringboot.service.PaymentService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.OrderItemMapper;
 import com.practice.fullstackbackendspringboot.utils.mapper.OrderMapper;
+import com.stripe.exception.StripeException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -34,15 +36,18 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
+    private final PaymentService paymentService;
 
     @Override
-    public void placeOrder(String email) {
+    public PaymentResponse placeOrder(String email, String paymentMethod) throws StripeException {      //CUSTOMER
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         List<Cart> cart = cartRepository.findAllByFilterTrueAndUserEmail(email);
 
         Map<String, List<Cart>> cartsByStore = cart.stream()
                 .collect(Collectors.groupingBy(Cart::getStoreId));
+
+        double totalAmount = 0.0;
 
         for (Map.Entry<String, List<Cart>> cartMap : cartsByStore.entrySet()) {
             List<Cart> storeCarts = cartMap.getValue();
@@ -57,70 +62,124 @@ public class OrderServiceImpl implements OrderService {
             order.setFullName(user.getName());
             order.setContactNumber(user.getContactNumber());
             order.setActive(true);
-            order.setOrderStatus(StringUtil.PENDING);
-            order.setOrderStatusInfo(StringUtil.ORDER_CONFIRMATION);
-            order.setPaymentMethod(StringUtil.CASH_ON_DELIVERY);
+            if(paymentMethod.equals(StringUtil.Stripe)){
+                order.setPaymentMethod(StringUtil.StripePayment);
+                order.setOrderStatus(StringUtil.TO_SHIP);
+                order.setOrderStatusInfo(StringUtil.SHIPPING_ORDER);
+
+                Store store1 = store.get();
+                store1.setOrderCount(store1.getOrderCount() + 1L);
+                storeRepository.save(store1);
+
+            } else if(paymentMethod.equals(StringUtil.Cash)){
+                order.setPaymentMethod(StringUtil.CASH_ON_DELIVERY);
+                order.setOrderStatus(StringUtil.PENDING);
+                order.setOrderStatusInfo(StringUtil.ORDER_CONFIRMATION);
+            }
             order = orderRepository.save(order);
             Double storeTotalAmount = 0.0;
 
             List<OrderItem> orderItems = new ArrayList<>();
 
             for (Cart carts : storeCarts) {
-                Optional<Product> product = productRepository.findById(carts.getProduct().getProductId());
+                Optional<Product> optionalProduct = productRepository.findByProductIdAndListedTrueAndSuspendedFalseAndDeletedFalse(carts.getProduct().getProductId());
                 Optional<Inventory> inventory = inventoryRepository.findById(carts.getInventory().getInventoryId());
-                OrderItem orderItem = new OrderItem();
 
-                orderItem.setQuantity(carts.getQuantity());
-                orderItem.setTotalAmount(carts.getTotalAmount());
-                orderItem.setPrice(inventory.get().getPrice());
-                orderItem.setStoreName(product.get().getStore().getStoreName());
-                orderItem.setProductName(product.get().getProductName());
-                orderItem.setPhotoUrl(product.get().getImage().get(0).getPhotoUrl());
-                orderItem.setUser(user);
-                orderItem.setColors(carts.getColors());
-                orderItem.setSizes(carts.getSizes());
-                orderItem.setOrder(order);
-                orderItem.setProduct(product.get());
-                orderItem.setInventory(inventory.get());
-                storeTotalAmount += orderItem.getTotalAmount();
-                OrderItem savedOrderItems = orderItemRepository.save(orderItem);
-                orderItems.add(savedOrderItems);
+                if(optionalProduct.isPresent()) {
+                    Product product = optionalProduct.get();
 
-                if (carts.getQuantity() > inventory.get().getQuantity()) {
-                    throw new IllegalArgumentException(StringUtil.OUT_OF_STOCK);
-                } else {
-                    Inventory inv = inventory.get();
-                    inv.setQuantity(inv.getQuantity() - carts.getQuantity());
-                    inventoryRepository.save(inv);
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setQuantity(carts.getQuantity());
+                    orderItem.setTotalAmount(carts.getTotalAmount());
+                    orderItem.setPrice(inventory.get().getPrice());
+                    orderItem.setStoreName(product.getStore().getStoreName());
+                    orderItem.setProductName(product.getProductName());
+                    orderItem.setPhotoUrl(product.getImage().get(0).getPhotoUrl());
+                    orderItem.setUser(user);
+                    orderItem.setColors(carts.getColors());
+                    orderItem.setSizes(carts.getSizes());
+                    orderItem.setOrder(order);
+                    orderItem.setProduct(product);
+                    orderItem.setInventory(inventory.get());
+                    storeTotalAmount += orderItem.getTotalAmount();
+                    OrderItem savedOrderItems = orderItemRepository.save(orderItem);
+                    orderItems.add(savedOrderItems);
+
+                    if (carts.getQuantity() > inventory.get().getQuantity()) {
+                        throw new IllegalArgumentException(StringUtil.OUT_OF_STOCK);
+                    } else {
+                        Inventory inv = inventory.get();
+                        inv.setQuantity(inv.getQuantity() - carts.getQuantity());
+                        inventoryRepository.save(inv);
+                    }
+
+                    product.setProductSold(product.getProductSold() + carts.getQuantity());
+                    productRepository.save(product);
+
                 }
-                Product product1 = product.get();
-                product1.setProductSold(product1.getProductSold() + carts.getQuantity());
-                productRepository.save(product1);
             }
 
             order.setOrderTotalAmount(storeTotalAmount + store.get().getShippingFee());
+            totalAmount += order.getOrderTotalAmount();
             order.setOrderItems(orderItems);
             orderRepository.save(order);
         }
         cartRepository.deleteAllByFilterTrueAndUserEmail(email);
+
+        return paymentService.paymentLink(totalAmount, paymentMethod);
     }
 
     @Override
-    public void cancelOrder(String email, String orderId) {
+    public void buyAgain(String email, String orderId) {        //CUSTOMER
         Optional<User> user = userRepository.findByEmail(email);
-        Optional<Order> order = orderRepository.findById(orderId);
-        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmailAndOrder_OrderId(email, orderId);
+        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmailAndOrder_OrderId(email,orderId);
+        Long quantity = 1L;
 
-        if(user.isPresent()){
+        for(OrderItem orderItem : orderItems){
+            Optional<Cart> existingCart = cartRepository.findByProduct_ProductIdAndInventory_InventoryIdAndUserEmail(
+                    orderItem.getProduct().getProductId(),
+                    orderItem.getInventory().getInventoryId(), email);
+
+            Cart cart;
+
+            if(existingCart.isPresent()){
+                cart = existingCart.get();
+                cartRepository.save(cart);
+            } else {
+                Optional<Product> optionalProduct = productRepository.findByProductIdAndListedTrueAndSuspendedFalseAndDeletedFalse(orderItem.getProduct().getProductId());
+                if(optionalProduct.isPresent()){
+                    Product product = optionalProduct.get();
+                    cart = new Cart();
+                    cart.setQuantity(quantity);
+                    cart.setStoreId(orderItem.getOrder().getStore().getStoreId());
+                    cart.setTotalAmount(orderItem.getPrice() * quantity);
+                    cart.setProduct(product);
+                    cart.setOrderItems(orderItems);
+                    cart.setSizes(orderItem.getSizes());
+                    cart.setColors(orderItem.getColors());
+                    cart.setInventory(orderItem.getInventory());
+                    cart.setUser(user.get());
+                    cartRepository.save(cart);
+                } else {
+                    throw new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void cancelOrder(String orderId) {     //CUSTOMER
+        Optional<Order> order = orderRepository.findById(orderId);
+        List<OrderItem> orderItems = orderItemRepository.findAllByOrder_OrderId(orderId);
+
             if(order.isPresent()){
                 Order orders = order.get();
                 orders.setOrderStatus(StringUtil.ORDER_CANCELLED);
                 orders.setOrderStatusInfo(StringUtil.ORDER_IS_CANCELLED);
                 orderRepository.save(orders);
             }else{
-                throw new IllegalArgumentException(StringUtil.ORDER_NOT_FOUND);
+                throw new NoSuchElementException(StringUtil.ORDER_NOT_FOUND);
             }
-        }
 
         for(OrderItem orderItem: orderItems){
             Optional<Inventory> inventory = inventoryRepository.findById(orderItem.getInventory().getInventoryId());
@@ -129,7 +188,7 @@ public class OrderServiceImpl implements OrderService {
                 inv.setQuantity(inv.getQuantity() + orderItem.getQuantity());
                 inventoryRepository.save(inv);
             }else{
-                throw new IllegalArgumentException(StringUtil.PRODUCT_NOT_FOUND);
+                throw new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND);
             }
 
             Optional<Product> product = productRepository.findById(orderItem.getProduct().getProductId());
@@ -142,57 +201,64 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void confirmCancelOrder(String email, String orderId) {
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
-        Optional<Order> order = orderRepository.findById(orderId);
+    public List<OrderItemModel> getCustomerOrdersByStatus(String email, String status1) {       //CUSTOMER
+        Sort sort = Sort.by(Sort.Direction.DESC, StringUtil.Created_Date);
+        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email, sort);
 
-        if(order.isPresent()){
-            Order orders = order.get();
-            orders.setActive(false);
-            orderRepository.save(orders);
-        }
-    }
-
-    @Override
-    public void buyAgain(String email, String orderId) {
-        Optional<User> user = userRepository.findByEmail(email);
-        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmailAndOrder_OrderId(email,orderId);
-        Long quantity = 1L;
+        List<OrderItemModel> orderModels = new ArrayList<>();
 
         for(OrderItem orderItem : orderItems){
-            Optional<Cart> existingCart = cartRepository.findByProduct_ProductIdAndInventory_InventoryIdAndUserEmail(
-                            orderItem.getProduct().getProductId(),
-                            orderItem.getInventory().getInventoryId(), email);
+            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
+            Product product = productRepository.findById(orderItem.getProduct().getProductId()).get();
 
-            Cart cart;
-
-            if(existingCart.isPresent()){
-                cart = existingCart.get();
-                cartRepository.save(cart);
-            } else {
-                Optional<Product> product = productRepository.findById(orderItem.getProduct().getProductId());
-
-                if(!product.get().isDeleted()) {
-                    cart = new Cart();
-                    cart.setQuantity(quantity);
-                    cart.setStoreId(orderItem.getOrder().getStore().getStoreId());
-                    cart.setTotalAmount(orderItem.getPrice() * quantity);
-                    cart.setProduct(product.get());
-                    cart.setOrderItems(orderItems);
-                    cart.setSizes(orderItem.getSizes());
-                    cart.setColors(orderItem.getColors());
-                    cart.setInventory(orderItem.getInventory());
-                    cart.setUser(user.get());
-                    cartRepository.save(cart);
-                }
+            if(order.isActive() && order.getOrderStatus().equals(status1)
+                    || !order.isActive() && order.getOrderStatus().equals(status1)
+                    || status1.isEmpty()) {
+                orderModels.add(this.mapOrderItems(order,orderItem,product));
             }
         }
+        return orderModels;
+    }
+
+
+    @Override
+    public List<OrderItemModel> getCustomerOrdersByCompletedAndRatedStatus(String email) {      //CUSTOMER
+        Sort sort = Sort.by(Sort.Direction.DESC, StringUtil.Created_Date);
+        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email, sort);
+
+        List<OrderItemModel> orderModels = new ArrayList<>();
+
+        for(OrderItem orderItem : orderItems){
+            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
+            Product product = productRepository.findById(orderItem.getProduct().getProductId()).get();
+
+            if(order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED) || order.getOrderStatus().equals(StringUtil.RATED)) {
+                orderModels.add(this.mapOrderItems(order,orderItem,product));
+            }
+        }
+        return orderModels;
     }
 
     @Override
-    public void processOrder(String email, String orderId) {
-        userRepository.findByEmail(email);
+    public Set<OrderItemModel> getCustomerOrdersByOrderIdToRate(String orderId) {     //CUSTOMER
+        Set<OrderItem> orderItems = orderItemRepository.findAllByRatedFalseAndOrder_OrderId(orderId);
+        Set<OrderItemModel> orderItemModels = new HashSet<>();
+        Set<String> productIds = new HashSet<>();
+
+        for(OrderItem orderItem : orderItems){
+            String productId = orderItem.getProduct().getProductId();
+
+            if(!productIds.contains(productId)) {
+                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+                orderItemModels.add(orderItemModel);
+                productIds.add(productId);
+            }
+        }
+        return orderItemModels;
+    }
+
+    @Override
+    public void processOrder(String orderId) {        //SELLER
         Optional<Order> order = orderRepository.findById(orderId);
 
         if(order.isPresent()) {
@@ -226,60 +292,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderItemModel> getCustomerOrdersByStatus(String email, String status1) {
-        Sort sort = Sort.by(Sort.Direction.DESC, StringUtil.Created_Date);
-        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email, sort);
-
-        List<OrderItemModel> orderModels = new ArrayList<>();
-
-        for(OrderItem orderItem : orderItems){
-            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
-            Product product = productRepository.findById(orderItem.getProduct().getProductId()).get();
-
-            if(order.isActive() && order.getOrderStatus().equals(status1)
-                    || !order.isActive() && order.getOrderStatus().equals(status1)
-                    || status1.isEmpty()) {
-                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
-                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
-                orderItemModel.setOrderStatus(order.getOrderStatus());
-                orderItemModel.setOrderStatusInfo(order.getOrderStatusInfo());
-                orderItemModel.setActive(order.isActive());
-                orderItemModel.setStoreId(order.getStore().getStoreId());
-                orderItemModel.setProductId(product.getProductId());
-                orderModels.add(orderItemModel);
-            }
+    public void confirmCancelOrder(String orderId) {      //SELLER
+        Optional<Order> order = orderRepository.findById(orderId);
+        if(order.isPresent()){
+            Order orders = order.get();
+            orders.setActive(false);
+            orderRepository.save(orders);
         }
-        return orderModels;
     }
 
     @Override
-    public List<OrderItemModel> getCustomerOrdersByCompletedAndRatedStatus(String email) {
-        Sort sort = Sort.by(Sort.Direction.DESC, StringUtil.Created_Date);
-        List<OrderItem> orderItems = orderItemRepository.findAllByUserEmail(email, sort);
+    public AllOrdersResponse getStoreOrdersByStatus(String storeId, String status1) {     //SELLER
 
-        List<OrderItemModel> orderModels = new ArrayList<>();
-
-        for(OrderItem orderItem : orderItems){
-            Order order = orderRepository.findById(orderItem.getOrder().getOrderId()).get();
-            Product product = productRepository.findById(orderItem.getProduct().getProductId()).get();
-
-            if(order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED) || order.getOrderStatus().equals(StringUtil.RATED)) {
-                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
-                orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
-                orderItemModel.setOrderStatus(order.getOrderStatus());
-                orderItemModel.setOrderStatusInfo(order.getOrderStatusInfo());
-                orderItemModel.setActive(order.isActive());
-                orderItemModel.setStoreId(order.getStore().getStoreId());
-                orderItemModel.setProductId(product.getProductId());
-                orderModels.add(orderItemModel);
-            }
-        }
-        return orderModels;
-    }
-
-    @Override
-    public AllOrdersResponse getStoreOrdersByStatus(String email, String storeId, String status1) {
-        userRepository.findByEmail(email);
         List<Order> orders = orderRepository.findAllByStore_StoreId(storeId);
         List<OrderModel> orderModels = new ArrayList<>();
 
@@ -292,31 +316,8 @@ public class OrderServiceImpl implements OrderService {
                 if (order.isActive() && order.getOrderStatus().equals(status1)
                         || !order.isActive() && order.getOrderStatus().equals(status1)
                         || status1.isEmpty()) {
-                    OrderModel orderModel = new OrderModel();
-                    orderModel.setOrderId(order.getOrderId());
-                    orderModel.setOrderTotalAmount(order.getOrderTotalAmount());
-                    orderModel.setPaymentMethod(order.getPaymentMethod());
-                    orderModel.setActive(order.isActive());
-                    orderModel.setOrderStatus(order.getOrderStatus());
-                    orderModel.setOrderStatusInfo(order.getOrderStatusInfo());
-                    orderModel.setDeliveryAddress(order.getDeliveryAddress());
-                    orderModel.setFullName(order.getFullName());
-                    orderModel.setContactNumber(order.getContactNumber());
-                    orderModel.setCreatedDate(order.getCreatedDate());
 
-                    List<OrderItemModel> orderItemModels = new ArrayList<>();
-                    List<OrderItem> orderItems = order.getOrderItems();
-
-                    for (OrderItem orderItem : orderItems) {
-                        OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
-                        orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
-                        orderItemModel.setOrderStatus(order.getOrderStatus());
-                        orderItemModel.setActive(order.isActive());
-                        orderItemModel.setStoreId(order.getStore().getStoreId());
-                        orderItemModel.setFullName(order.getFullName());
-                        orderItemModels.add(orderItemModel);
-                    }
-                    orderModel.setOrderItemModels(orderItemModels);
+                    OrderModel orderModel = this.mapOrders(order);
                     orderModels.sort(Comparator.comparing(OrderModel::getCreatedDate).reversed());
                     orderModels.add(orderModel);
                 }
@@ -326,27 +327,30 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Set<OrderItemModel> getCustomerOrdersByOrderIdToRate(String email, String orderId) {
-        Set<OrderItem> orderItems = orderItemRepository.findAllByRatedFalseAndOrder_OrderIdAndUserEmail(orderId, email);
-        Set<OrderItemModel> orderItemModels = new HashSet<>();
-        Set<String> productIds = new HashSet<>();
+    public AllOrdersResponse getStoreOrdersByCompletedAndRatedStatus(String storeId) {    //SELLER
 
-        for(OrderItem orderItem : orderItems){
-            String productId = orderItem.getProduct().getProductId();
+        List<Order> orders = orderRepository.findAllByStore_StoreId(storeId);
+        List<OrderModel> orderModels = new ArrayList<>();
 
-            if(!productIds.contains(productId)) {
-                OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
-                orderItemModels.add(orderItemModel);
-                productIds.add(productId);
+        Map<String, List<Order>> listOfOrders = orders.stream().collect(Collectors.groupingBy(Order::getOrderId));
+
+        for(Map.Entry<String, List<Order>> orderMap : listOfOrders.entrySet()) {
+            List<Order> orderList = orderMap.getValue();
+
+            for(Order order: orderList) {
+                if (order.getOrderStatus().equals(StringUtil.RATED)
+                        || order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED)) {
+                    OrderModel orderModel = this.mapOrders(order);
+                    orderModels.sort(Comparator.comparing(OrderModel::getCreatedDate).reversed());
+                    orderModels.add(orderModel);
+                }
             }
         }
-        return orderItemModels;
+        return new AllOrdersResponse(orderModels);
     }
 
     @Override
-    public TodoListTotal getSellersTodoListTotal(String email, String storeId) {
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public TodoListTotal getSellersTodoListTotal(String storeId) {    //SELLER
         Optional<Store> store = storeRepository.findById(storeId);
         List<Order> orders = orderRepository.findAllByActiveTrueAndStore_StoreId(storeId);
 
@@ -405,21 +409,23 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public TotalSales getTotalSales(String email, String storeId) {
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public TotalSales getTotalSales(String storeId) {     //SELLER
+
         Optional<Store> store = storeRepository.findById(storeId);
         List<Order> orders = orderRepository.findAllByActiveFalseAndStore_StoreId(storeId);
         double totalSale = 0.0;
 
         if(store.isPresent()) {
             for (Order order : orders) {
-                if (order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED)) {
+                if (order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED) || order.getOrderStatus().equals(StringUtil.RATED)) {
                     double sales = order.getOrderTotalAmount() - store.get().getShippingFee();
                     totalSale += sales;
                 }
             }
+        }else {
+            throw new NoSuchElementException(StringUtil.STORE_NOT_FOUND);
         }
+
         TotalSales totalSales = new TotalSales();
         totalSales.setTotalSales(totalSale);
 
@@ -427,22 +433,92 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderCount getOrderCountAndTotalSales(String email) {
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public OrderCount getOrderCountAndTotalSales() {    //ADMIN
+
         List<Order> orders = orderRepository.findAll();
+
         double countOrder = orderRepository.count();
         double sales = 0.0;
+        double shippingTotal = 0.0;
 
         for(Order order : orders){
-            if(order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED)){
+            if(order.getOrderStatus().equals(StringUtil.ORDER_COMPLETED) || order.getOrderStatus().equals(StringUtil.RATED)){
+
+                double shippingAmount = order.getStore().getShippingFee();
+                shippingTotal += shippingAmount;
+
                 double orderAmount = order.getOrderTotalAmount() - order.getStore().getShippingFee();
                 sales+=orderAmount;
             }
         }
         OrderCount orderCount = new OrderCount();
         orderCount.setOrderCount(countOrder);
+        orderCount.setTotalShippingFee(shippingTotal);
         orderCount.setTotalSales(sales);
         return orderCount;
+    }
+
+    @Override
+    public PaginateOrderResponse getAllOrders(int pageNo, int pageSize) { //ADMIN
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(StringUtil.LAST_MODIFIED).descending());
+        Page<Order> orders = orderRepository.findAll(pageable);
+        List<OrderModel> orderModels = new ArrayList<>();
+
+        PageResponse pageResponse = new PageResponse();
+        pageResponse.setPageNo(orders.getNumber());
+        pageResponse.setPageSize(orders.getSize());
+        pageResponse.setTotalElements(orders.getTotalElements());
+        pageResponse.setTotalPages(orders.getTotalPages());
+        pageResponse.setLast(orders.isLast());
+
+        for(Order order : orders) {
+            OrderModel orderModel = orderMapper.mapOrderEntityToOrderModel(order);
+            orderModel.setShopName(order.getStore().getStoreName());
+            orderModels.add(orderModel);
+        }
+
+        return new PaginateOrderResponse(orderModels,pageResponse);
+    }
+
+    private OrderItemModel mapOrderItems(Order order, OrderItem orderItem, Product product){
+        OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+        orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
+        orderItemModel.setOrderStatus(order.getOrderStatus());
+        orderItemModel.setOrderStatusInfo(order.getOrderStatusInfo());
+        orderItemModel.setActive(order.isActive());
+        orderItemModel.setStoreId(order.getStore().getStoreId());
+        orderItemModel.setProductId(product.getProductId());
+        orderItemModel.setStoreRated(orderItem.getOrder().isStoreRated());
+        return orderItemModel;
+    }
+
+    private OrderModel mapOrders(Order order){
+        OrderModel orderModel = new OrderModel();
+        orderModel.setOrderId(order.getOrderId());
+        orderModel.setOrderTotalAmount(order.getOrderTotalAmount());
+        orderModel.setPaymentMethod(order.getPaymentMethod());
+        orderModel.setActive(order.isActive());
+        orderModel.setOrderStatus(order.getOrderStatus());
+        orderModel.setOrderStatusInfo(order.getOrderStatusInfo());
+        orderModel.setDeliveryAddress(order.getDeliveryAddress());
+        orderModel.setFullName(order.getFullName());
+        orderModel.setContactNumber(order.getContactNumber());
+        orderModel.setCreatedDate(order.getCreatedDate());
+
+        List<OrderItemModel> orderItemModels = new ArrayList<>();
+        List<OrderItem> orderItems = order.getOrderItems();
+
+        for (OrderItem orderItem : orderItems) {
+            OrderItemModel orderItemModel = orderItemMapper.mapEntityToModel(orderItem);
+            orderItemModel.setOrderTotalAmount(order.getOrderTotalAmount());
+            orderItemModel.setOrderStatus(order.getOrderStatus());
+            orderItemModel.setActive(order.isActive());
+            orderItemModel.setStoreId(order.getStore().getStoreId());
+            orderItemModel.setFullName(order.getFullName());
+            orderItemModels.add(orderItemModel);
+        }
+        orderModel.setOrderItemModels(orderItemModels);
+        return orderModel;
     }
 }

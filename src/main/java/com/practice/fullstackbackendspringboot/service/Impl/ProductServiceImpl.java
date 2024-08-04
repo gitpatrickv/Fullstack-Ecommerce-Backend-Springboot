@@ -47,7 +47,7 @@ public class ProductServiceImpl implements ProductService {
     private final SellersProductMapper sellersProductMapper;
 
     @Override
-    public void saveProduct(SaveProductModel model, String email, MultipartFile[] files) {
+    public void saveProduct(SaveProductModel model, String email, MultipartFile[] files) {      //SELLER
         User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Store store = storeRepository.findByUserEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.STORE_NOT_FOUND + email));
         Category category = categoryRepository.findById(model.getCategoryId()).orElseThrow(() -> new NoSuchElementException(StringUtil.CATEGORY_NOT_FOUND));
@@ -83,33 +83,39 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductModel getProductById(String productId) {
-        Product products = productRepository.findById(productId).orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId));
-        List<Image> images = imageRepository.findAllPhotoUrlByProduct_ProductId(productId);
-        Set<Inventory> inventories = inventoryRepository.findAllByProduct_ProductId(productId);
+        Optional<Product> optionalProduct = productRepository.findByProductIdAndListedTrueAndDeletedFalse(productId);
 
-        List<InventoryModel> inventoryModels = new ArrayList<>();
-        List<String> photoUrls = new ArrayList<>();
+        if(optionalProduct.isPresent()) {
+            Product products = optionalProduct.get();
+            List<Image> images = imageRepository.findAllPhotoUrlByProduct_ProductId(productId);
+            Set<Inventory> inventories = inventoryRepository.findAllByProduct_ProductId(productId);
 
-        ProductModel productModel = mapper.mapProductEntityToProductModel(products);
+            List<InventoryModel> inventoryModels = new ArrayList<>();
+            List<String> photoUrls = new ArrayList<>();
 
-        for(Inventory inventory : inventories){
-            InventoryModel inventoryModel = inventoryMapper.mapInventoryEntityToInventoryModel(inventory);
-            inventoryModels.add(inventoryModel);
+            ProductModel productModel = mapper.mapProductEntityToProductModel(products);
+
+            for (Inventory inventory : inventories) {
+                InventoryModel inventoryModel = inventoryMapper.mapInventoryEntityToInventoryModel(inventory);
+                inventoryModels.add(inventoryModel);
+            }
+
+            for (Image image : images) {
+                photoUrls.add(image.getPhotoUrl());
+            }
+            productModel.setInventoryModels(inventoryModels);
+            productModel.setProductImage(photoUrls);
+            productModel.setStoreId(products.getStore().getStoreId());
+            productModel.setStorePhotoUrl(products.getStore().getPhotoUrl());
+            return productModel;
+        } else {
+            throw new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND + productId);
         }
-
-        for(Image image : images){
-            photoUrls.add(image.getPhotoUrl());
-        }
-        productModel.setInventoryModels(inventoryModels);
-        productModel.setProductImage(photoUrls);
-        productModel.setStoreId(products.getStore().getStoreId());
-        productModel.setStorePhotoUrl(products.getStore().getPhotoUrl());
-        return productModel;
     }
 
     @Override
-    public void updateProduct(UpdateProductRequest request, String email) {
-        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public void updateProduct(UpdateProductRequest request) {     //SELLER
+
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
 
@@ -129,12 +135,7 @@ public class ProductServiceImpl implements ProductService {
         Page<Product> products = productRepository.findAllByDeletedFalseAndListedTrueAndSuspendedFalse(pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
-        PageResponse pageResponse = new PageResponse();
-        pageResponse.setPageNo(products.getNumber());
-        pageResponse.setPageSize(products.getSize());
-        pageResponse.setTotalElements(products.getTotalElements());
-        pageResponse.setTotalPages(products.getTotalPages());
-        pageResponse.setLast(products.isLast());
+        PageResponse pageResponse = getPagination(products);
 
         for (Product product : products) {
             AllProductModel allProductModel = allProductMapper.mapProductEntityToProductModel(product);
@@ -153,12 +154,7 @@ public class ProductServiceImpl implements ProductService {
         Page<Product> products = productRepository.findAllByDeletedFalseAndListedTrueAndSuspendedFalseAndCategory_CategoryId(categoryId,pageable);
         List<AllProductModel> productModels = new ArrayList<>();
 
-        PageResponse pageResponse = new PageResponse();
-        pageResponse.setPageNo(products.getNumber());
-        pageResponse.setPageSize(products.getSize());
-        pageResponse.setTotalElements(products.getTotalElements());
-        pageResponse.setTotalPages(products.getTotalPages());
-        pageResponse.setLast(products.isLast());
+        PageResponse pageResponse = getPagination(products);
 
         for (Product product : products) {
             AllProductModel allProductModel = allProductMapper.mapProductEntityToProductModel(product);
@@ -188,12 +184,7 @@ public class ProductServiceImpl implements ProductService {
         Store store = storeRepository.findById(storeId).get();
         List<AllProductModel> productModels = new ArrayList<>();
 
-        PageResponse pageResponse = new PageResponse();
-        pageResponse.setPageNo(products.getNumber());
-        pageResponse.setPageSize(products.getSize());
-        pageResponse.setTotalElements(products.getTotalElements());
-        pageResponse.setTotalPages(products.getTotalPages());
-        pageResponse.setLast(products.isLast());
+        PageResponse pageResponse = getPagination(products);
 
         StoreInfo storeInfo = new StoreInfo();
         storeInfo.setStoreName(store.getStoreName());
@@ -224,12 +215,7 @@ public class ProductServiceImpl implements ProductService {
 
         List<AllProductModel> productModels = new ArrayList<>();
 
-        PageResponse pageResponse = new PageResponse();
-        pageResponse.setPageNo(products.getNumber());
-        pageResponse.setPageSize(products.getSize());
-        pageResponse.setTotalElements(products.getTotalElements());
-        pageResponse.setTotalPages(products.getTotalPages());
-        pageResponse.setLast(products.isLast());
+        PageResponse pageResponse = getPagination(products);
 
         for(Product product : products) {
             AllProductModel allProductModel = allProductMapper.mapProductEntityToProductModel(product);
@@ -241,7 +227,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public SellersProductsPageResponse getAllSellersProducts(String email, int pageNo, int pageSize, String sortBy) {
+    public SellersProductsPageResponse getAllSellersProducts(String email, int pageNo, int pageSize, String sortBy) {       //SELLER
         Sort sorts = Sort.by(StringUtil.Product_Sold).descending();
 
         if(StringUtil.True.equals(sortBy)){
@@ -252,19 +238,15 @@ public class ProductServiceImpl implements ProductService {
             sorts = Sort.by(StringUtil.Suspended).descending();
         }
 
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Pageable pageable = PageRequest.of(pageNo, pageSize, sorts);
-        Optional<User> user = userRepository.findByEmail(email);
-        Page<Product> products = productRepository.findAllByDeletedFalseAndUserEmail(user.get().getEmail(), pageable);
+
+        Page<Product> products = productRepository.findAllByDeletedFalseAndUserEmail(user.getEmail(), pageable);
 
         Sort sort = Sort.by(Sort.Direction.DESC, StringUtil.Color);
         List<SellersProductModel> productModels = new ArrayList<>();
 
-        PageResponse pageResponse = new PageResponse();
-        pageResponse.setPageNo(products.getNumber());
-        pageResponse.setPageSize(products.getSize());
-        pageResponse.setTotalElements(products.getTotalElements());
-        pageResponse.setTotalPages(products.getTotalPages());
-        pageResponse.setLast(products.isLast());
+        PageResponse pageResponse = getPagination(products);
 
         for(Product product : products){
             SellersProductModel allProductModel = sellersProductMapper.mapProductEntityToProductModel(product);
@@ -285,10 +267,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void delete(String productId, String email) {
-        userRepository.findByEmail(email);
+    public void delete(String productId) {        //SELLER
         Optional<Product> product = productRepository.findById(productId);
-
         if(product.isPresent()){
             Product prod = product.get();
             prod.setDeleted(true);
@@ -302,9 +282,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductCount getProductCount(String email) {
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public ProductCount getProductCount() {     //ADMIN
         double count = productRepository.count();
         ProductCount productCount = new ProductCount();
         productCount.setProductCount(count);
@@ -312,7 +290,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void suspendProduct(String productId, String email) {
+    public void suspendProduct(String productId, String email) {       //ADMIN
         User admin = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
@@ -326,8 +304,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void delistProduct(String productId, String email) {
-        userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
+    public void delistProduct(String productId) {     //SELLER
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
 
@@ -336,15 +313,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public SuspendedProductCount getSuspendedProductCount(String storeId, String email) {
-        userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
-
+    public SuspendedProductCount getSuspendedProductCount(String storeId) {   //SELLER
         double count = productRepository.findAllBySuspendedTrueAndStore_StoreId(storeId).stream().count();
-
         SuspendedProductCount suspendedProductCount = new SuspendedProductCount();
         suspendedProductCount.setSuspendedProductCount(count);
-
         return suspendedProductCount;
     }
 
@@ -363,6 +335,16 @@ public class ProductServiceImpl implements ProductService {
             productModel.setPrice(inventory.getPrice());
             productModel.setQuantity(inventory.getQuantity());
         }
+    }
+
+    private PageResponse getPagination(Page<Product> products){
+        PageResponse pageResponse = new PageResponse();
+        pageResponse.setPageNo(products.getNumber());
+        pageResponse.setPageSize(products.getSize());
+        pageResponse.setTotalElements(products.getTotalElements());
+        pageResponse.setTotalPages(products.getTotalPages());
+        pageResponse.setLast(products.isLast());
+        return pageResponse;
     }
 
 }

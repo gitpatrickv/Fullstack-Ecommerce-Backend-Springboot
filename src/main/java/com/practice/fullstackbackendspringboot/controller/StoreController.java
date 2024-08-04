@@ -3,16 +3,16 @@ package com.practice.fullstackbackendspringboot.controller;
 import com.practice.fullstackbackendspringboot.model.StoreModel;
 import com.practice.fullstackbackendspringboot.model.request.CreateStoreRequest;
 import com.practice.fullstackbackendspringboot.model.request.UpdateShopInfoRequest;
+import com.practice.fullstackbackendspringboot.model.response.PaginateStoreResponse;
 import com.practice.fullstackbackendspringboot.model.response.StoreCount;
 import com.practice.fullstackbackendspringboot.service.StoreService;
 import com.practice.fullstackbackendspringboot.service.UserService;
+import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -23,45 +23,43 @@ public class StoreController {
     private final StoreService storeService;
 
     @PostMapping("/store/create")
-    public ResponseEntity<?> createStore(@RequestBody @Valid CreateStoreRequest request, @RequestHeader("Authorization") String email){
+    public ResponseEntity<?> createStore(@RequestBody @Valid CreateStoreRequest request){
         try {
-            String user = userService.getUserFromToken(email);
+            String user = userService.getAuthenticatedUser();
             storeService.createStore(request,user);
             return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (IllegalArgumentException e){
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }catch (IllegalArgumentException e){
+            return new ResponseEntity<>(StringUtil.StoreNameExists, HttpStatus.BAD_REQUEST);
         }catch (Exception e){
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     @GetMapping("/store")
-    @ResponseStatus(HttpStatus.OK)
-    public StoreModel getStoreInfo(@RequestHeader("Authorization") String email){
-        String user = userService.getUserFromToken(email);
-        return storeService.getStoreInfo(user);
+    public StoreModel getStoreInfo(){
+            String user = userService.getAuthenticatedUser();
+            return storeService.getStoreInfo(user);
     }
+
     @PutMapping("/store/update/{storeId}")
     @ResponseStatus(HttpStatus.OK)
-    public void updateShopInfo(@RequestHeader("Authorization") String email, @PathVariable String storeId, @RequestBody @Valid UpdateShopInfoRequest request){
-        String user = userService.getUserFromToken(email);
-        storeService.updateShopInfo(user,storeId,request);
+    public void updateShopInfo(@PathVariable String storeId, @RequestBody @Valid UpdateShopInfoRequest request){
+        storeService.updateShopInfo(storeId,request);
     }
 
     @GetMapping("/store/list")
     @ResponseStatus(HttpStatus.OK)
-    public List<StoreModel> getAllStores(@RequestHeader("Authorization") String email,
-                                         @RequestParam(defaultValue = "true", required = false) String sortBy){
-        String user = userService.getUserFromToken(email);
-        return storeService.getAllStores(user, sortBy);
+    public PaginateStoreResponse getAllStores(@RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                              @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize,
+                                              @RequestParam(defaultValue = "true", required = false) String sortBy){
+        return storeService.getAllStores(pageNo,pageSize,sortBy);
     }
     @GetMapping("/store/count")
-    public StoreCount getStoreCount(@RequestHeader("Authorization") String email) {
-        String user = userService.getUserFromToken(email);
-        return  storeService.getStoreCount(user);
+    public StoreCount getStoreCount() {
+        return storeService.getStoreCount();
     }
     @PutMapping("/store/suspend/{storeId}")
-    public void suspendStoreAndProductListing(@PathVariable String storeId, @RequestHeader("Authorization") String email) {
-        String user = userService.getUserFromToken(email);
+    public void suspendStoreAndProductListing(@PathVariable String storeId) {
+        String user = userService.getAuthenticatedUser();
         storeService.suspendStoreAndProductListing(storeId,user);
     }
 }

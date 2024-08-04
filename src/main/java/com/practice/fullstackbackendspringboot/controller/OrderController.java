@@ -1,15 +1,14 @@
 package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.OrderItemModel;
-import com.practice.fullstackbackendspringboot.model.response.AllOrdersResponse;
-import com.practice.fullstackbackendspringboot.model.response.OrderCount;
-import com.practice.fullstackbackendspringboot.model.response.TodoListTotal;
-import com.practice.fullstackbackendspringboot.model.response.TotalSales;
+import com.practice.fullstackbackendspringboot.model.response.*;
 import com.practice.fullstackbackendspringboot.service.OrderService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
+import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,163 +21,156 @@ public class OrderController {
     private final OrderService orderService;
     private final UserService userService;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.OK)
-    public void placeOrder(@RequestHeader("Authorization") String email){
-        String user = userService.getUserFromToken(email);
-        orderService.placeOrder(user);
+    @PostMapping("/{paymentMethod}")
+    public ResponseEntity<?> placeOrder(@PathVariable String paymentMethod) throws StripeException {
+        String user = userService.getAuthenticatedUser();
+        PaymentResponse response =  orderService.placeOrder(user,paymentMethod);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
     @PostMapping("/buy/{orderId}")
-    public void buyAgain(@RequestHeader("Authorization") String email, @PathVariable (value="orderId") String orderId){
-        String user = userService.getUserFromToken(email);
+    public void buyAgain(@PathVariable (value="orderId") String orderId){
+        String user = userService.getAuthenticatedUser();
         orderService.buyAgain(user,orderId);
     }
 
     @PostMapping("/cancel/{orderId}")
     @ResponseStatus(HttpStatus.OK)
-    public void cancelOrder(@RequestHeader("Authorization") String email, @PathVariable (value="orderId") String orderId) {
-        String user = userService.getUserFromToken(email);
-        orderService.cancelOrder(user, orderId);
+    public void cancelOrder(@PathVariable (value="orderId") String orderId) {
+        orderService.cancelOrder(orderId);
     }
+
     @PostMapping("/confirm/cancel/{orderId}")
-    public void confirmCancelOrder(@RequestHeader("Authorization") String email, @PathVariable (value="orderId") String orderId) {
-        String user = userService.getUserFromToken(email);
-        orderService.confirmCancelOrder(user,orderId);
+    public void confirmCancelOrder(@PathVariable (value="orderId") String orderId) {
+        orderService.confirmCancelOrder(orderId);
     }
 
     @PutMapping("/process/{orderId}")
     @ResponseStatus(HttpStatus.OK)
-    public void processOrder(@RequestHeader("Authorization") String email, @PathVariable (value="orderId") String orderId){
-        String user = userService.getUserFromToken(email);
-        orderService.processOrder(user,orderId);
+    public void processOrder(@PathVariable (value="orderId") String orderId){
+        orderService.processOrder(orderId);
     }
     @GetMapping("/get/all")
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderItemModel> getAllCustomerOrders(@RequestHeader("Authorization") String email ){
-        String user =  userService.getUserFromToken(email);
+    public List<OrderItemModel> getAllCustomerOrders(){
+        String user = userService.getAuthenticatedUser();
         String status1 = "";
         return orderService.getCustomerOrdersByStatus(user, status1);
     }
     @GetMapping("/get/pending")
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderItemModel> getCustomerOrdersByToPendingStatus(@RequestHeader("Authorization") String email ){
-        String user =  userService.getUserFromToken(email);
+    public List<OrderItemModel> getCustomerOrdersByToPendingStatus(){
+        String user = userService.getAuthenticatedUser();
         String status1 = StringUtil.PENDING;
         return orderService.getCustomerOrdersByStatus(user, status1);
     }
     @GetMapping("/get/to-pay")
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderItemModel> getCustomerOrdersByToPayStatus(@RequestHeader("Authorization") String email ){
-        String user =  userService.getUserFromToken(email);
+    public List<OrderItemModel> getCustomerOrdersByToPayStatus(){
+        String user = userService.getAuthenticatedUser();
         String status1 = StringUtil.TO_PAY;
         return orderService.getCustomerOrdersByStatus(user, status1);
     }
 
     @GetMapping("/get/to-ship")
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderItemModel> getCustomerOrdersByToShipStatus(@RequestHeader("Authorization") String email){
-        String user =  userService.getUserFromToken(email);
+    public List<OrderItemModel> getCustomerOrdersByToShipStatus(){
+        String user = userService.getAuthenticatedUser();
         String status = StringUtil.TO_SHIP;
         return orderService.getCustomerOrdersByStatus(user, status);
     }
 
     @GetMapping("/get/to-receive")
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderItemModel> getCustomerOrdersByToReceiveStatus(@RequestHeader("Authorization") String email) {
-        String user = userService.getUserFromToken(email);
+    public List<OrderItemModel> getCustomerOrdersByToReceiveStatus() {
+        String user = userService.getAuthenticatedUser();
         String status = StringUtil.TO_RECEIVE;
         return orderService.getCustomerOrdersByStatus(user, status);
     }
     @GetMapping("/get/cancelled")
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderItemModel> getCustomerOrdersByCancelledStatus(@RequestHeader("Authorization") String email){
-        String user =  userService.getUserFromToken(email);
+    public List<OrderItemModel> getCustomerOrdersByCancelledStatus(){
+        String user = userService.getAuthenticatedUser();
         String status = StringUtil.ORDER_CANCELLED;
         return orderService.getCustomerOrdersByStatus(user, status);
     }
 
     @GetMapping("/get/completed")
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderItemModel> getCustomerOrdersByCompletedStatus(@RequestHeader("Authorization") String email){
-        String user =  userService.getUserFromToken(email);
+    public List<OrderItemModel> getCustomerOrdersByCompletedStatus(){
+        String user = userService.getAuthenticatedUser();
         return orderService.getCustomerOrdersByCompletedAndRatedStatus(user);
     }
 
     @GetMapping("/seller/get/pending/{storeId}")
     @ResponseStatus(HttpStatus.OK)
-    public AllOrdersResponse getStoreOrdersByPendingStatus(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
-        String user =  userService.getUserFromToken(email);
+    public AllOrdersResponse getStoreOrdersByPendingStatus(@PathVariable(value="storeId") String storeId ){
         String status1 = StringUtil.PENDING;
-        return orderService.getStoreOrdersByStatus(user, storeId, status1);
+        return orderService.getStoreOrdersByStatus(storeId, status1);
     }
 
     @GetMapping("/seller/get/unpaid/{storeId}")
     @ResponseStatus(HttpStatus.OK)
-    public AllOrdersResponse getStoreOrdersByUnpaidStatus(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
-        String user =  userService.getUserFromToken(email);
+    public AllOrdersResponse getStoreOrdersByUnpaidStatus(@PathVariable(value="storeId") String storeId ){
         String status1 = StringUtil.TO_PAY;
-        return orderService.getStoreOrdersByStatus(user, storeId, status1);
+        return orderService.getStoreOrdersByStatus(storeId, status1);
     }
 
     @GetMapping("/seller/get/to-ship/{storeId}")
     @ResponseStatus(HttpStatus.OK)
-    public AllOrdersResponse getStoreOrdersByToShipStatus(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
-        String user =  userService.getUserFromToken(email);
+    public AllOrdersResponse getStoreOrdersByToShipStatus(@PathVariable(value="storeId") String storeId ){
         String status1 = StringUtil.TO_SHIP;
-        return orderService.getStoreOrdersByStatus(user, storeId, status1);
+        return orderService.getStoreOrdersByStatus(storeId, status1);
     }
 
     @GetMapping("/seller/get/shipping/{storeId}")
     @ResponseStatus(HttpStatus.OK)
-    public AllOrdersResponse getStoreOrdersByToReceiveStatus(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
-        String user =  userService.getUserFromToken(email);
+    public AllOrdersResponse getStoreOrdersByToReceiveStatus(@PathVariable(value="storeId") String storeId ){
         String status1 = StringUtil.TO_RECEIVE;
-        return orderService.getStoreOrdersByStatus(user, storeId, status1);
+        return orderService.getStoreOrdersByStatus(storeId, status1);
     }
 
     @GetMapping("/seller/get/cancelled/{storeId}")
     @ResponseStatus(HttpStatus.OK)
-    public AllOrdersResponse getStoreOrdersByToCancelled(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
-        String user =  userService.getUserFromToken(email);
+    public AllOrdersResponse getStoreOrdersByToCancelled(@PathVariable(value="storeId") String storeId ){
         String status1 = StringUtil.ORDER_CANCELLED;
-        return orderService.getStoreOrdersByStatus(user, storeId, status1);
+        return orderService.getStoreOrdersByStatus(storeId, status1);
     }
 
     @GetMapping("/seller/get/completed/{storeId}")
     @ResponseStatus(HttpStatus.OK)
-    public AllOrdersResponse getStoreOrdersByCompletedOrders(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
-        String user =  userService.getUserFromToken(email);
-        String status1 = StringUtil.ORDER_COMPLETED;
-        return orderService.getStoreOrdersByStatus(user, storeId, status1);
+    public AllOrdersResponse getStoreOrdersByCompletedOrders(@PathVariable(value="storeId") String storeId ){
+        return orderService.getStoreOrdersByCompletedAndRatedStatus(storeId);
     }
 
     @GetMapping("/seller/get/all/{storeId}")
     @ResponseStatus(HttpStatus.OK)
-    public AllOrdersResponse getAllStoreOrder(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId ){
-        String user =  userService.getUserFromToken(email);
+    public AllOrdersResponse getAllStoreOrder(@PathVariable(value="storeId") String storeId ){
         String status1 = "";
-        return orderService.getStoreOrdersByStatus(user, storeId, status1);
+        return orderService.getStoreOrdersByStatus(storeId, status1);
     }
 
     @GetMapping("/get/{orderId}")
-    public Set<OrderItemModel> getCustomerOrdersByOrderIdToRate(@RequestHeader("Authorization") String email, @PathVariable(value="orderId") String orderId){
-        String user =  userService.getUserFromToken(email);
-        return orderService.getCustomerOrdersByOrderIdToRate(user,orderId);
+    public Set<OrderItemModel> getCustomerOrdersByOrderIdToRate(@PathVariable(value="orderId") String orderId){
+        return orderService.getCustomerOrdersByOrderIdToRate(orderId);
     }
     @GetMapping("/get/todo/total/{storeId}")
-    public TodoListTotal getSellersTodoListTotal(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId){
-        String user =  userService.getUserFromToken(email);
-        return orderService.getSellersTodoListTotal(user,storeId);
+    public TodoListTotal getSellersTodoListTotal(String email, @PathVariable(value="storeId") String storeId){
+        return orderService.getSellersTodoListTotal(storeId);
     }
     @GetMapping("/get/sales/total/{storeId}")
-    public TotalSales getTotalSales(@RequestHeader("Authorization") String email, @PathVariable(value="storeId") String storeId) {
-        String user =  userService.getUserFromToken(email);
-        return orderService.getTotalSales(user,storeId);
+    public TotalSales getTotalSales(@PathVariable(value="storeId") String storeId) {
+        return orderService.getTotalSales(storeId);
     }
     @GetMapping("/count")
-    public OrderCount getOrderCountAndTotalSales(@RequestHeader("Authorization") String email) {
-        String user =  userService.getUserFromToken(email);
-        return orderService.getOrderCountAndTotalSales(user);
+    public OrderCount getOrderCountAndTotalSales() {
+        return orderService.getOrderCountAndTotalSales();
+    }
+
+    @GetMapping("/all")
+    public PaginateOrderResponse getAllOrders(
+                                              @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+                                              @RequestParam(value = "pageSize", defaultValue = "20", required = false) int pageSize){
+        return orderService.getAllOrders(pageNo,pageSize);
     }
 
 }

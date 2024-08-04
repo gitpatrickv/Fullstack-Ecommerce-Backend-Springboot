@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, String> {
@@ -19,5 +20,7 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     List<Product> findAllByDeletedFalseAndListedTrueAndSuspendedFalseAndStore_StoreId(String storeId);
     List<Product> findAllByDeletedFalseAndStore_StoreId(String storeId);
     List<Product> findAllBySuspendedTrueAndStore_StoreId(String storeId);
+    Optional<Product> findByProductIdAndListedTrueAndSuspendedFalseAndDeletedFalse(String productId);
+    Optional<Product> findByProductIdAndListedTrueAndDeletedFalse(String productId);
 
 }

@@ -1,13 +1,7 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
-import com.practice.fullstackbackendspringboot.entity.Product;
-import com.practice.fullstackbackendspringboot.entity.Image;
-import com.practice.fullstackbackendspringboot.entity.Store;
-import com.practice.fullstackbackendspringboot.entity.User;
-import com.practice.fullstackbackendspringboot.repository.ImageRepository;
-import com.practice.fullstackbackendspringboot.repository.ProductRepository;
-import com.practice.fullstackbackendspringboot.repository.StoreRepository;
-import com.practice.fullstackbackendspringboot.repository.UserRepository;
+import com.practice.fullstackbackendspringboot.entity.*;
+import com.practice.fullstackbackendspringboot.repository.*;
 import com.practice.fullstackbackendspringboot.service.ImageService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +29,7 @@ public class ImageServiceImpl implements ImageService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public void uploadProductPhoto(String productId, MultipartFile[] files) {
@@ -57,11 +52,25 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public void uploadStorePhoto(String email, String storeId, MultipartFile file) {
-        userRepository.findByEmail(email);
-        Store store = storeRepository.findById(storeId).get();
-        store.setPhotoUrl(processUserImage(storeId,file));
-        storeRepository.save(store);
+    public void uploadStorePhoto(String storeId, MultipartFile file) {
+        Optional<Store> optionalStore = storeRepository.findById(storeId);
+
+        if(optionalStore.isPresent()) {
+            Store store = optionalStore.get();
+            store.setPhotoUrl(processUserImage(storeId, file));
+            storeRepository.save(store);
+        }
+    }
+
+    @Override
+    public void uploadCategoryPhoto(String categoryId, MultipartFile file) {
+        Optional<Category> optionalCategory = categoryRepository.findById(categoryId);
+
+        if(optionalCategory.isPresent()){
+            Category category = optionalCategory.get();
+            category.setCategoryPhotoUrl(processUserImage(categoryId,file));
+            categoryRepository.save(category);
+        }
     }
 
     @Override

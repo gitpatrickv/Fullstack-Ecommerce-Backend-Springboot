@@ -19,27 +19,25 @@ public class RatingAndReviewController {
     private final UserService userService;
     @PostMapping("/product/review")
     @ResponseStatus(HttpStatus.OK)
-    public void rateAndReviewProduct(@RequestHeader("Authorization") String email, @RequestBody RateProductRequest request){
-        String user = userService.getUserFromToken(email);
+    public void rateAndReviewProduct(@RequestBody RateProductRequest request){
+        String user = userService.getAuthenticatedUser();
         ratingAndReviewService.rateAndReviewProduct(user,request);
     }
 
     @PostMapping("/product/review/reply")
     @ResponseStatus(HttpStatus.OK)
-    public void replyToReview(@RequestHeader("Authorization") String email, @RequestBody ReplyToReviewRequest request){
-        String user = userService.getUserFromToken(email);
+    public void replyToReview(@RequestBody ReplyToReviewRequest request){
+        String user = userService.getAuthenticatedUser();
         ratingAndReviewService.replyToReview(user,request);
     }
 
     @GetMapping("/seller/customer/service/review/{storeId}")
-    public RatingAndReviewResponse manageAllProductReview(@RequestHeader("Authorization") String email,
-                                                                @PathVariable String storeId,
+    public RatingAndReviewResponse manageAllProductReview(@PathVariable String storeId,
                                                                 @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
                                                                 @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
                                                                 @RequestParam(defaultValue = "productName", required = false) String sortBy
     ){
-        String user = userService.getUserFromToken(email);
-        return ratingAndReviewService.manageAllProductReview(user, storeId, pageNo, pageSize, sortBy);
+        return ratingAndReviewService.manageAllProductReview(storeId, pageNo, pageSize, sortBy);
     }
 
     @GetMapping("/product/review/get/all/{productId}")

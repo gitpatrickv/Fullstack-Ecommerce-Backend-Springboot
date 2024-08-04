@@ -13,7 +13,7 @@ public class RatingAndReview extends AuditEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long reviewId;
-    @Column(name="rating")
+
     private Double rating;
     @Column(length = 1000)
     private String review;

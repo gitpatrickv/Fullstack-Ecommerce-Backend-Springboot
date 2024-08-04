@@ -7,9 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderCount {
-
-    private Double orderCount;
-    private Double totalSales;
-    private Double totalShippingFee;
+public class PaymentMethod {
+    private String paymentMethod;
 }

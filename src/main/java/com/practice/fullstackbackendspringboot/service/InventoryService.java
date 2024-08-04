@@ -5,7 +5,7 @@ import com.practice.fullstackbackendspringboot.model.request.UpdatePriceRequest;
 
 public interface InventoryService {
 
-    void addInventoryStock(String email, AddStockRequest request);
-    void updatePrice(String email, UpdatePriceRequest request);
+    void addInventoryStock(AddStockRequest request);
+    void updatePrice(UpdatePriceRequest request);
 
 }

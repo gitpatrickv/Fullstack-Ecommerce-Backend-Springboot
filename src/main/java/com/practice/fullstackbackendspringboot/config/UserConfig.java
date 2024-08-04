@@ -1,11 +1,9 @@
 package com.practice.fullstackbackendspringboot.config;
 
 
-import com.practice.fullstackbackendspringboot.entity.Category;
-import com.practice.fullstackbackendspringboot.entity.User;
+import com.practice.fullstackbackendspringboot.entity.*;
 import com.practice.fullstackbackendspringboot.entity.constants.Role;
-import com.practice.fullstackbackendspringboot.repository.CategoryRepository;
-import com.practice.fullstackbackendspringboot.repository.UserRepository;
+import com.practice.fullstackbackendspringboot.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -21,11 +19,15 @@ public class UserConfig {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final StoreRepository storeRepository;
+    private final ProductRepository productRepository;
+    private final InventoryRepository inventoryRepository;
+    private final ImageRepository imageRepository;
 
     @Bean
     public CommandLineRunner commandLineRunner(){
         return args -> {
-            if(userRepository.count() == 0) {
+            if(userRepository.count() == 0 && categoryRepository.count() == 0 && storeRepository.count() == 0 && productRepository.count() == 0) {
                 User admin = new User();
                 admin.setName("ADMIN");
                 admin.setEmail("admin@gmail.com");
@@ -50,9 +52,18 @@ public class UserConfig {
                 seller.setPassword(passwordEncoder.encode("12345678"));
                 seller.setRole(Role.SELLER);
                 userRepository.save(seller);
-            }
 
-            if(categoryRepository.count() == 0) {
+                Store store = new Store();
+                store.setStoreName("My Store");
+                store.setStoreDescription("My Store Description");
+                store.setAddress("Seller Address");
+                store.setContactNumber("0912345678");
+                store.setShippingFee(99.0);
+                store.setProductCount(2L);
+                store.setOnline(true);
+                store.setUser(seller);
+                storeRepository.save(store);
+
                 Category category1 = new Category();
                 category1.setCategoryName("Men's Apparel");
                 category1.setCategoryPhotoUrl("https://img.freepik.com/premium-vector/men-s-clothing-store-logo-clothing-store-transparent-background-clothing-shop-logo-vector_148524-756.jpg");
@@ -172,6 +183,88 @@ public class UserConfig {
                 category24.setCategoryName("Gaming");
                 category24.setCategoryPhotoUrl("https://hips.hearstapps.com/hmg-prod/images/gh-index-gamingconsoles-052-print-preview-1659705142.jpg");
                 categoryRepository.save(category24);
+
+                Product noVarProduct = new Product();
+                noVarProduct.setProductName("No Variation");
+                noVarProduct.setProductDescription("No Variation Product Description");
+                noVarProduct.setListed(true);
+                noVarProduct.setCategory(category1);
+                noVarProduct.setStore(store);
+                noVarProduct.setUser(seller);
+                productRepository.save(noVarProduct);
+
+                Inventory inventory = new Inventory();
+                inventory.setPrice(100.0);
+                inventory.setQuantity(10L);
+                inventory.setProduct(noVarProduct);
+                inventoryRepository.save(inventory);
+
+                Image image = new Image();
+                image.setPhotoUrl("https://t4.ftcdn.net/jpg/00/38/13/73/360_F_38137330_gUbR3ZXBc5J5g4pRkaC8TYZQA62OZhx5.jpg");
+                image.setProduct(noVarProduct);
+                imageRepository.save(image);
+
+                Product product1 = new Product();
+                product1.setProductName("With Variation");
+                product1.setProductDescription("With Variation Product Description");
+                product1.setListed(true);
+                product1.setCategory(category2);
+                product1.setStore(store);
+                product1.setUser(seller);
+                productRepository.save(product1);
+
+                Inventory inventory1 = new Inventory();
+                inventory1.setPrice(100.0);
+                inventory1.setQuantity(10L);
+                inventory1.setColors("Red");
+                inventory1.setSizes("XS");
+                inventory1.setProduct(product1);
+                inventoryRepository.save(inventory1);
+
+                Inventory inventory2 = new Inventory();
+                inventory2.setPrice(110.0);
+                inventory2.setQuantity(15L);
+                inventory2.setColors("Red");
+                inventory2.setSizes("S");
+                inventory2.setProduct(product1);
+                inventoryRepository.save(inventory2);
+
+                Inventory inventory3 = new Inventory();
+                inventory3.setPrice(100.0);
+                inventory3.setQuantity(20L);
+                inventory3.setColors("Blue");
+                inventory3.setSizes("XS");
+                inventory3.setProduct(product1);
+                inventoryRepository.save(inventory3);
+
+                Inventory inventory4 = new Inventory();
+                inventory4.setPrice(110.0);
+                inventory4.setQuantity(5L);
+                inventory4.setColors("Blue");
+                inventory4.setSizes("S");
+                inventory4.setProduct(product1);
+                inventoryRepository.save(inventory4);
+
+                Inventory inventory5 = new Inventory();
+                inventory5.setPrice(120.0);
+                inventory5.setQuantity(0L);
+                inventory5.setColors("Blue");
+                inventory5.setSizes("M");
+                inventory5.setProduct(product1);
+                inventoryRepository.save(inventory5);
+
+                Inventory inventory6 = new Inventory();
+                inventory6.setPrice(120.0);
+                inventory6.setQuantity(99L);
+                inventory6.setColors("Red");
+                inventory6.setSizes("M");
+                inventory6.setProduct(product1);
+                inventoryRepository.save(inventory6);
+
+                Image image1 = new Image();
+                image1.setPhotoUrl("https://t4.ftcdn.net/jpg/00/38/13/73/360_F_38137330_gUbR3ZXBc5J5g4pRkaC8TYZQA62OZhx5.jpg");
+                image1.setProduct(product1);
+                imageRepository.save(image1);
             }
         };
     }
