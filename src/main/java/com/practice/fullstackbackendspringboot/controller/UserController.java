@@ -52,8 +52,5 @@ public class  UserController {
             String admin = userService.getAuthenticatedUser();
             userService.freezeAccount(admin, email);
     }
-    @GetMapping("/token")       //TODO: delete
-    public String getUserFromToken(String token){
-        return userService.getAuthenticatedUser();
-    }
+
 }

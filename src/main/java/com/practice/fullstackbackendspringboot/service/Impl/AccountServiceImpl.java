@@ -25,7 +25,7 @@ public class AccountServiceImpl implements AccountService {
     private final PasswordEncoder passwordEncoder;
     @Override
     public UpdateUserRequest updateAccountInfo(String email, UpdateUserRequest updateUserRequest) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.PRODUCT_NOT_FOUND));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND));
 
         user.setName(updateUserRequest.getName() != null ? updateUserRequest.getName() : user.getName());
         user.setAddress(updateUserRequest.getAddress() != null ? updateUserRequest.getAddress() : user.getAddress());
