@@ -12,9 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Builder
 @Getter
@@ -58,6 +56,8 @@ public class User implements UserDetails {
     private List<OrderItem> orderItems = new ArrayList<>();
     @OneToMany(mappedBy = "user")
     private List<RatingAndReview> ratingAndReviews = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Set<StoreFollower> followedStores = new HashSet<>();
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
