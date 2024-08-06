@@ -1,6 +1,7 @@
 package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.response.FollowedStore;
+import com.practice.fullstackbackendspringboot.model.response.StoreFollowerCount;
 import com.practice.fullstackbackendspringboot.service.StoreFollowerService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -22,5 +23,9 @@ public class StoreFollowerController {
     public FollowedStore getFollowedStatus(@PathVariable String storeId){
         String user = userService.getAuthenticatedUser();
         return storeFollowerService.getFollowedStatus(storeId,user);
+    }
+    @GetMapping("/follow/count/{storeId}")
+    public StoreFollowerCount getStoreFollowerCount(@PathVariable String storeId){
+        return storeFollowerService.getStoreFollowerCount(storeId);
     }
 }

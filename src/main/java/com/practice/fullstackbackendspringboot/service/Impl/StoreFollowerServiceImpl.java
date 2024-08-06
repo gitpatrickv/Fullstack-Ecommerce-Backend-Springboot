@@ -4,6 +4,7 @@ import com.practice.fullstackbackendspringboot.entity.Store;
 import com.practice.fullstackbackendspringboot.entity.StoreFollower;
 import com.practice.fullstackbackendspringboot.entity.User;
 import com.practice.fullstackbackendspringboot.model.response.FollowedStore;
+import com.practice.fullstackbackendspringboot.model.response.StoreFollowerCount;
 import com.practice.fullstackbackendspringboot.repository.StoreFollowerRepository;
 import com.practice.fullstackbackendspringboot.repository.StoreRepository;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
@@ -55,5 +56,13 @@ public class StoreFollowerServiceImpl implements StoreFollowerService {
         }
 
         return followedStore;
+    }
+
+    @Override
+    public StoreFollowerCount getStoreFollowerCount(String storeId) {
+        long count = storeFollowerRepository.findAllByStore_StoreId(storeId).stream().count();
+        StoreFollowerCount storeFollowerCount = new StoreFollowerCount();
+        storeFollowerCount.setStoreFollowerCount(count);
+        return storeFollowerCount;
     }
 }
