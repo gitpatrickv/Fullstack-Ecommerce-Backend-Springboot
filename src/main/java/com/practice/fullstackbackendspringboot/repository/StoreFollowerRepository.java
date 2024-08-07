@@ -12,4 +12,5 @@ public interface StoreFollowerRepository extends JpaRepository<StoreFollower, Lo
 
     Optional<StoreFollower> findByStore_StoreIdAndUserEmail(String storeId, String email);
     List<StoreFollower> findAllByStore_StoreId(String storeId);
+    List<StoreFollower> findAllByUserEmail(String email);
 }

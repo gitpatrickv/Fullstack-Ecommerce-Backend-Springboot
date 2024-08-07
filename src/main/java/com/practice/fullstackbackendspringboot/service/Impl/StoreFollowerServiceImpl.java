@@ -3,6 +3,7 @@ package com.practice.fullstackbackendspringboot.service.Impl;
 import com.practice.fullstackbackendspringboot.entity.Store;
 import com.practice.fullstackbackendspringboot.entity.StoreFollower;
 import com.practice.fullstackbackendspringboot.entity.User;
+import com.practice.fullstackbackendspringboot.model.StoreFollowerModel;
 import com.practice.fullstackbackendspringboot.model.response.FollowedStore;
 import com.practice.fullstackbackendspringboot.model.response.StoreFollowerCount;
 import com.practice.fullstackbackendspringboot.repository.StoreFollowerRepository;
@@ -13,6 +14,7 @@ import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -60,9 +62,29 @@ public class StoreFollowerServiceImpl implements StoreFollowerService {
 
     @Override
     public StoreFollowerCount getStoreFollowerCount(String storeId) {
-        long count = storeFollowerRepository.findAllByStore_StoreId(storeId).stream().count();
+        long count = storeFollowerRepository.findAllByStore_StoreId(storeId)
+                .stream()
+                .count();
+
         StoreFollowerCount storeFollowerCount = new StoreFollowerCount();
         storeFollowerCount.setStoreFollowerCount(count);
         return storeFollowerCount;
     }
+
+    @Override
+    public List<StoreFollowerModel> getAllFollowedStore(String email) {
+        return storeFollowerRepository.findAllByUserEmail(email)
+                .stream()
+                .map(storeFollower -> {
+                    StoreFollowerModel storeFollowerModel = new StoreFollowerModel();
+                    storeFollowerModel.setStoreFollowerId(storeFollower.getStoreFollowerId());
+                    storeFollowerModel.setFollowed(storeFollower.isFollowed());
+                    storeFollowerModel.setStoreId(storeFollower.getStore().getStoreId());
+                    storeFollowerModel.setStoreName(storeFollower.getStore().getStoreName());
+                    storeFollowerModel.setStorePhotoUrl(storeFollower.getStore().getPhotoUrl());
+
+                    return storeFollowerModel;
+                }).toList();
+    }
+
 }
