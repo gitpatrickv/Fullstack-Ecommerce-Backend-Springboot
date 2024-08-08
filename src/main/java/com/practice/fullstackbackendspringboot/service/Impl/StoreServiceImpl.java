@@ -57,7 +57,14 @@ public class StoreServiceImpl implements StoreService {
             store.setShippingFee(request.getShippingFee());
             store.setOnline(true);
             store.setUser(user);
-            storeRepository.save(store);
+            Store savedStore = storeRepository.save(store);
+
+            if(savedStore.isOnline()) {
+                if (user.getRole().equals(Role.USER)) {
+                    user.setRole(Role.SELLER);
+                    userRepository.save(user);
+                }
+            }
         }
     }
 

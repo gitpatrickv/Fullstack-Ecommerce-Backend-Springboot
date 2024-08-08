@@ -36,6 +36,7 @@ public class SecurityConfig {
                                         .requestMatchers(HttpMethod.POST, "api/product/update").hasAuthority(SELLER.name())
                                         .requestMatchers(HttpMethod.POST, "/api/product/save").hasAuthority(SELLER.name())
 
+                                        .requestMatchers(HttpMethod.POST,"/api/store/create").hasAnyAuthority(SELLER.name(), USER.name())
                                         .requestMatchers("/api/store/**").hasAnyAuthority(SELLER.name(), ADMIN.name())
                                         .requestMatchers(HttpMethod.POST, "api/product/rate").hasAnyAuthority(USER.name(), SELLER.name())
                                         .requestMatchers(HttpMethod.DELETE,"/api/product/delete/**").hasAnyAuthority(SELLER.name(), ADMIN.name())
@@ -46,6 +47,7 @@ public class SecurityConfig {
                                         .requestMatchers("/api/cart/**").authenticated()
                                         .requestMatchers("api/order/**").authenticated()
 
+                                        .requestMatchers(HttpMethod.GET, "/api/follow/count/**").permitAll()
                                         .requestMatchers( "/api/rating/**").permitAll()
                                         .requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
                                         .requestMatchers(HttpMethod.POST, "/api/user/register").permitAll()

@@ -72,6 +72,7 @@ public class StoreRatingServiceImpl implements StoreRatingService {
         totalStoreRating.setStoreTotalRating(totalRatingCount);
         totalStoreRating.setStoreRatingAvg(roundedAvg);
         totalStoreRating.setProductCount(store.getProductCount());
+        totalStoreRating.setCreatedDate(store.getCreatedDate());
         return totalStoreRating;
     }
 

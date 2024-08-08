@@ -40,6 +40,11 @@ public class CartServiceImpl implements CartService {
         Inventory inventory = inventoryRepository.findByProduct_ProductId(cartRequest.getProductId()).orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + email));
         Optional<Cart> existingCart = cartRepository.findByProduct_ProductIdAndUserEmail(cartRequest.getProductId(),email);
         Cart cart;
+
+        if(product.getStore().getUser().getEmail().equals(user.getEmail())){
+            throw new IllegalArgumentException(StringUtil.INVALID_TRANSACTION);
+        }
+
         if(existingCart.isPresent()){
             cart = existingCart.get();
 
@@ -78,6 +83,11 @@ public class CartServiceImpl implements CartService {
         Optional<Inventory> inventory = inventoryRepository.findByColorsAndSizesAndProduct_ProductId(cartRequest.getColors(),cartRequest.getSizes(), cartRequest.getProductId());
         Optional<Cart> existingCart = cartRepository.findByColorsAndSizesAndProduct_ProductIdAndUserEmail(cartRequest.getColors(), cartRequest.getSizes(),cartRequest.getProductId(),email);
         Cart cart;
+
+        if(product.getStore().getUser().getEmail().equals(user.getEmail())){
+            throw new IllegalArgumentException(StringUtil.INVALID_TRANSACTION);
+        }
+
         if(existingCart.isPresent()){
             cart = existingCart.get();
 
