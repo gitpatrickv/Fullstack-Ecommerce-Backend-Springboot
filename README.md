@@ -19,7 +19,6 @@ The project utilizes React and TypeScript for the frontend, with Chakra UI for s
 - **Backend:** Spring Boot, Java, MySql
 - **Authentication:** Spring Security, JWT
 - **Payments:** Stripe API integration
-- **DevOps:** Docker, Docker Compose
 
 ## Getting Started
 
