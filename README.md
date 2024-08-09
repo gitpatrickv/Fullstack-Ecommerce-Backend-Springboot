@@ -11,7 +11,7 @@ The project utilizes React and TypeScript for the frontend, with Chakra UI for s
 - **Product Management:** Create, update, delete, and manage product listings with support for multiple categories, sizes, and colors.
 - **Search & Filtering:** Advanced search capabilities with filters based on price, category, rating, and more.
 - **Shopping Cart & Checkout:** Seamless shopping cart experience with options for payment via Stripe or cash on delivery.
-- **Order Management:** Track order history, manage returns, and view delivery status.
+- **Order Management:** Track order history, and view delivery status.
 
 ## Tech Stack
 
