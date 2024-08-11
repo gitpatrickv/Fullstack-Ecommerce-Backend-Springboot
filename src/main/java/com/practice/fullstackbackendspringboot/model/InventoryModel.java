@@ -19,4 +19,5 @@ public class InventoryModel {
     private String colors;
     private String sizes;
     private String productId;
+    private String productName;
 }
