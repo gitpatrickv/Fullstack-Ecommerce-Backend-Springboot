@@ -13,5 +13,6 @@ public class LoginResponse {
 
     private String jwtToken;
     private String role;
+    private String authUser;
 
 }
