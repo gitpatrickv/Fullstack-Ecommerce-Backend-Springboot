@@ -1,6 +1,7 @@
 package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.ChatModel;
+import com.practice.fullstackbackendspringboot.model.response.ChatIdResponse;
 import com.practice.fullstackbackendspringboot.service.ChatService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +20,9 @@ public class ChatController {
 
     @PostMapping("/{recipient}")
     @ResponseStatus(HttpStatus.OK)
-    public void createChat(@PathVariable("recipient") String recipient){
+    public ChatIdResponse createChat(@PathVariable("recipient") String recipient){
         String sender = userService.getAuthenticatedUser();
-        chatService.createChat(sender, recipient);
+        return chatService.createChat(sender, recipient);
     }
 
     @GetMapping

@@ -6,6 +6,7 @@ import com.practice.fullstackbackendspringboot.entity.Store;
 import com.practice.fullstackbackendspringboot.entity.User;
 import com.practice.fullstackbackendspringboot.model.ChatModel;
 import com.practice.fullstackbackendspringboot.model.MessageModel;
+import com.practice.fullstackbackendspringboot.model.response.ChatIdResponse;
 import com.practice.fullstackbackendspringboot.repository.ChatRepository;
 import com.practice.fullstackbackendspringboot.repository.MessageRepository;
 import com.practice.fullstackbackendspringboot.repository.StoreRepository;
@@ -32,20 +33,27 @@ public class ChatServiceImpl implements ChatService {
     private final MessageMapper messageMapper;
 
     @Override
-    public void createChat(String sender, String recipient) {
+    public ChatIdResponse createChat(String sender, String recipient) {
 
         User user = userRepository.findByEmail(sender)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.USER_NOT_FOUND + sender));
         Store store = storeRepository.findById(recipient)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.STORE_NOT_FOUND + recipient));
         Boolean isChatExists = chatRepository.existsByStore_StoreIdAndUserEmail(store.getStoreId(),user.getEmail());
+        Chat chat;
 
         if(!isChatExists) {
-            Chat chat = new Chat();
+            chat = new Chat();
             chat.setUser(user);
             chat.setStore(store);
-            chatRepository.save(chat);
+            chat = chatRepository.save(chat);
+        }else {
+            chat = chatRepository.findByStore_StoreIdAndUserEmail(store.getStoreId(), user.getEmail()).get();
         }
+
+        ChatIdResponse chatIdResponse = new ChatIdResponse();
+        chatIdResponse.setChatId(chat.getChatId());
+        return chatIdResponse;
     }
 
     @Override
