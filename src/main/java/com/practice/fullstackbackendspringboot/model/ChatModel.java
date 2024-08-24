@@ -1,11 +1,11 @@
 package com.practice.fullstackbackendspringboot.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -14,8 +14,8 @@ public class ChatModel {
     private Long chatId;
     private String storeName;
     private String storePhotoUrl;
-    List<MessageModel> messageModelList = new ArrayList<>();
-//    private String content;
-//    private String timestamp;
+    private String content;
+    @JsonFormat(pattern = "MM/dd")
+    private LocalDateTime timestamp;
 
 }

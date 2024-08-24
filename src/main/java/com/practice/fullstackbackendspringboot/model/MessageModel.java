@@ -13,7 +13,7 @@ public class MessageModel {
     private Long messageId;
     private String sender;
     private String content;
-    @JsonFormat(pattern = "MM-dd")
+    @JsonFormat(pattern = "H:mm")
     private LocalDateTime timestamp;
     private Long chatId;
 

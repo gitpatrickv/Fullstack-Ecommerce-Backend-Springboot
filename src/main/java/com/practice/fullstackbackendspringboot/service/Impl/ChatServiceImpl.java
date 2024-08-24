@@ -7,6 +7,7 @@ import com.practice.fullstackbackendspringboot.entity.User;
 import com.practice.fullstackbackendspringboot.model.ChatModel;
 import com.practice.fullstackbackendspringboot.model.MessageModel;
 import com.practice.fullstackbackendspringboot.model.response.ChatIdResponse;
+import com.practice.fullstackbackendspringboot.model.response.GetChatByIdResponse;
 import com.practice.fullstackbackendspringboot.repository.ChatRepository;
 import com.practice.fullstackbackendspringboot.repository.MessageRepository;
 import com.practice.fullstackbackendspringboot.repository.StoreRepository;
@@ -17,10 +18,7 @@ import com.practice.fullstackbackendspringboot.utils.mapper.MessageMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -57,12 +55,12 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public ChatModel getChatById(Long chatId) {
+    public GetChatByIdResponse getChatById(Long chatId) {
         Optional<Chat> chatOptional = chatRepository.findById(chatId);
 
         if(chatOptional.isPresent()){
             Chat chat = chatOptional.get();
-            ChatModel chatModel = getChat(chat);
+            GetChatByIdResponse getChatByIdResponse = new GetChatByIdResponse();
 
             List<Message> messages = messageRepository.findAllByChat_ChatId(chatId);
             List<MessageModel> messageModelList = new ArrayList<>();
@@ -72,9 +70,9 @@ public class ChatServiceImpl implements ChatService {
                 messageModel.setChatId(chat.getChatId());
                 messageModelList.add(messageModel);
             }
-            chatModel.setMessageModelList(messageModelList);
 
-            return chatModel;
+            getChatByIdResponse.setMessageModelList(messageModelList);
+            return getChatByIdResponse;
         }
         else {
             throw new NoSuchElementException(StringUtil.CHAT_NOT_FOUND + chatId);
@@ -100,6 +98,11 @@ public class ChatServiceImpl implements ChatService {
         chatModel.setChatId(chat.getChatId());
         chatModel.setStoreName(chat.getStore().getStoreName());
         chatModel.setStorePhotoUrl(chat.getStore().getPhotoUrl());
+        if(!chat.getMessages().isEmpty()) {
+            chat.getMessages().sort(Comparator.comparing(Message::getTimestamp).reversed());
+            chatModel.setContent(chat.getMessages().get(0).getContent());
+            chatModel.setTimestamp(chat.getMessages().get(0).getTimestamp());
+        }
         return chatModel;
     }
 
