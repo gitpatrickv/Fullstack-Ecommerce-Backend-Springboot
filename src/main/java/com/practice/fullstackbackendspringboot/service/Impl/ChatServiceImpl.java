@@ -7,7 +7,6 @@ import com.practice.fullstackbackendspringboot.entity.User;
 import com.practice.fullstackbackendspringboot.model.ChatModel;
 import com.practice.fullstackbackendspringboot.model.response.ChatIdResponse;
 import com.practice.fullstackbackendspringboot.repository.ChatRepository;
-import com.practice.fullstackbackendspringboot.repository.MessageRepository;
 import com.practice.fullstackbackendspringboot.repository.StoreRepository;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.service.ChatService;
@@ -15,7 +14,10 @@ import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -69,8 +71,12 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public List<ChatModel> getAllStoreChats(String storeId) {
-        List<Chat> chats = chatRepository.findAllByStore_StoreId(storeId);
+    public List<ChatModel> getAllStoreChats(String email) {
+
+        Store store = storeRepository.findByUserEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(StringUtil.STORE_NOT_FOUND + email));
+
+        List<Chat> chats = chatRepository.findAllByStore_StoreId(store.getStoreId());
         List<ChatModel> chatModelList = new ArrayList<>();
 
         for(Chat chat : chats){

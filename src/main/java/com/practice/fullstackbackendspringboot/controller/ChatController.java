@@ -32,10 +32,11 @@ public class ChatController {
         return chatService.getAllUserChats(user);
     }
 
-    @GetMapping("/store/{storeId}")
+    @GetMapping("/store")
     @ResponseStatus(HttpStatus.OK)
-    public List<ChatModel> getAlLStoreChats(@PathVariable("storeId") String storeId){
-        return chatService.getAllStoreChats(storeId);
+    public List<ChatModel> getAlLStoreChats(){
+        String user = userService.getAuthenticatedUser();
+        return chatService.getAllStoreChats(user);
     }
 
 }
