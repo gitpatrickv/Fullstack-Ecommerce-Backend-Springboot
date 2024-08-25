@@ -35,6 +35,10 @@ public class ChatServiceImpl implements ChatService {
         Boolean isChatExists = chatRepository.existsByStore_StoreIdAndUserEmail(store.getStoreId(),user.getEmail());
         Chat chat;
 
+        if(store.getUser().getEmail().equals(user.getEmail())){
+            throw new IllegalArgumentException(StringUtil.SELF_CHAT_NOT_ALLOWED);
+        }
+
         if(!isChatExists) {
             chat = new Chat();
             chat.setUser(user);
@@ -56,6 +60,23 @@ public class ChatServiceImpl implements ChatService {
 
         for(Chat chat : chats){
             ChatModel chatModel = getChat(chat);
+            chatModel.setName(chat.getStore().getStoreName());
+            chatModel.setPhotoUrl(chat.getStore().getPhotoUrl());
+            chatModelList.add(chatModel);
+        }
+
+        return chatModelList;
+    }
+
+    @Override
+    public List<ChatModel> getAllStoreChats(String storeId) {
+        List<Chat> chats = chatRepository.findAllByStore_StoreId(storeId);
+        List<ChatModel> chatModelList = new ArrayList<>();
+
+        for(Chat chat : chats){
+            ChatModel chatModel = getChat(chat);
+            chatModel.setName(chat.getUser().getName());
+            chatModel.setPhotoUrl(chat.getUser().getPhotoUrl());
             chatModelList.add(chatModel);
         }
 
@@ -65,8 +86,6 @@ public class ChatServiceImpl implements ChatService {
     private ChatModel getChat(Chat chat){
         ChatModel chatModel = new ChatModel();
         chatModel.setChatId(chat.getChatId());
-        chatModel.setStoreName(chat.getStore().getStoreName());
-        chatModel.setStorePhotoUrl(chat.getStore().getPhotoUrl());
         if(!chat.getMessages().isEmpty()) {
             chat.getMessages().sort(Comparator.comparing(Message::getTimestamp).reversed());
             chatModel.setContent(chat.getMessages().get(0).getContent());
@@ -74,6 +93,4 @@ public class ChatServiceImpl implements ChatService {
         }
         return chatModel;
     }
-
-
 }

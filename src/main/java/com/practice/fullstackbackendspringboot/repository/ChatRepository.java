@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface ChatRepository extends JpaRepository<Chat,Long> {
 
     List<Chat> findAllByUserEmail(String email);
+    List<Chat> findAllByStore_StoreId(String storeId);
     Optional<Chat> findByStore_StoreIdAndUserEmail(String storeId, String email);
     Boolean existsByStore_StoreIdAndUserEmail(String storeId, String email);
 }

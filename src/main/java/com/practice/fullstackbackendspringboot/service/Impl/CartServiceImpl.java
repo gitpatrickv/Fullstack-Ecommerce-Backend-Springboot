@@ -42,7 +42,7 @@ public class CartServiceImpl implements CartService {
         Cart cart;
 
         if(product.getStore().getUser().getEmail().equals(user.getEmail())){
-            throw new IllegalArgumentException(StringUtil.INVALID_TRANSACTION);
+            throw new IllegalArgumentException(StringUtil.SELLER_CANNOT_BUY_OWN_PRODUCT);
         }
 
         if(existingCart.isPresent()){
@@ -85,7 +85,7 @@ public class CartServiceImpl implements CartService {
         Cart cart;
 
         if(product.getStore().getUser().getEmail().equals(user.getEmail())){
-            throw new IllegalArgumentException(StringUtil.INVALID_TRANSACTION);
+            throw new IllegalArgumentException(StringUtil.SELLER_CANNOT_BUY_OWN_PRODUCT);
         }
 
         if(existingCart.isPresent()){

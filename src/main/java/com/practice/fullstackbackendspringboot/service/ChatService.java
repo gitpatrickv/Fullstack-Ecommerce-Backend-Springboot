@@ -9,4 +9,5 @@ public interface ChatService {
 
     ChatIdResponse createChat(String sender, String recipient);
     List<ChatModel> getAllUserChats(String email);
+    List<ChatModel> getAllStoreChats(String storeId);
 }

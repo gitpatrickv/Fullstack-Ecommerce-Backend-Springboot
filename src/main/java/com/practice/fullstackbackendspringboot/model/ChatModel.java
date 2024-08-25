@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ChatModel {
     private Long chatId;
-    private String storeName;
-    private String storePhotoUrl;
+    private String name;
+    private String photoUrl;
     private String content;
     @JsonFormat(pattern = "MM/dd")
     private LocalDateTime timestamp;

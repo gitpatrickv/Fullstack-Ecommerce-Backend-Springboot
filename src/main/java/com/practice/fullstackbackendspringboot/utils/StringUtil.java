@@ -63,6 +63,7 @@ public class StringUtil {
     public static final String SuccessUrl = "http://localhost:5173/user/purchase/order/to-ship";
     public static final String CancelUrl = "http://localhost:5173/checkout";
     public static final String StoreNameExists = "Store name already exists: ";
-    public static final String INVALID_TRANSACTION = "Sellers cannot purchase their own products";
+    public static final String SELLER_CANNOT_BUY_OWN_PRODUCT = "Sellers cannot purchase their own products";
+    public static final String SELF_CHAT_NOT_ALLOWED = "Sellers are not allowed to chat with themselves.";
 
 }
