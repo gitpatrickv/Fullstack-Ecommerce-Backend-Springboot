@@ -2,7 +2,6 @@ package com.practice.fullstackbackendspringboot.controller;
 
 import com.practice.fullstackbackendspringboot.model.ChatModel;
 import com.practice.fullstackbackendspringboot.model.response.ChatIdResponse;
-import com.practice.fullstackbackendspringboot.model.response.GetChatByIdResponse;
 import com.practice.fullstackbackendspringboot.service.ChatService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -32,9 +31,5 @@ public class ChatController {
         String user = userService.getAuthenticatedUser();
         return chatService.getAllUserChats(user);
     }
-    @GetMapping("/{chatId}")
-    @ResponseStatus(HttpStatus.OK)
-    public GetChatByIdResponse getChatById(@PathVariable("chatId") Long chatId){
-        return chatService.getChatById(chatId);
-    }
+
 }

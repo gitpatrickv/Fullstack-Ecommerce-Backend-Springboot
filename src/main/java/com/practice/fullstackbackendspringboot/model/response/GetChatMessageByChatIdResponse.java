@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetChatByIdResponse {
+public class GetChatMessageByChatIdResponse {
 
     List<MessageModel> messageModelList = new ArrayList<>();
 }
