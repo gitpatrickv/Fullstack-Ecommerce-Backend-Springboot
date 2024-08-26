@@ -65,5 +65,11 @@ public class StringUtil {
     public static final String StoreNameExists = "Store name already exists: ";
     public static final String SELLER_CANNOT_BUY_OWN_PRODUCT = "Sellers cannot purchase their own products";
     public static final String SELF_CHAT_NOT_ALLOWED = "Sellers are not allowed to chat with themselves.";
+    public static final String CHAT_ID_NOT_NULL = "Chat ID cannot be null";
+    public static final String USER_ENDPOINT2 = "/user/";
+    public static final String USER_ENDPOINT = "/user";
+    public static final String APP_ENDPOINT = "/app";
+    public static final String WEBSOCKET_ENDPOINT = "/ws";
+    public static final String MESSAGES_ENDPOINT = "/messages";
 
 }
