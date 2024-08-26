@@ -4,6 +4,7 @@ import com.practice.fullstackbackendspringboot.entity.Chat;
 import com.practice.fullstackbackendspringboot.entity.Message;
 import com.practice.fullstackbackendspringboot.entity.Store;
 import com.practice.fullstackbackendspringboot.entity.User;
+import com.practice.fullstackbackendspringboot.entity.constants.Role;
 import com.practice.fullstackbackendspringboot.model.ChatModel;
 import com.practice.fullstackbackendspringboot.model.response.ChatIdResponse;
 import com.practice.fullstackbackendspringboot.repository.ChatRepository;
@@ -14,10 +15,7 @@ import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -72,22 +70,26 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public List<ChatModel> getAllStoreChats(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        List<ChatModel> chatModelList = new ArrayList<>();
+        if(user.get().getRole().equals(Role.SELLER)) {
 
         Store store = storeRepository.findByUserEmail(email)
                 .orElseThrow(() -> new NoSuchElementException(StringUtil.STORE_NOT_FOUND + email));
 
-        List<Chat> chats = chatRepository.findAllByStore_StoreId(store.getStoreId());
-        List<ChatModel> chatModelList = new ArrayList<>();
+            List<Chat> chats = chatRepository.findAllByStore_StoreId(store.getStoreId());
 
-        for(Chat chat : chats){
-            ChatModel chatModel = getChat(chat);
-            chatModel.setName(chat.getUser().getName());
-            chatModel.setPhotoUrl(chat.getUser().getPhotoUrl());
-            chatModelList.add(chatModel);
+            for (Chat chat : chats) {
+                ChatModel chatModel = getChat(chat);
+                chatModel.setName(chat.getUser().getName());
+                chatModel.setPhotoUrl(chat.getUser().getPhotoUrl());
+                chatModelList.add(chatModel);
+            }
         }
 
         return chatModelList;
     }
+
 
     private ChatModel getChat(Chat chat){
         ChatModel chatModel = new ChatModel();
