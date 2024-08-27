@@ -1,17 +1,19 @@
 # Shopee E-Commerce Platform Clone
 
 ## Introduction
-Welcome to the Shopee E-Commerce Platform Clone! This project is an imitation of the popular e-commerce platform, Shopee, designed to replicate its core features and functionalities. The goal of this project is to provide a comprehensive, full-stack implementation that covers everything from user authentication, product management, and shopping cart features, to payment processing, order management, product rating, store service rating, and the ability to follow your favorite stores.
+Welcome to the Shopee E-Commerce Platform Clone! This project is an imitation of the popular e-commerce platform, Shopee, designed to replicate its core features and functionalities. The goal of this project is to provide a comprehensive, full-stack implementation that covers everything from user authentication, product management, and shopping cart features, to payment processing, order management, product rating, store service rating, the ability to follow your favorite stores and real-time chat functionality.
 
 The project utilizes React and TypeScript for the frontend, with Chakra UI for styling and Zustand for state management. The backend is powered by Java 17 and Spring Boot, ensuring secure login through Spring Security with JWT-based authentication.
 
 ## Features
 
-- **User Authentication & Authorization:** Secure sign-up, login, and role-based access control (admin, seller, and buyer).
+- **User Authentication & Authorization:** Secure sign-up, login, and role-based access control (admin, seller, and buyer), with personalized pages for buyers, sellers, and admins.
 - **Product Management:** Create, update, delete, and manage product listings with support for multiple categories, sizes, and colors.
 - **Search & Filtering:** Advanced search capabilities with filters.
 - **Shopping Cart & Checkout:** Seamless shopping cart experience with options for payment via Stripe or cash on delivery.
 - **Order Management:** Track order history, and view delivery status.
+- **Product Rating & Store Service Rating:** Rate products and store service to provide feedback and enhance user experience.
+- **Real-Time Chat:** Instant messaging between users and sellers using WebSockets.
 
 ## Tech Stack
 
@@ -47,6 +49,7 @@ git@github.com:gitpatrickv/Fullstack-Ecommerce-Backend-Springboot.git
    
      - **Configure Spring Boot application.yml for database and other configurations.**
 
+
 5. Run the Application:
     - **Start the frontend:**
     ```bash
@@ -74,56 +77,68 @@ git@github.com:gitpatrickv/Fullstack-Ecommerce-Backend-Springboot.git
      - Username: `seller@gmail.com`
      - Password: `12345678`
 
+
 7. Screenshots & Video
 - **Video**
-  
-https://youtu.be/Eje4XYn_NCg
+
+https://youtu.be/L5btxVQpZRM
 
 - **User Page**
 
-![ss_homepage](https://github.com/user-attachments/assets/6c5541ee-d35e-4139-aa36-cb42ee00931d)
+![home](https://github.com/user-attachments/assets/1d287039-8ae2-45a6-9782-3dc30aa03e9f)
 
-![ss_loginpage](https://github.com/user-attachments/assets/238ddffc-bb10-4a4c-a1ce-a7286f2cda90)
+![chat](https://github.com/user-attachments/assets/268ea0be-bdcd-46b1-8252-55bef27c250e)
 
-![ss_productdetailpage](https://github.com/user-attachments/assets/eaf7ea07-b9b6-4fbb-875c-1d214fa54f77)
+![productdetail](https://github.com/user-attachments/assets/9fd5e7ce-ddbe-4032-b23c-2da66bd743d7)
 
-![ss_cartpage](https://github.com/user-attachments/assets/e4e80a7c-ea14-45f5-9e99-1c9d6c67f21c)
+![cartpage](https://github.com/user-attachments/assets/d8609481-ea66-417a-9109-603c0176f372)
 
-![ss_checkoutpage](https://github.com/user-attachments/assets/b13fbac0-1ae2-4c61-b2e8-c44ba4b62006)
+![checkoutpage](https://github.com/user-attachments/assets/d31b1520-ea8e-42fc-8300-6a5f0bba35c9)
 
-![ss_orderpage](https://github.com/user-attachments/assets/c0b6ff27-4a5a-4b11-9998-3a6966ed3e10)
+![storepage](https://github.com/user-attachments/assets/f517d4c5-b818-4519-8826-94834c8aa82f)
 
-![ss_myaccountpage](https://github.com/user-attachments/assets/559703be-0136-459c-85a9-1d9729c662b8)
+![searchpage](https://github.com/user-attachments/assets/987794b6-b988-4030-a013-98bd3d1dbce9)
 
-![ss_favoritespage](https://github.com/user-attachments/assets/19207f12-4c79-4a0d-9e65-d3676c8ce65b)
+![categorypage](https://github.com/user-attachments/assets/c56eeae7-9ada-4219-80fe-2b84860cbcbb)
 
-![ss_followingpage](https://github.com/user-attachments/assets/fdf02b8b-d0ff-4192-8f4d-ac4432828836)
+![accountpage](https://github.com/user-attachments/assets/749bbf01-8b39-49e2-a6e7-8f0211e05712)
 
-![ss_storepage](https://github.com/user-attachments/assets/b7561b8d-950a-475e-9532-4fe3da04ca53)
+![changepasspage](https://github.com/user-attachments/assets/3089665d-e1c1-4797-b2a0-d8c6e7680d2b)
+
+![favoritespage](https://github.com/user-attachments/assets/71beab54-16c0-4f22-a79d-420aa1a7d521)
+
+![followingpage](https://github.com/user-attachments/assets/10447925-c185-4bb6-9292-cf8d01c57993)
+
+![mypurchasepage](https://github.com/user-attachments/assets/50349b8f-858e-49e5-a443-4b5958cec1ad)
 
 - **Seller Page**
 
-![ss_sellerhome](https://github.com/user-attachments/assets/5c584993-0350-4949-afd1-cadf1b4c0f4a)
+![loginpage](https://github.com/user-attachments/assets/b9bd7020-9b7e-4cf4-a221-55e0111e11b9)
 
-![ss_sellerorderpage](https://github.com/user-attachments/assets/d3e278d0-76f2-49c2-a398-680c5e8c2e11)
+![sellerspage](https://github.com/user-attachments/assets/c1c994ce-d52e-4e27-8fe6-5a0a8360dfef)
 
-![ss_myproductpage](https://github.com/user-attachments/assets/ae6313a0-9642-40a8-b4c5-745fc586b6be)
+![soldout](https://github.com/user-attachments/assets/53e9709b-4615-4a22-8a1e-4bae4cf4a964)
 
-![ss_newproductpage](https://github.com/user-attachments/assets/b0ba433d-6010-4e9e-9671-6e1dc1e0e125)
+![myproductpage](https://github.com/user-attachments/assets/7e9e940f-16fe-48e1-af80-20b97410d176)
 
-![ss_reviewmanagementpage](https://github.com/user-attachments/assets/8ba770b8-ab37-4faa-bae6-4ce42f3fe19c)
+![newproductpage](https://github.com/user-attachments/assets/84205a29-bc7c-4ac3-a663-57040f549521)
 
-![ss_sellersoldoutproducts](https://github.com/user-attachments/assets/9d695075-ce3a-4720-b663-5804a19303b9)
+![reviewpage](https://github.com/user-attachments/assets/011b8e9a-0316-4ac3-84d0-d43e32e0c2ef)
+
+![allorderpage](https://github.com/user-attachments/assets/71efe56c-9e2e-495e-9809-ec76283af893)
+
+![shopprofilepage](https://github.com/user-attachments/assets/8c47b6a5-853a-4520-8165-7fc53fa83874)
 
 - **Admin Page**
 
-![ss_adminhomepage](https://github.com/user-attachments/assets/37d2bfe4-8802-4786-ba59-4399daf9e301)
+![adminpage](https://github.com/user-attachments/assets/9b764322-da5f-4364-ba8e-c757f9e883aa)
 
-![ss_adminshoplist](https://github.com/user-attachments/assets/89e6237d-baf9-4ffc-8302-3f40f9cb303b)
+![userlist](https://github.com/user-attachments/assets/157869dc-156d-4efb-b854-53be1ffb1ac3)
 
-![ss_adminuserlist](https://github.com/user-attachments/assets/13026691-cf5a-40e0-a97a-0ff66715eebb)
+![shoplist](https://github.com/user-attachments/assets/98bef262-eaed-42e0-a1e0-7d7a52a23221)
 
-![ss_admincategorylist](https://github.com/user-attachments/assets/00c85496-3497-403c-b663-b20ebb153255)
+![categorylist](https://github.com/user-attachments/assets/95288aeb-4cd3-4c58-9c37-1151cd0a9b1a)
+
 
 
 

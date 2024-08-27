@@ -1,5 +1,6 @@
 package com.practice.fullstackbackendspringboot.service.Impl;
 
+import com.practice.fullstackbackendspringboot.entity.Store;
 import com.practice.fullstackbackendspringboot.entity.User;
 import com.practice.fullstackbackendspringboot.entity.constants.Role;
 import com.practice.fullstackbackendspringboot.model.UserModel;
@@ -8,8 +9,10 @@ import com.practice.fullstackbackendspringboot.model.response.LoginResponse;
 import com.practice.fullstackbackendspringboot.model.response.PageResponse;
 import com.practice.fullstackbackendspringboot.model.response.PaginateUserResponse;
 import com.practice.fullstackbackendspringboot.model.response.UserCount;
+import com.practice.fullstackbackendspringboot.repository.StoreRepository;
 import com.practice.fullstackbackendspringboot.repository.UserRepository;
 import com.practice.fullstackbackendspringboot.security.JwtService;
+import com.practice.fullstackbackendspringboot.service.StoreService;
 import com.practice.fullstackbackendspringboot.service.UserService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
 import com.practice.fullstackbackendspringboot.utils.mapper.UserMapper;
@@ -31,6 +34,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +44,8 @@ public class UserServiceImpl implements UserService {
     private final UserMapper mapper;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final StoreService storeService;
+    private final StoreRepository storeRepository;
 
     @Override
     public LoginResponse register(UserModel userModel) {
@@ -143,6 +149,16 @@ public class UserServiceImpl implements UserService {
 
         user.setFrozen(!user.isFrozen());
         userRepository.save(user);
+
+        if(user.getRole().equals(Role.SELLER)){
+
+            Optional<Store> store = storeRepository.findByUserEmail(user.getEmail());
+
+            if(store.isPresent()) {
+                storeService.suspendStoreAndProductListing(store.get().getStoreId(), admin);
+            }
+        }
+
     }
 
     @Override
