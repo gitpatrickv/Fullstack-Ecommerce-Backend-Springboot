@@ -71,5 +71,6 @@ public class StringUtil {
     public static final String APP_ENDPOINT = "/app";
     public static final String WEBSOCKET_ENDPOINT = "/ws";
     public static final String MESSAGES_ENDPOINT = "/messages";
+    public static final String THANK_YOU = "Thank you for your purchase!";
 
 }
