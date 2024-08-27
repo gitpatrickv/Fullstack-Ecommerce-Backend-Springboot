@@ -2,11 +2,13 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    url: jdbc:mysql://localhost:3306/newdb
+    url: jdbc:mysql://localhost:3306/testschema
     password: patrick
   jpa:
     hibernate:
       ddl-auto: update
+server:
+  port: 8080
 
 application:
   security:

@@ -113,6 +113,7 @@ public class StoreServiceImpl implements StoreService {
         for(Store store : stores) {
             StoreModel storeModel = mapper.mapEntityToModel(store);
             storeModel.setEmail(store.getUser().getEmail());
+            storeModel.setFrozen(store.getUser().isFrozen());
             storeModels.add(storeModel);
         }
         return new PaginateStoreResponse(storeModels,pageResponse);
