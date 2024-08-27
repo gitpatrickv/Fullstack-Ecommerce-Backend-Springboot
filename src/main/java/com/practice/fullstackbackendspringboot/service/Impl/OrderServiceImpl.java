@@ -5,6 +5,7 @@ import com.practice.fullstackbackendspringboot.model.OrderItemModel;
 import com.practice.fullstackbackendspringboot.model.OrderModel;
 import com.practice.fullstackbackendspringboot.model.response.*;
 import com.practice.fullstackbackendspringboot.repository.*;
+import com.practice.fullstackbackendspringboot.service.ChatService;
 import com.practice.fullstackbackendspringboot.service.OrderService;
 import com.practice.fullstackbackendspringboot.service.PaymentService;
 import com.practice.fullstackbackendspringboot.utils.StringUtil;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,6 +39,9 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
     private final PaymentService paymentService;
+    private final ChatRepository chatRepository;
+    private final MessageRepository messageRepository;
+    private final ChatService chatService;
 
     @Override
     public PaymentResponse placeOrder(String email, String paymentMethod) throws StripeException {      //CUSTOMER
@@ -123,6 +128,20 @@ public class OrderServiceImpl implements OrderService {
             totalAmount += order.getOrderTotalAmount();
             order.setOrderItems(orderItems);
             orderRepository.save(order);
+
+            ChatIdResponse chatIdResponse = chatService.createChat(user.getEmail(), store.get().getStoreId());
+
+            Optional<Chat> chatOptional = chatRepository.findById(chatIdResponse.getChatId());
+
+            if(chatOptional.isPresent()) {
+                Chat chat = chatOptional.get();
+                Message message = new Message();
+                message.setSender(store.get().getUser().getEmail());
+                message.setContent(StringUtil.THANK_YOU);
+                message.setTimestamp(LocalDateTime.now());
+                message.setChat(chat);
+                messageRepository.save(message);
+            }
         }
         cartRepository.deleteAllByFilterTrueAndUserEmail(email);
 

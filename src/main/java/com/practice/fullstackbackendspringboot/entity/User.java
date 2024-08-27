@@ -39,7 +39,8 @@ public class User implements UserDetails {
     private LocalDate createdDate;
     @UpdateTimestamp
     private LocalDate lastModified;
-
+    @OneToMany(mappedBy = "user")
+    private List<Chat> chats;
     @OneToMany(mappedBy = "user")
     private List<Cart> cart;
     @OneToMany(mappedBy = "user")

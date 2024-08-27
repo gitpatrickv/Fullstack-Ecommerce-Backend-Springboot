@@ -30,6 +30,7 @@ public class SecurityConfig {
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize ->
                                 authorize
+                                        .requestMatchers("/ws/**").permitAll()
                                         .requestMatchers("/api/admin/**").hasAuthority(ADMIN.name())
                                         .requestMatchers("/api/seller/**").hasAuthority(SELLER.name())
                                         .requestMatchers(HttpMethod.POST, "/api/product/category/add").hasAuthority(ADMIN.name())

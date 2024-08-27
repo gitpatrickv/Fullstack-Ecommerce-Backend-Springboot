@@ -45,4 +45,7 @@ public class Store extends AuditEntity {
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
     private Set<StoreFollower> followers = new HashSet<>();
 
+    @OneToMany(mappedBy = "store")
+    private List<Chat> chats;
+
 }
