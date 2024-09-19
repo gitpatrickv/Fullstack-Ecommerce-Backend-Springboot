@@ -21,36 +21,27 @@ The project utilizes React and TypeScript for the frontend, with Chakra UI for s
 - **Backend:** Spring Boot, Java 17, MySql
 - **Authentication:** Spring Security, JWT
 - **Payments:** Stripe API integration
+- **DevOps:** Docker
 
 ## Getting Started
 
 1. Clone the Repository:
 
 - **For the frontend:**
-```bash
-git@github.com:gitpatrickv/FullStack-Ecommerce-Frontend-React.git
-```
+    ```bash
+    git@github.com:gitpatrickv/FullStack-Ecommerce-Frontend-React.git
+    ```
 - **For the backend:**
-```bash
-git@github.com:gitpatrickv/Fullstack-Ecommerce-Backend-Springboot.git
-```
+    ```bash
+    git@github.com:gitpatrickv/Fullstack-Ecommerce-Backend-Springboot.git
+    ```
 
 2. Install Frontend Dependencies in the terminal:
    ```bash
    npm install
    ```
-   
-3. Install Backend Dependencies in the terminal:
-    ```bash
-   mvn clean install
-   ```
 
-4. Configure Environment Variables:
-   
-     - **Configure Spring Boot application.yml for database and other configurations.**
-
-
-5. Run the Application:
+3. Run the Application:
     - **Start the frontend:**
     ```bash
     npm run dev
@@ -58,10 +49,10 @@ git@github.com:gitpatrickv/Fullstack-Ecommerce-Backend-Springboot.git
 
     - **Start the backend:**
     ```bash
-    mvn spring-boot:run
+    docker compose up
     ```
 
-6. Open your browser and visit `http://localhost:5173` to access the application.
+4. Open your browser and visit `http://localhost:5173` to access the application.
 
    Log in using one of the following credentials or register a new account:
 
@@ -78,7 +69,7 @@ git@github.com:gitpatrickv/Fullstack-Ecommerce-Backend-Springboot.git
      - Password: `12345678`
 
 
-7. Screenshots & Video
+5. Screenshots & Video
 - **Video**
 
 https://youtu.be/L5btxVQpZRM
