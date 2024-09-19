@@ -1,15 +1,12 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://shopee-clone-db:3306/shopee-db
     username: root
-    url: jdbc:mysql://localhost:3306/testschema
-    password: patrick
+    password: password
   jpa:
     hibernate:
       ddl-auto: update
-server:
-  port: 8080
-
 application:
   security:
     jwt:

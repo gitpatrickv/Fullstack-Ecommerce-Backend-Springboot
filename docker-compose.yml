@@ -1,0 +1,28 @@
+services:
+  shopee-clone-db:
+    container_name: shopee-clone-db
+    image: mysql:latest
+    environment:
+      MYSQL_DATABASE: shopee-db
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3308:3306"
+    volumes:
+      - shopee-clone-db:/var/lib/mysql
+    networks:
+      - shopee-clone-network
+  shopee-clone-api:
+    container_name: shopee-clone
+    image: gitpatrickv/shopee-clone
+    ports:
+      - "8080:8080"
+    networks:
+      - shopee-clone-network
+    depends_on:
+      - shopee-clone-db
+volumes:
+  shopee-clone-db:
+
+networks:
+  shopee-clone-network:
+    driver: bridge
