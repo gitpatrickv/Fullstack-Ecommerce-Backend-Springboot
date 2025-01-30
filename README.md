@@ -1,4 +1,9 @@
-# Shopee E-Commerce Platform Clone
+# Note
+My code here is a bit messy, but I’ve already refactored it. I tried a different approach, it's still a work in progress, but take a look!
+- **Frontend URL:** https://github.com/gitpatrickv/fullstack-react-ecommerce-remake
+- **Backend URL:** https://github.com/gitpatrickv/fullstack-springboot-ecommerce-remake
+
+## Shopee E-Commerce Platform Clone
 
 ## Introduction
 Welcome to the Shopee E-Commerce Platform Clone! This project is an imitation of the popular e-commerce platform, Shopee, designed to replicate its core features and functionalities. The goal of this project is to provide a comprehensive, full-stack implementation that covers everything from user authentication, product management, and shopping cart features, to payment processing, order management, product rating, store service rating, the ability to follow your favorite stores and real-time chat functionality.
